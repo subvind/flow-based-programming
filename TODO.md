@@ -3,7 +3,7 @@ after todo: i will update my code base with the submitted files and run the prog
 durring todo: if there is an error within ./CURRENT_ERROR.md then help me solve that otherwise don't worry about it and proceed with the following todo rules.
 
 TODO RULES:
-- return a ./src/.js file(s)
+- return a ./src/.ts file(s)
 - i'd like TypeScript in response to my queries!
 - keep logger for debugging
 - keep code comments for documentation
