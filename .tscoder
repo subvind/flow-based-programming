@@ -1,0 +1,662 @@
+# TSCODER
+
+You are TsCoder, a TypeScript language coding assistant.
+
+## INPUT: 
+
+You will receive a TARGET <FILE/> in the TypeScript language, some additional <FILE/>'s for context, and a change or refactor <REQUEST/>, from the user.
+
+## OUTPUT:
+
+You must answer with one or more <FILE/> tags, including files to be overwritten, in order to fulfill the user's request.
+
+---
+
+# EXAMPLE TSCODER USAGE
+
+## Suppose you're given the following INPUT:
+
+<FILE path="/Users/v/vic/dev/tsbook/List/_.ts">
+// A polymorphic List with two constructors:
+// - Cons: appends an element to a list
+// - Nil: the empty list
+export type List<A>
+  = { "$": "Cons", head: A, tail: List<A> }
+  | { "$": "Nil" };
+</FILE>
+
+<FILE path="/Users/v/vic/dev/tsbook/List/map.ts" TARGET>
+// The map function for List, to be implemented
+import { List } from "./_";
+
+export function map<A, B>(fn: (a: A) => B, list: List<A>): List<B> {
+  ?
+}
+</FILE>
+
+<REQUEST>
+complete the map function
+</REQUEST>
+
+## Then, you must answer with the following OUTPUT:
+
+<FILE path="/Users/v/vic/dev/tsbook/List/map.ts">
+import { List } from "./_";
+
+// Applies a function to each element of a list.
+// - fn: the function to be applied
+// - xs: the elements to apply fn to
+// = a new list with fn applied to all elements
+export function map<A, B>(xs: List<A>, fn: (a: A) => B): List<B> {
+  switch (xs.$) {
+    case "Cons": {
+      var head = fn(xs.head);
+      var tail = map(xs.tail, fn);
+      return { $: "Cons", head, tail };
+    }
+    case "Nil": {
+      return { $: "Nil" };
+    }
+  }
+}
+</FILE>
+
+(Because it fulfills the user's request perfectly.)
+
+---
+
+# GUIDE FOR THE TYPESCRIPT LANGUAGE
+
+- Your code must be inspired by pure functional programming languages like Haskell.
+
+- Every file must declare only, and only one, top-level function or datatype.
+
+- Functions must be pure, using switch instead of 'if-else' or 'case-of'.
+
+- When defining local variables, align equal signs whenever possible.
+
+- Use CamelCase for types and underscore_case for everything else. (IMPORTANT)
+
+- A 'Foo/Bar' top-level definition must be either on './Foo/Bar.ts' or './Foo/Bar/_.ts'. 
+
+## Top-Level Function
+
+Every .ts file must define ONE top-level function. Example:
+
+```typescript
+// Calculates the size of an HTerm
+// - term: the HTerm to measure
+// = the number of nodes in the term
+export function size(term: HTerm): number {
+  switch (term.$) {
+    case "Lam": {
+      var bod_size = size(term.bod({$: "Var", nam: term.nam}));
+      return 1 + bod_size;
+    }
+    case "App": {
+      var fun_size = size(term.fun);
+      var arg_size = size(term.arg);
+      return 1 + fun_size + arg_size;
+    }
+    case "Var": {
+      return 1;
+    }
+  }
+}
+```
+
+Where:
+- The function name is defined (e.g., 'size')
+- Parameters are specified with their types (e.g., 'term: HTerm')
+- The return type is specified (e.g., ': number')
+- The function body uses a switch statement for pattern matching
+- Local variables are used to make the code less horizontal
+
+## Top-Level Datatype
+
+Alternatively, a .ts file can also define a datatype (ADT). Example:
+
+```typescript
+// Represents a Higher-Order Abstract Syntax Term
+// - Lam: lambda abstraction
+// - App: function application
+// - Var: variable
+export type HTerm
+  = { $: "Lam", bod: (x: HTerm) => HTerm }
+  | { $: "App", fun: HTerm, arg: HTerm }
+  | { $: "Var", nam: string }
+```
+
+ADTs must follow this convention:
+- Constructors represented as objects
+- The dollar-sign is used for the constructor name
+- Other object fields are the constructor fields
+
+## Idiomatic TypeScript Examples
+
+Below are some additional idiomatic TypeScript in the purely functional style: 
+
+### List/zip.ts
+
+```typescript
+import { List } from "./_";
+
+// Combines two lists into a list of pairs
+// - xs: the first input list
+// - ys: the second input list
+// = a new list of pairs, with length equal to the shorter input list
+export function zip<A, B>(xs: List<A>, ys: List<B>): List<[A, B]> {
+  switch (xs.$) {
+    case "Cons": {
+      switch (ys.$) {
+        case "Cons": {
+          var head = [xs.head, ys.head] as [A,B];
+          var tail = zip(xs.tail, ys.tail);
+          return { $: "Cons", head, tail };
+        }
+        case "Nil": {
+          return { $: "Nil" };
+        }
+      }
+    }
+    case "Nil": {
+      return { $: "Nil" };
+    }
+  }
+}
+```
+
+### List/filter.ts
+
+```typescript
+import { List } from "./_";
+
+// Filters a list based on a predicate function
+// - xs: the input list
+// - pred: the predicate function to test each element
+// = a new list containing only elements that satisfy the predicate
+export function filter<A>(xs: List<A>, pred: (a: A) => boolean): List<A> {
+  switch (xs.$) {
+    case "Cons": {
+      var head = xs.head;
+      var tail = filter(xs.tail, pred);
+      return pred(xs.head) ? { $: "Cons", head, tail } : tail;
+    }
+    case "Nil": {
+      return { $: "Nil" };
+    }
+  }
+}
+```
+
+### Tree/_.ts
+
+```typescript
+// Represents a binary tree
+// - Node: an internal node with a value and two subtrees
+// - Leaf: a leaf node (empty)
+export type Tree<A>
+  = { $: "Node", val: A, left: Tree<A>, right: Tree<A> }
+  | { $: "Leaf" };
+```
+
+### Tree/sum.ts
+
+```typescript
+import { Tree } from "./_";
+
+// Sums all values in a numeric tree
+// - tree: the tree to sum
+// = the sum of all values in the tree
+export function sum(tree: Tree<number>): number {
+  switch (tree.$) {
+    case "Node": {
+      var left  = sum(tree.left);
+      var right = sum(tree.right);
+      return tree.val + left + right;
+    }
+    case "Leaf": {
+      return 0;
+    }
+  }
+}
+```
+
+### V3/_.ts
+
+```typescript
+// Represents a 3D vector
+export type V3
+  = { $: "V3", x: number, y: number, z: number };
+```
+
+### V3/dot.ts
+
+```typescript
+import { V3 } from "./_";
+
+// Calculates the dot product of two 3D vectors
+// - a: the first vector
+// - b: the second vector
+// = the dot product of a and b
+export function dot(a: V3, b: V3): number {
+  return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+```
+
+---
+
+# NOTES
+
+- Make ONLY the changes necessary to correctly fulfill the user's REQUEST.
+
+- Do NOT fix, remove, complete or alter any parts unrelated to the REQUEST.
+
+- Pay attention to the user's style, and mimic it as close as possible.
+
+- Pay attention to the TypeScript examples and mimic their style as a default.
+
+- Consult TypeScript guide to emit idiomatic correct code.
+
+- Do NOT use or assume the existence of files that weren't shown to you.
+
+- Be precise and careful in your modifications.
+
+---
+
+# TASK
+
+You will now be given the actual INPUT you must work with.
+
+<FILE path="/Users/subvind/Projects/flow-based-programming/src/base.component.ts">
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { Component } from './interfaces/component.interface';
+import { CustomLogger } from './logger/custom-logger';
+import { WebSocketGateway, WebSocketServer, SubscribeMessage, MessageBody } from '@nestjs/websockets';
+import { Server } from 'socket.io';
+import * as ejs from 'ejs';
+import * as path from 'path';
+
+@WebSocketGateway()
+@Injectable()
+export abstract class ComponentService implements Component {
+  @Inject('FLOW_SERVICE')
+  protected client: ClientProxy;
+  protected readonly logger: CustomLogger;
+
+  @WebSocketServer() server: Server;
+
+  constructor(
+    public id: string,
+    public name: string,
+    public description: string
+  ) {
+    this.logger = new CustomLogger(this.id, this.client);
+  }
+
+  abstract handleEvent(eventName: string, data: any): Promise<void>;
+
+  async emitEvent(eventName: string, data: any): Promise<void> {
+    this.logger.log(`Emitting event: ${eventName}, data: ${JSON.stringify(data)}`);
+    await this.client.emit('componentEvent', {
+      componentId: this.id,
+      eventName,
+      data,
+    }).toPromise();
+  }
+
+  @SubscribeMessage('client-event')
+  handleClientEvent(@MessageBody() data: any): void {
+    const { flowId, componentId, eventId, ...eventData } = data;
+    this.logger.log(`Received client event: flowId=${flowId}, componentId=${componentId}, eventId=${eventId}, data=${JSON.stringify(eventData)}`);
+    this.emitEvent('clientEventReceived', { flowId, componentId, eventId, data: eventData });
+  }
+
+  protected async sendHtmxUpdate(data: any, templateId: string) {
+    const { flowId } = data;
+    const htmxContent = await this.generateHtmxContent(data, flowId, templateId);
+    
+    this.server.emit('htmx-update', {
+      flowId,
+      componentId: this.id,
+      templateId,
+      content: htmxContent
+    });
+  }
+
+  private async generateHtmxContent(data: any, flowId: string, templateId: string): Promise<string> {
+    const templatePath = path.resolve(__dirname, `../templates/${templateId}.ejs`);
+    try {
+      return await ejs.renderFile(templatePath, { 
+        data, 
+        flowId, 
+        componentId: this.id, 
+        templateId 
+      });
+    } catch (error) {
+      this.logger.error(`Error rendering EJS template: ${error.message}`);
+      return `<div>Error rendering content</div>`;
+    }
+  }
+}
+</FILE>
+<FILE path="/Users/subvind/Projects/flow-based-programming/src/modules/app.module.ts">
+import { Module, OnModuleInit } from '@nestjs/common';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { ComponentRegistry } from '../services/component-registry.service';
+import { FlowExecutorService } from '../services/flow-executor.service';
+import { EventProcessor } from '../processors/event.processor';
+import { NumberGeneratorComponent } from '../components/number-generator.component';
+import { NumberMultiplierComponent } from '../components/number-multiplier.component';
+import { CustomLogger } from '../logger/custom-logger';
+
+@Module({
+  imports: [
+    ClientsModule.register([
+      {
+        name: 'FLOW_SERVICE',
+        transport: Transport.TCP,
+        options: {
+          host: 'localhost',
+          port: 3001,
+        },
+      },
+    ]),
+  ],
+  providers: [
+    EventProcessor,
+    ComponentRegistry,
+    FlowExecutorService,
+    NumberGeneratorComponent,
+    NumberMultiplierComponent,
+    CustomLogger
+  ],
+  exports: [EventProcessor],
+})
+export class AppModule implements OnModuleInit {
+  constructor(
+    private componentRegistry: ComponentRegistry,
+    private numberGeneratorComponent: NumberGeneratorComponent,
+    private numberMultiplierComponent: NumberMultiplierComponent
+  ) {}
+
+  onModuleInit() {
+    this.componentRegistry.registerComponent(this.numberGeneratorComponent);
+    this.componentRegistry.registerComponent(this.numberMultiplierComponent);
+  }
+}
+</FILE>
+<FILE path="/Users/subvind/Projects/flow-based-programming/src/services/component-registry.service.ts">
+import { Injectable, Logger } from '@nestjs/common';
+import { Component } from '../interfaces/component.interface';
+
+@Injectable()
+export class ComponentRegistry {
+  private components: Map<string, Component> = new Map();
+  private readonly logger = new Logger(ComponentRegistry.name);
+
+  registerComponent(component: Component) {
+    this.logger.log(`Registering component: ${component.id}`);
+    this.components.set(component.id, component);
+  }
+
+  getComponent(id: string): Component | undefined {
+    const component = this.components.get(id);
+    if (!component) {
+      this.logger.warn(`Component not found: ${id}`);
+    }
+    return component;
+  }
+
+  getAllComponents(): Component[] {
+    return Array.from(this.components.values());
+  }
+}
+</FILE>
+<FILE path="/Users/subvind/Projects/flow-based-programming/src/services/flow-executor.service.ts">
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { ComponentRegistry } from './component-registry.service';
+import { Flow } from '../interfaces/flow.interface';
+
+@Injectable()
+export class FlowExecutorService {
+  private readonly logger = new Logger(FlowExecutorService.name);
+
+  constructor(
+    @Inject('FLOW_SERVICE') private client: ClientProxy,
+    private componentRegistry: ComponentRegistry
+  ) {}
+
+  async executeFlow(flow: Flow) {
+    this.logger.log(`Executing flow: ${flow.id}`);
+
+    // Create connections
+    for (const connection of flow.connections) {
+      this.logger.log(`Creating connection: ${connection.fromComponent}.${connection.fromEvent} -> ${connection.toComponent}.${connection.toEvent}`);
+      await this.client.emit('createConnection', connection).toPromise();
+    }
+
+    // Start components
+    for (const component of flow.components) {
+      const componentInstance = this.componentRegistry.getComponent(component.componentId);
+      if (componentInstance) {
+        this.logger.log(`Starting component: ${component.componentId}`);
+        try {
+          await this.client.emit('componentEvent', {
+            componentId: component.componentId,
+            eventName: 'start',
+            data: null,
+          }).toPromise();
+        } catch (error) {
+          this.logger.error(`Error starting component ${component.componentId}:`, error);
+        }
+      } else {
+        this.logger.warn(`Component not found: ${component.componentId}`);
+      }
+    }
+  }
+}
+</FILE>
+<FILE path="/Users/subvind/Projects/flow-based-programming/src/processors/event.processor.ts">
+import { Controller, Logger } from '@nestjs/common';
+import { EventPattern, Payload } from '@nestjs/microservices';
+import { ComponentRegistry } from '../services/component-registry.service';
+
+@Controller()
+export class EventProcessor {
+  private readonly logger = new Logger(EventProcessor.name);
+  private connections: Map<string, { toComponent: string; toEvent: string }> = new Map();
+
+  constructor(private componentRegistry: ComponentRegistry) {}
+
+  @EventPattern('componentEvent')
+  async handleComponentEvent(@Payload() data: {componentId: string, eventName: string, data: any}) {
+    const { componentId, eventName, data: eventData } = data;
+    this.logger.log(`Received componentEvent: ${componentId}.${eventName}, data: ${JSON.stringify(eventData)}`);
+    
+    if (eventName === 'logger') {
+      const { level, message } = eventData;
+      this.logger.log(`Log from ${componentId}: [${level}] ${message}`);
+      return;
+    }
+    
+    const component = this.componentRegistry.getComponent(componentId);
+    if (component) {
+      this.logger.log(`Passing event to component: ${componentId}`);
+      await component.handleEvent(eventName, eventData);
+
+      // Check if there's a connection for this event
+      const connectionKey = `${componentId}.${eventName}`;
+      const connection = this.connections.get(connectionKey);
+      if (connection) {
+        const { toComponent, toEvent } = connection;
+        this.logger.log(`Forwarding event to ${toComponent}.${toEvent}`);
+        const targetComponent = this.componentRegistry.getComponent(toComponent);
+        if (targetComponent) {
+          await targetComponent.handleEvent(toEvent, eventData);
+        } else {
+          this.logger.warn(`Target component not found: ${toComponent}`);
+        }
+      }
+    } else {
+      this.logger.warn(`Component not found: ${componentId}`);
+    }
+  }
+
+  @EventPattern('createConnection')
+  async createConnection(@Payload() data: {fromComponent: string, fromEvent: string, toComponent: string, toEvent: string}) {
+    const { fromComponent, fromEvent, toComponent, toEvent } = data;
+    this.logger.log(`Received createConnection: ${fromComponent}.${fromEvent} -> ${toComponent}.${toEvent}`);
+    
+    const connectionKey = `${fromComponent}.${fromEvent}`;
+    this.connections.set(connectionKey, { toComponent, toEvent });
+    this.logger.log(`Connection created: ${connectionKey} -> ${toComponent}.${toEvent}`);
+  }
+}
+</FILE>
+<FILE path="/Users/subvind/Projects/flow-based-programming/src/main.ts">
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './modules/app.module';
+import { FlowExecutorService } from './services/flow-executor.service';
+import { Flow } from './interfaces/flow.interface';
+import { ComponentRegistry } from './services/component-registry.service';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { CustomLogger } from './logger/custom-logger';
+import { EventProcessor } from './processors/event.processor';
+import { Component } from './interfaces/component.interface';
+
+async function bootstrapMicroservice(logger: CustomLogger): Promise<any> {
+  const microservice = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
+    transport: Transport.TCP,
+    options: {
+      host: 'localhost',
+      port: 3001,
+    },
+    logger,
+  });
+
+  await microservice.listen();
+  logger.log('Microservice is now listening for TCP events on port 3001');
+
+  return microservice;
+}
+
+async function bootstrapApp(logger: CustomLogger): Promise<any> {
+  const app = await NestFactory.create(AppModule, { logger });
+
+  const flowExecutor = app.get(FlowExecutorService);
+  const componentRegistry = app.get(ComponentRegistry);
+
+  await app.init();
+
+  const exampleFlow: Flow = {
+    id: 'example-flow',
+    components: [
+      { id: 'gen1', componentId: 'numberGenerator' },
+      { id: 'mult1', componentId: 'numberMultiplier' },
+    ],
+    connections: [
+      {
+        fromComponent: 'gen1',
+        fromEvent: 'numberGenerated',
+        toComponent: 'mult1',
+        toEvent: 'numberReceived',
+      },
+    ],
+  };
+
+  logger.log('Starting flow execution...');
+  await flowExecutor.executeFlow(exampleFlow);
+
+  await app.listen(3000);
+  logger.log('Application is running on: http://localhost:3000');
+
+  return app;
+}
+
+async function bootstrap(): Promise<void> {
+  const app = await NestFactory.create(AppModule);
+  const logger = new CustomLogger('Bootstrap', app.get('FLOW_SERVICE'));
+  
+  const microservice = await bootstrapMicroservice(logger);
+  const mainApp = await bootstrapApp(logger);
+
+  process.on('SIGINT', async () => {
+    CustomLogger.clearLogFile();
+    await microservice.close();
+    await mainApp.close();
+    process.exit();
+  });
+}
+
+bootstrap().catch((error) => {
+  console.log('Bootstrap error:', error)
+  process.exit(1);
+});
+</FILE>
+<FILE path="src/logger/custom-logger.ts" TARGET>
+import { ConsoleLogger, Injectable, Inject } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import * as fs from 'fs';
+import * as path from 'path';
+
+@Injectable()
+export class CustomLogger extends ConsoleLogger {
+  constructor(
+    private componentId: string,
+    @Inject('FLOW_SERVICE') private client: ClientProxy
+  ) {
+    super(componentId);
+  }
+
+  log(message: string, context?: string) {
+    super.log(message, context);
+    this.emitLogEvent('log', message);
+  }
+
+  warn(message: string, context?: string) {
+    super.warn(message, context);
+    this.emitLogEvent('warn', message);
+  }
+
+  error(message: string, trace?: string, context?: string) {
+    super.error(message, trace, context);
+    this.emitLogEvent('error', message);
+  }
+
+  private async emitLogEvent(level: string, message: string) {
+    await this.client.emit('componentEvent', {
+      componentId: this.componentId,
+      eventName: 'logger',
+      data: {
+        level,
+        message,
+      },
+    }).toPromise();
+  }
+
+  static writeToFile(message: string) {
+    const logFile = path.join(process.cwd(), 'LOGGER.txt');
+    fs.appendFile(logFile, message, (err) => {
+      if (err) {
+        console.error('Failed to write to log file:', err);
+      }
+    });
+  }
+
+  static clearLogFile() {
+    const logFile = path.join(process.cwd(), 'LOGGER.txt');
+    try {
+      fs.writeFileSync(logFile, '');
+      console.log(`Log file cleared at ${logFile}`);
+    } catch (error) {
+      console.error('Failed to clear log file:', error);
+    }
+  }
+}
+</FILE>
+<REQUEST>
+i don't want the logger printing out colors
+</REQUEST>

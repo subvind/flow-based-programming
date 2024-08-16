@@ -12,9 +12,10 @@ import { CustomLogger } from '../logger/custom-logger';
     ClientsModule.register([
       {
         name: 'FLOW_SERVICE',
-        transport: Transport.REDIS,
+        transport: Transport.TCP,
         options: {
           host: 'localhost',
+          port: 3001,
         },
       },
     ]),

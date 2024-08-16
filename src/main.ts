@@ -4,41 +4,33 @@ import { FlowExecutorService } from './services/flow-executor.service';
 import { Flow } from './interfaces/flow.interface';
 import { ComponentRegistry } from './services/component-registry.service';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { Logger } from '@nestjs/common';
+import { CustomLogger } from './logger/custom-logger';
 import { EventProcessor } from './processors/event.processor';
 import { Component } from './interfaces/component.interface';
 
-async function bootstrapMicroservice() {
-  const logger = new Logger('BootstrapMicroservice');
-
+async function bootstrapMicroservice(logger: CustomLogger): Promise<any> {
   const microservice = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
-    transport: Transport.REDIS,
+    transport: Transport.TCP,
     options: {
       host: 'localhost',
+      port: 3001,
     },
+    logger,
   });
 
   await microservice.listen();
-  logger.log('Microservice is now listening for Redis events');
+  logger.log('Microservice is now listening for TCP events on port 3001');
 
   return microservice;
 }
 
-async function bootstrapApp() {
-  const logger = new Logger('BootstrapMain');
-
-  const app = await NestFactory.create(AppModule);
+async function bootstrapApp(logger: CustomLogger): Promise<any> {
+  const app = await NestFactory.create(AppModule, { logger });
 
   const flowExecutor = app.get(FlowExecutorService);
   const componentRegistry = app.get(ComponentRegistry);
 
   await app.init();
-
-  // const components = componentRegistry.getAllComponents();
-  // components.forEach(component => {
-  //   logger.log(`Registered component: ${component.id}`);
-  //   wrapComponentEmitEvent(component, logger);
-  // });
 
   const exampleFlow: Flow = {
     id: 'example-flow',
@@ -65,23 +57,22 @@ async function bootstrapApp() {
   return app;
 }
 
-// function wrapComponentEmitEvent(component: Component, logger: Logger) {
-//   const originalEmitEvent = component.emitEvent.bind(component);
-//   component.emitEvent = async (eventName: string, data: any) => {
-//     logger.log(`${component.id} emitting event: ${eventName}, data: ${JSON.stringify(data)}`);
-//     return originalEmitEvent(eventName, data);
-//   };
-// }
-
-async function bootstrap() {
-  const microservice = await bootstrapMicroservice();
-  const app = await bootstrapApp();
+async function bootstrap(): Promise<void> {
+  const app = await NestFactory.create(AppModule);
+  const logger = new CustomLogger('Bootstrap', app.get('FLOW_SERVICE'));
+  
+  const microservice = await bootstrapMicroservice(logger);
+  const mainApp = await bootstrapApp(logger);
 
   process.on('SIGINT', async () => {
+    CustomLogger.clearLogFile();
     await microservice.close();
-    await app.close();
+    await mainApp.close();
     process.exit();
   });
 }
 
-bootstrap();
+bootstrap().catch((error) => {
+  console.log('Bootstrap error:', error)
+  process.exit(1);
+});
