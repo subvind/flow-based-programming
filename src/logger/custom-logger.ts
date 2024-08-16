@@ -64,7 +64,7 @@ export class CustomLogger extends ConsoleLogger {
     });
   }
 
-  static clearLogFile() {
+  static clearSTDOUT() {
     const logFile = path.join(process.cwd(), 'LOGGER.txt');
     try {
       fs.writeFileSync(logFile, '');

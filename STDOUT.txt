@@ -1,0 +1,49 @@
+c[[90m3:57:25 PM[0m] Starting compilation in watch mode...
+
+[[90m3:57:28 PM[0m] Found 0 errors. Watching for file changes.
+
+[32m[Nest] 37659  - [39m08/16/2024, 3:57:31 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 37659  - [39m08/16/2024, 3:57:31 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mClientsModule dependencies initialized[39m[38;5;3m +33ms[39m
+[32m[Nest] 37659  - [39m08/16/2024, 3:57:31 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +0ms[39m
+[08/16/2024, 3:57:31 PM] [LOG] Starting microservice...
+[08/16/2024, 3:57:31 PM] [LOG] [NestFactory] Starting Nest application...
+[08/16/2024, 3:57:31 PM] [LOG] [InstanceLoader] ClientsModule dependencies initialized
+[08/16/2024, 3:57:31 PM] [LOG] [InstanceLoader] AppModule dependencies initialized
+[08/16/2024, 3:57:31 PM] [LOG] [WebSocketsController] NumberGeneratorComponent subscribed to the "client-event" message
+[08/16/2024, 3:57:31 PM] [LOG] [WebSocketsController] NumberMultiplierComponent subscribed to the "client-event" message
+[08/16/2024, 3:57:31 PM] [LOG] [ComponentRegistry] Registering component: numberGenerator
+[08/16/2024, 3:57:31 PM] [LOG] [ComponentRegistry] Registering component: numberMultiplier
+[08/16/2024, 3:57:31 PM] [LOG] [NestMicroservice] Nest microservice successfully started
+[08/16/2024, 3:57:31 PM] [LOG] Microservice is now listening for TCP events on port 3001
+[08/16/2024, 3:57:31 PM] [LOG] Waiting for microservice to fully start...
+node:internal/process/promises:391
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1118:18)
+    at afterConnectMultiple (node:net:1685:7) {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:3001
+        at createConnectionError (node:net:1648:14)
+        at afterConnectMultiple (node:net:1678:16) {
+      errno: -61,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 3001
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:3001
+        at createConnectionError (node:net:1648:14)
+        at afterConnectMultiple (node:net:1678:16) {
+      errno: -61,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 3001
+    }
+  ]
+}
+
+Node.js v22.4.0
