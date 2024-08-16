@@ -1,0 +1,16 @@
+<div id="<%= flowId %>-<%= componentId %>-<%= templateId %>" class="event-trigger-content">
+  <h3>Event Triggered</h3>
+  <p>Flow ID: <%= flowId %></p>
+  <p>Component ID: <%= componentId %></p>
+  <p>Template ID: <%= templateId %></p>
+  <% if (typeof data === 'object') { %>
+    <ul>
+      <% for (const [key, value] of Object.entries(data)) { %>
+        <li><strong><%= key %>:</strong> <%= value %></li>
+      <% } %>
+    </ul>
+  <% } else { %>
+    <p>Data: <%= data %></p>
+  <% } %>
+  <p>Timestamp: <%= new Date().toISOString() %></p>
+</div>

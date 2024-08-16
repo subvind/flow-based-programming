@@ -11,5 +11,10 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "incremental": true
-  }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"],
+  "copy": [
+    { "from": "src/templates", "to": "dist/templates" }
+  ]
 }

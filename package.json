@@ -5,20 +5,25 @@
   "main": "dist/main.js",
   "scripts": {
     "prompt": "node ./prompt.mjs",
-    "build": "tsc",
+    "copy-templates": "cp -R src/templates dist/",
+    "build": "nest build && npm run copy-templates",
     "start": "node dist/main.js",
     "start:dev": "nest start --watch"
   },
   "dependencies": {
-    "@nestjs/bull": "^0.4.2",
-    "@nestjs/common": "^8.4.7",
-    "@nestjs/core": "^8.4.7",
-    "@nestjs/microservices": "^8.4.7",
-    "@nestjs/platform-express": "^8.4.7",
+    "@nestjs/bull": "^10.2.0",
+    "@nestjs/common": "^10.4.1",
+    "@nestjs/core": "^10.4.1",
+    "@nestjs/microservices": "^10.4.1",
+    "@nestjs/platform-express": "^10.4.1",
+    "@nestjs/platform-socket.io": "^10.4.1",
+    "@nestjs/websockets": "^10.4.1",
     "bull": "^3.29.3",
+    "ejs": "^3.1.10",
     "ioredis": "^5.4.1",
     "reflect-metadata": "^0.1.14",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "socket.io": "^4.7.5"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.4.4",

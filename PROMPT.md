@@ -2,32 +2,22 @@ Please follow the instructions within ./TODO.md! Thank you :)
 ### ./src/components/base.component.ts
 ```ts
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { ClientProxy, ClientProxyFactory, Transport } from '@nestjs/microservices';
+import { ClientProxy } from '@nestjs/microservices';
 import { Component } from '../interfaces/component.interface';
+import { CustomLogger } from '../logger/custom-logger';
 
 @Injectable()
 export abstract class ComponentService implements Component {
   @Inject('FLOW_SERVICE')
   protected client: ClientProxy;
-  public readonly logger = new Logger(ComponentService.name);
+  protected readonly logger: CustomLogger;
 
   constructor(
     public id: string,
     public name: string,
     public description: string
   ) {
-    this.client = ClientProxyFactory.create({
-      transport: Transport.REDIS,
-      options: {
-        url: 'redis://localhost:6379',
-      },
-    });
-
-    this.client.connect().then(() => {
-      this.logger.log('Connected to Redis successfully');
-    }).catch(err => {
-      this.logger.error('Failed to connect to Redis', err);
-    });
+    this.logger = new CustomLogger(this.id, this.client);
   }
 
   abstract handleEvent(eventName: string, data: any): Promise<void>;
@@ -45,24 +35,45 @@ export abstract class ComponentService implements Component {
 
 ### ./src/components/number-generator.component.ts
 ```ts
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ComponentService } from './base.component';
 
 @Injectable()
 export class NumberGeneratorComponent extends ComponentService {
+  private interval: NodeJS.Timeout | null = null;
+
   constructor() {
     super('numberGenerator', 'Number Generator', 'Generates random numbers periodically');
   }
 
   async handleEvent(eventName: string, data: any): Promise<void> {
-    this.logger.log(`Handling event: ${eventName}`);
+    this.logger.log(`NumberGenerator handling event: ${eventName}`);
     if (eventName === 'start') {
-      this.logger.log('Starting number generation');
-      setInterval(() => {
-        const randomNumber = Math.random();
-        this.logger.log(`Emitting numberGenerated event: ${randomNumber}`);
-        this.emitEvent('numberGenerated', randomNumber);
-      }, 1000);
+      this.logger.log('NumberGenerator starting number generation');
+      this.startGenerating();
+    } else if (eventName === 'stop') {
+      this.logger.log('NumberGenerator stopping number generation');
+      this.stopGenerating();
+    }
+  }
+
+  private startGenerating() {
+    this.logger.log('NumberGenerator startGenerating method called');
+    if (this.interval) {
+      clearInterval(this.interval);
+    }
+    this.interval = setInterval(async () => {
+      const randomNumber = Math.random();
+      this.logger.log(`NumberGenerator generated number: ${randomNumber}`);
+      await this.emitEvent('numberGenerated', randomNumber);
+    }, 1000);
+  }
+
+  private stopGenerating() {
+    this.logger.log('NumberGenerator stopGenerating method called');
+    if (this.interval) {
+      clearInterval(this.interval);
+      this.interval = null;
     }
   }
 }
@@ -127,6 +138,7 @@ import { FlowExecutorService } from '../services/flow-executor.service';
 import { EventProcessor } from '../processors/event.processor';
 import { NumberGeneratorComponent } from '../components/number-generator.component';
 import { NumberMultiplierComponent } from '../components/number-multiplier.component';
+import { CustomLogger } from '../logger/custom-logger';
 
 @Module({
   imports: [
@@ -146,6 +158,7 @@ import { NumberMultiplierComponent } from '../components/number-multiplier.compo
     FlowExecutorService,
     NumberGeneratorComponent,
     NumberMultiplierComponent,
+    CustomLogger
   ],
   exports: [EventProcessor],
 })
@@ -172,18 +185,39 @@ import { ComponentRegistry } from '../services/component-registry.service';
 @Controller()
 export class EventProcessor {
   private readonly logger = new Logger(EventProcessor.name);
+  private connections: Map<string, { toComponent: string; toEvent: string }> = new Map();
 
   constructor(private componentRegistry: ComponentRegistry) {}
 
   @EventPattern('componentEvent')
   async handleComponentEvent(@Payload() data: {componentId: string, eventName: string, data: any}) {
-    console.log('test1')
     const { componentId, eventName, data: eventData } = data;
     this.logger.log(`Received componentEvent: ${componentId}.${eventName}, data: ${JSON.stringify(eventData)}`);
+    
+    if (eventName === 'logger') {
+      const { level, message } = eventData;
+      this.logger.log(`Log from ${componentId}: [${level}] ${message}`);
+      return;
+    }
+    
     const component = this.componentRegistry.getComponent(componentId);
     if (component) {
       this.logger.log(`Passing event to component: ${componentId}`);
       await component.handleEvent(eventName, eventData);
+
+      // Check if there's a connection for this event
+      const connectionKey = `${componentId}.${eventName}`;
+      const connection = this.connections.get(connectionKey);
+      if (connection) {
+        const { toComponent, toEvent } = connection;
+        this.logger.log(`Forwarding event to ${toComponent}.${toEvent}`);
+        const targetComponent = this.componentRegistry.getComponent(toComponent);
+        if (targetComponent) {
+          await targetComponent.handleEvent(toEvent, eventData);
+        } else {
+          this.logger.warn(`Target component not found: ${toComponent}`);
+        }
+      }
     } else {
       this.logger.warn(`Component not found: ${componentId}`);
     }
@@ -191,11 +225,12 @@ export class EventProcessor {
 
   @EventPattern('createConnection')
   async createConnection(@Payload() data: {fromComponent: string, fromEvent: string, toComponent: string, toEvent: string}) {
-
-    console.log('test2')
     const { fromComponent, fromEvent, toComponent, toEvent } = data;
     this.logger.log(`Received createConnection: ${fromComponent}.${fromEvent} -> ${toComponent}.${toEvent}`);
-    // Implement connection logic here
+    
+    const connectionKey = `${fromComponent}.${fromEvent}`;
+    this.connections.set(connectionKey, { toComponent, toEvent });
+    this.logger.log(`Connection created: ${connectionKey} -> ${toComponent}.${toEvent}`);
   }
 }
 ```
@@ -232,47 +267,42 @@ export class ComponentRegistry {
 ### ./src/services/flow-executor.service.ts
 ```ts
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { ClientProxy, ClientProxyFactory, Transport } from '@nestjs/microservices';
+import { ClientProxy } from '@nestjs/microservices';
 import { ComponentRegistry } from './component-registry.service';
 import { Flow } from '../interfaces/flow.interface';
 
 @Injectable()
 export class FlowExecutorService {
-  @Inject('FLOW_SERVICE')
-  private client: ClientProxy;
   private readonly logger = new Logger(FlowExecutorService.name);
 
-  constructor(private componentRegistry: ComponentRegistry) {
-    this.client = ClientProxyFactory.create({
-      transport: Transport.REDIS,
-      options: {
-        url: 'redis://localhost:6379',
-      },
-    });
-
-    this.client.connect().then(() => {
-      this.logger.log('Connected to Redis successfully');
-    }).catch(err => {
-      this.logger.error('Failed to connect to Redis', err);
-    });
-  }
+  constructor(
+    @Inject('FLOW_SERVICE') private client: ClientProxy,
+    private componentRegistry: ComponentRegistry
+  ) {}
 
   async executeFlow(flow: Flow) {
     this.logger.log(`Executing flow: ${flow.id}`);
+
+    // Create connections
     for (const connection of flow.connections) {
       this.logger.log(`Creating connection: ${connection.fromComponent}.${connection.fromEvent} -> ${connection.toComponent}.${connection.toEvent}`);
       await this.client.emit('createConnection', connection).toPromise();
     }
 
+    // Start components
     for (const component of flow.components) {
       const componentInstance = this.componentRegistry.getComponent(component.componentId);
       if (componentInstance) {
         this.logger.log(`Starting component: ${component.componentId}`);
-        await this.client.emit('componentEvent', {
-          componentId: component.componentId,
-          eventName: 'start',
-          data: null,
-        }).toPromise();
+        try {
+          await this.client.emit('componentEvent', {
+            componentId: component.componentId,
+            eventName: 'start',
+            data: null,
+          }).toPromise();
+        } catch (error) {
+          this.logger.error(`Error starting component ${component.componentId}:`, error);
+        }
       } else {
         this.logger.warn(`Component not found: ${component.componentId}`);
       }
@@ -290,11 +320,12 @@ import { Flow } from './interfaces/flow.interface';
 import { ComponentRegistry } from './services/component-registry.service';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { Logger } from '@nestjs/common';
+import { EventProcessor } from './processors/event.processor';
+import { Component } from './interfaces/component.interface';
 
 async function bootstrapMicroservice() {
   const logger = new Logger('BootstrapMicroservice');
 
-  // Create the microservice
   const microservice = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
     transport: Transport.REDIS,
     options: {
@@ -302,33 +333,27 @@ async function bootstrapMicroservice() {
     },
   });
 
-  // Start the microservice
   await microservice.listen();
   logger.log('Microservice is now listening for Redis events');
+
+  return microservice;
 }
 
 async function bootstrapApp() {
   const logger = new Logger('BootstrapMain');
 
-  // Create the main application
   const app = await NestFactory.create(AppModule);
 
   const flowExecutor = app.get(FlowExecutorService);
   const componentRegistry = app.get(ComponentRegistry);
 
-  // Ensure components are registered before flow execution
   await app.init();
 
-  // Log emitted events
-  const components = componentRegistry.getAllComponents();
-  components.forEach(component => {
-    logger.log(`Registered component: ${component.id}`);
-    const originalEmitEvent = component.emitEvent.bind(component);
-    component.emitEvent = async (eventName: string, data: any) => {
-      logger.log(`${component.id} emitted event: ${eventName}, data: ${JSON.stringify(data)}`);
-      return originalEmitEvent(eventName, data);
-    };
-  });
+  // const components = componentRegistry.getAllComponents();
+  // components.forEach(component => {
+  //   logger.log(`Registered component: ${component.id}`);
+  //   wrapComponentEmitEvent(component, logger);
+  // });
 
   const exampleFlow: Flow = {
     id: 'example-flow',
@@ -351,53 +376,36 @@ async function bootstrapApp() {
 
   await app.listen(3000);
   logger.log('Application is running on: http://localhost:3000');
+
+  return app;
 }
 
-async function bootstrap() {
-  // Start the microservice
-  await bootstrapMicroservice();
+// function wrapComponentEmitEvent(component: Component, logger: Logger) {
+//   const originalEmitEvent = component.emitEvent.bind(component);
+//   component.emitEvent = async (eventName: string, data: any) => {
+//     logger.log(`${component.id} emitting event: ${eventName}, data: ${JSON.stringify(data)}`);
+//     return originalEmitEvent(eventName, data);
+//   };
+// }
 
-  // Start the main application
-  await bootstrapApp();
+async function bootstrap() {
+  const microservice = await bootstrapMicroservice();
+  const app = await bootstrapApp();
+
+  process.on('SIGINT', async () => {
+    await microservice.close();
+    await app.close();
+    process.exit();
+  });
 }
 
 bootstrap();
-
 ```
 
 ### ./CURRENT_ERROR.md
 ```md
-[7:47:04 PM] File change detected. Starting incremental compilation...
+implement an eventTrigger component that sends and receives htmx over websocket.
 
-[7:47:04 PM] Found 0 errors. Watching for file changes.
-
-[Nest] 10321  - 08/12/2024, 7:47:05 PM     LOG [NestFactory] Starting Nest application...
-[Nest] 10321  - 08/12/2024, 7:47:05 PM     LOG [InstanceLoader] ClientsModule dependencies initialized +77ms
-[Nest] 10321  - 08/12/2024, 7:47:05 PM     LOG [InstanceLoader] AppModule dependencies initialized +2ms
-[Nest] 10321  - 08/12/2024, 7:47:05 PM     LOG [ComponentRegistry] Registering component: numberGenerator
-[Nest] 10321  - 08/12/2024, 7:47:05 PM     LOG [ComponentRegistry] Registering component: numberMultiplier
-[Nest] 10321  - 08/12/2024, 7:47:05 PM     LOG [ComponentService] Connected to Redis successfully
-[Nest] 10321  - 08/12/2024, 7:47:05 PM     LOG [ComponentService] Connected to Redis successfully
-[Nest] 10321  - 08/12/2024, 7:47:05 PM     LOG [FlowExecutorService] Connected to Redis successfully
-[Nest] 10321  - 08/12/2024, 7:47:05 PM     LOG [NestMicroservice] Nest microservice successfully started +1ms
-[Nest] 10321  - 08/12/2024, 7:47:05 PM     LOG [BootstrapMicroservice] Microservice is now listening for Redis events
-[Nest] 10321  - 08/12/2024, 7:47:06 PM     LOG [NestFactory] Starting Nest application... +151ms
-[Nest] 10321  - 08/12/2024, 7:47:06 PM     LOG [InstanceLoader] ClientsModule dependencies initialized +10ms
-[Nest] 10321  - 08/12/2024, 7:47:06 PM     LOG [InstanceLoader] AppModule dependencies initialized +1ms
-[Nest] 10321  - 08/12/2024, 7:47:06 PM     LOG [ComponentRegistry] Registering component: numberGenerator
-[Nest] 10321  - 08/12/2024, 7:47:06 PM     LOG [ComponentRegistry] Registering component: numberMultiplier
-[Nest] 10321  - 08/12/2024, 7:47:06 PM     LOG [NestApplication] Nest application successfully started +1ms
-[Nest] 10321  - 08/12/2024, 7:47:06 PM     LOG [BootstrapMain] Registered component: numberGenerator
-[Nest] 10321  - 08/12/2024, 7:47:06 PM     LOG [BootstrapMain] Registered component: numberMultiplier
-[Nest] 10321  - 08/12/2024, 7:47:06 PM     LOG [BootstrapMain] Starting flow execution...
-[Nest] 10321  - 08/12/2024, 7:47:06 PM     LOG [FlowExecutorService] Executing flow: example-flow
-[Nest] 10321  - 08/12/2024, 7:47:06 PM     LOG [FlowExecutorService] Creating connection: gen1.numberGenerated -> mult1.numberReceived
-[Nest] 10321  - 08/12/2024, 7:47:06 PM     LOG [ComponentService] Connected to Redis successfully
-[Nest] 10321  - 08/12/2024, 7:47:06 PM     LOG [ComponentService] Connected to Redis successfully
-[Nest] 10321  - 08/12/2024, 7:47:06 PM     LOG [FlowExecutorService] Connected to Redis successfully
-[Nest] 10321  - 08/12/2024, 7:47:06 PM     LOG [FlowExecutorService] Starting component: numberGenerator
-[Nest] 10321  - 08/12/2024, 7:47:06 PM     LOG [FlowExecutorService] Starting component: numberMultiplier
-[Nest] 10321  - 08/12/2024, 7:47:06 PM     LOG [BootstrapMain] Application is running on: http://localhost:3000
 ```
 
 ### ./TODO.md
@@ -407,7 +415,7 @@ after todo: i will update my code base with the submitted files and run the prog
 durring todo: if there is an error within ./CURRENT_ERROR.md then help me solve that otherwise don't worry about it and proceed with the following todo rules.
 
 TODO RULES:
-- return a ./src/.js file(s)
+- return a ./src/.ts file(s)
 - i'd like TypeScript in response to my queries!
 - keep logger for debugging
 - keep code comments for documentation

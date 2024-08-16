@@ -5,6 +5,7 @@ import { FlowExecutorService } from '../services/flow-executor.service';
 import { EventProcessor } from '../processors/event.processor';
 import { NumberGeneratorComponent } from '../components/number-generator.component';
 import { NumberMultiplierComponent } from '../components/number-multiplier.component';
+import { CustomLogger } from '../logger/custom-logger';
 
 @Module({
   imports: [
@@ -13,7 +14,7 @@ import { NumberMultiplierComponent } from '../components/number-multiplier.compo
         name: 'FLOW_SERVICE',
         transport: Transport.REDIS,
         options: {
-          url: 'redis://localhost:6379',
+          host: 'localhost',
         },
       },
     ]),
@@ -24,6 +25,7 @@ import { NumberMultiplierComponent } from '../components/number-multiplier.compo
     FlowExecutorService,
     NumberGeneratorComponent,
     NumberMultiplierComponent,
+    CustomLogger
   ],
   exports: [EventProcessor],
 })

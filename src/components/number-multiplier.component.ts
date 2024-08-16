@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ComponentService } from './base.component';
+import { ComponentService } from '../base.component';
 
 @Injectable()
 export class NumberMultiplierComponent extends ComponentService {

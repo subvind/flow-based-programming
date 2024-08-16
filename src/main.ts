@@ -5,45 +5,40 @@ import { Flow } from './interfaces/flow.interface';
 import { ComponentRegistry } from './services/component-registry.service';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { Logger } from '@nestjs/common';
+import { EventProcessor } from './processors/event.processor';
+import { Component } from './interfaces/component.interface';
 
 async function bootstrapMicroservice() {
   const logger = new Logger('BootstrapMicroservice');
 
-  // Create the microservice
   const microservice = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
     transport: Transport.REDIS,
     options: {
-      url: 'redis://localhost:6379',
+      host: 'localhost',
     },
   });
 
-  // Start the microservice
   await microservice.listen();
   logger.log('Microservice is now listening for Redis events');
+
+  return microservice;
 }
 
 async function bootstrapApp() {
   const logger = new Logger('BootstrapMain');
 
-  // Create the main application
   const app = await NestFactory.create(AppModule);
 
   const flowExecutor = app.get(FlowExecutorService);
   const componentRegistry = app.get(ComponentRegistry);
 
-  // Ensure components are registered before flow execution
   await app.init();
 
-  // Log emitted events
-  const components = componentRegistry.getAllComponents();
-  components.forEach(component => {
-    logger.log(`Registered component: ${component.id}`);
-    const originalEmitEvent = component.emitEvent.bind(component);
-    component.emitEvent = async (eventName: string, data: any) => {
-      logger.log(`${component.id} emitted event: ${eventName}, data: ${JSON.stringify(data)}`);
-      return originalEmitEvent(eventName, data);
-    };
-  });
+  // const components = componentRegistry.getAllComponents();
+  // components.forEach(component => {
+  //   logger.log(`Registered component: ${component.id}`);
+  //   wrapComponentEmitEvent(component, logger);
+  // });
 
   const exampleFlow: Flow = {
     id: 'example-flow',
@@ -66,14 +61,27 @@ async function bootstrapApp() {
 
   await app.listen(3000);
   logger.log('Application is running on: http://localhost:3000');
+
+  return app;
 }
 
-async function bootstrap() {
-  // Start the microservice
-  await bootstrapMicroservice();
+// function wrapComponentEmitEvent(component: Component, logger: Logger) {
+//   const originalEmitEvent = component.emitEvent.bind(component);
+//   component.emitEvent = async (eventName: string, data: any) => {
+//     logger.log(`${component.id} emitting event: ${eventName}, data: ${JSON.stringify(data)}`);
+//     return originalEmitEvent(eventName, data);
+//   };
+// }
 
-  // Start the main application
-  await bootstrapApp();
+async function bootstrap() {
+  const microservice = await bootstrapMicroservice();
+  const app = await bootstrapApp();
+
+  process.on('SIGINT', async () => {
+    await microservice.close();
+    await app.close();
+    process.exit();
+  });
 }
 
 bootstrap();
