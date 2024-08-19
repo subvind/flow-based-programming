@@ -1,5 +1,5 @@
 import { ConsoleLogger, Injectable, Inject } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -7,7 +7,7 @@ import * as path from 'path';
 export class CustomLogger extends ConsoleLogger {
   constructor(
     private componentId: string,
-    @Inject('FLOW_SERVICE') private client: ClientProxy
+    @Inject(AmqpConnection) private amqpConnection: AmqpConnection
   ) {
     super(componentId);
     this.setLogLevels(['log', 'error', 'warn', 'debug', 'verbose']);
@@ -15,17 +15,17 @@ export class CustomLogger extends ConsoleLogger {
 
   log(message: string, context?: string) {
     this.printMessage(message, 'log', context);
-    this.emitLogEvent('log', message);
+    // this.emitLogEvent('log', message);
   }
 
   warn(message: string, context?: string) {
     this.printMessage(message, 'warn', context);
-    this.emitLogEvent('warn', message);
+    // this.emitLogEvent('warn', message);
   }
 
   error(message: string, trace?: string, context?: string) {
     this.printMessage(message, 'error', context);
-    this.emitLogEvent('error', message);
+    // this.emitLogEvent('error', message);
     if (trace) {
       this.printMessage(trace, 'error', context);
     }
@@ -41,21 +41,25 @@ export class CustomLogger extends ConsoleLogger {
 
   private printMessage(message: string, logLevel: string, context?: string) {
     const output = context ? `[${context}] ${message}` : message;
-    console.log(`[${this.getTimestamp()}] [${logLevel.toUpperCase()}] ${output}`);
+    console.log(`[${this.getNow()}] [${logLevel.toUpperCase()}] ${output}`);
   }
 
   private async emitLogEvent(level: string, message: string) {
-    await this.client.emit('componentEvent', {
+    await this.amqpConnection.publish('flow_exchange', 'componentEvent', {
       componentId: this.componentId,
       eventName: 'logger',
       data: {
         level,
         message,
       },
-    }).toPromise();
+    });
   }
 
-  static writeToFile(message: string) {
+  private getNow(): string {
+    return new Date().toISOString();
+  }
+
+  static write_to_file(message: string) {
     const logFile = path.join(process.cwd(), 'STDOUT.txt');
     fs.appendFile(logFile, message, (err) => {
       if (err) {

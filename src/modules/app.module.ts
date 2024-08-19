@@ -1,5 +1,5 @@
 import { Module, OnModuleInit } from '@nestjs/common';
-import { ClientsModule, Transport } from '@nestjs/microservices';
+import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { ComponentRegistry } from '../services/component-registry.service';
 import { FlowExecutorService } from '../services/flow-executor.service';
 import { EventProcessor } from '../processors/event.processor';
@@ -9,12 +9,16 @@ import { CustomLogger } from '../logger/custom-logger';
 
 @Module({
   imports: [
-    ClientsModule.register([
-      {
-        name: 'FLOW_SERVICE',
-        transport: Transport.RMQ,
-      },
-    ]),
+    RabbitMQModule.forRoot(RabbitMQModule, {
+      exchanges: [
+        {
+          name: 'flow_exchange',
+          type: 'topic',
+        },
+      ],
+      uri: 'amqp://localhost:5672',
+      connectionInitOptions: { wait: false },
+    }),
   ],
   providers: [
     EventProcessor,

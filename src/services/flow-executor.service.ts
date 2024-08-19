@@ -1,5 +1,5 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { Injectable, Logger } from '@nestjs/common';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { ComponentRegistry } from './component-registry.service';
 import { Flow } from '../interfaces/flow.interface';
 
@@ -8,7 +8,7 @@ export class FlowExecutorService {
   private readonly logger = new Logger(FlowExecutorService.name);
 
   constructor(
-    @Inject('FLOW_SERVICE') private client: ClientProxy,
+    private amqpConnection: AmqpConnection,
     private componentRegistry: ComponentRegistry
   ) {}
 
@@ -18,7 +18,7 @@ export class FlowExecutorService {
     // Create connections
     for (const connection of flow.connections) {
       this.logger.log(`Creating connection: ${connection.fromComponent}.${connection.fromEvent} -> ${connection.toComponent}.${connection.toEvent}`);
-      await this.client.emit('createConnection', connection).toPromise();
+      await this.amqpConnection.publish('flow_exchange', 'createConnection', connection);
     }
 
     // Start components
@@ -27,12 +27,11 @@ export class FlowExecutorService {
       if (componentInstance) {
         this.logger.log(`Starting component: ${component.componentId}`);
         try {
-          let ce = await this.client.emit('componentEvent', {
+          await this.amqpConnection.publish('flow_exchange', 'componentEvent', {
             componentId: component.componentId,
             eventName: 'start',
             data: {},
-          }).toPromise();
-          this.logger.log(`ce: ${ce}`);
+          });
         } catch (error) {
           this.logger.error(`Error starting component ${component.componentId}:`, error);
         }
