@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flow-Based Programming Example</title>
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+    <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        .component { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; }
+        h2 { margin-top: 0; }
+    </style>
+</head>
+<body>
+    <h1>Flow-Based Programming Example</h1>
+
+    <div id="number-generator" class="component">
+        <h2>Number Generator</h2>
+        <button hx-post="/trigger-event" hx-vals='{"flowId": "example-flow", "componentId": "gen1", "eventId": "start"}'>
+            Start Generating
+        </button>
+        <button hx-post="/trigger-event" hx-vals='{"flowId": "example-flow", "componentId": "gen1", "eventId": "stop"}'>
+            Stop Generating
+        </button>
+        <div id="generator-output"></div>
+    </div>
+
+    <div id="number-multiplier" class="component">
+        <h2>Number Multiplier</h2>
+        <div id="multiplier-output"></div>
+    </div>
+
+    <script>
+        const socket = io();
+
+        socket.on('htmx-update', function(data) {
+            const targetId = `${data.componentId}-output`;
+            const targetElement = document.getElementById(targetId);
+            if (targetElement) {
+                targetElement.innerHTML = data.content;
+            }
+        });
+
+        htmx.on("htmx:configRequest", (event) => {
+            event.detail.headers['Content-Type'] = 'application/json';
+        });
+    </script>
+</body>
+</html>

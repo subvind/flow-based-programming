@@ -29,6 +29,12 @@ export class NumberGeneratorComponent extends ComponentService {
       const randomNumber = Math.random();
       this.logger.log(`NumberGenerator generated number: ${randomNumber}`);
       await this.emitEvent('numberGenerated', randomNumber);
+      
+      // Send HTMX update
+      await this.sendHtmxUpdate({
+        number: randomNumber,
+        timestamp: Date.now()
+      }, 'number-generator');
     }, 1000);
   }
 

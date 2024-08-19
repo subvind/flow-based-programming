@@ -22,6 +22,7 @@
     "amqp-connection-manager": "^4.1.14",
     "amqplib": "^0.10.4",
     "bull": "^3.29.3",
+    "cookie-parser": "^1.4.6",
     "ejs": "^3.1.10",
     "ioredis": "^5.4.1",
     "reflect-metadata": "^0.1.14",

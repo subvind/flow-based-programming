@@ -12,4 +12,9 @@ npm install
 npm run start:dev
 
 systemctl stop rabbitmq.service
+
+# rabbitqm management portal
+# http://localhost:15672/#/queues
+
+
 ```

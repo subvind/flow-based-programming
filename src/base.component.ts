@@ -55,7 +55,7 @@ export abstract class ComponentService implements Component {
   }
 
   private async generate_htmx_content(data: any, flowId: string, templateId: string): Promise<string> {
-    const template_path = path.resolve(__dirname, `../templates/${templateId}.ejs`);
+    const template_path = path.resolve(__dirname, `./templates/${templateId}.ejs`);
     try {
       return await ejs.renderFile(template_path, { 
         data, 
@@ -66,6 +66,15 @@ export abstract class ComponentService implements Component {
     } catch (error) {
       this.logger.error(`Error rendering EJS template: ${error.message}`);
       return `<div>Error rendering content</div>`;
+    }
+  }
+
+  async publish(message: any): Promise<void> {
+    try {
+      await this.amqpConnection.publish('flow_exchange', 'componentEvent', message);
+    } catch (error) {
+      this.logger.error(`Error publishing message: ${error.message}`);
+      throw error;
     }
   }
 }
