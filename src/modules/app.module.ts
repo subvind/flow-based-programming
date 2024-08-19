@@ -12,11 +12,7 @@ import { CustomLogger } from '../logger/custom-logger';
     ClientsModule.register([
       {
         name: 'FLOW_SERVICE',
-        transport: Transport.TCP,
-        options: {
-          host: 'localhost',
-          port: 3001,
-        },
+        transport: Transport.RMQ,
       },
     ]),
   ],

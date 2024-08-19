@@ -2,14 +2,14 @@ flow-based-programming
 ========
 
 ```bash
-brew install rabbitmq
+sudo pacman -S rabbitmq
 
-brew services start rabbitmq
-brew services info rabbitmq
-# http://server-name:15672/api
+systemctl start rabbitmq.service
+systemctl enable rabbitmq.service
+systemctl status rabbitmq.service
 
 npm install
 npm run start:dev
 
-brew services stop rabbitmq
+systemctl stop rabbitmq.service
 ```

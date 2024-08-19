@@ -27,11 +27,12 @@ export class FlowExecutorService {
       if (componentInstance) {
         this.logger.log(`Starting component: ${component.componentId}`);
         try {
-          await this.client.emit('componentEvent', {
+          let ce = await this.client.emit('componentEvent', {
             componentId: component.componentId,
             eventName: 'start',
-            data: null,
+            data: {},
           }).toPromise();
+          this.logger.log(`ce: ${ce}`);
         } catch (error) {
           this.logger.error(`Error starting component ${component.componentId}:`, error);
         }
