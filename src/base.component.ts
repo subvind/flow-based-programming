@@ -44,7 +44,7 @@ export abstract class ComponentService implements Component {
     this.emitEvent('clientEventReceived', { componentId, eventId, data: eventData });
   }
 
-  protected async sendHtmxUpdate(data: any, templateId: string) {
+  protected async sendHtmxUpdate(templateId: string, data: any) {
     const htmxContent = await this.generateHtmxContent(data, templateId);
     
     this.server.emit('htmx-update', {

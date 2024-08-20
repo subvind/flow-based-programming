@@ -1,10 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { ComponentService } from '../base.component';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 @Injectable()
 export class EventTriggerComponent extends ComponentService {
-  constructor(flowId: string) {
+  constructor(@Inject('FLOW_ID') flowId: string) {
     super('eventTrigger', 'Event Trigger', 'Handles HTMX requests and triggers events', flowId);
   }
 

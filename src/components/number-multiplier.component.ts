@@ -1,9 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { ComponentService } from '../base.component';
 
 @Injectable()
 export class NumberMultiplierComponent extends ComponentService {
-  constructor(flowId: string) {
+  constructor(@Inject('FLOW_ID') flowId: string) {
     super('numberMultiplier', 'Number Multiplier', 'Multiplies received number by 2', flowId);
   }
 
@@ -15,11 +15,11 @@ export class NumberMultiplierComponent extends ComponentService {
       await this.emitEvent('numberMultiplied', result);
 
       // Send HTMX update
-      await this.sendHtmxUpdate({
+      await this.sendHtmxUpdate('number-multiplier', {
         input: data,
         result: result,
         timestamp: Date.now()
-      }, 'number-multiplier');
+      });
     }
   }
 }

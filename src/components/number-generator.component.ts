@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { ComponentService } from '../base.component';
 
 @Injectable()
 export class NumberGeneratorComponent extends ComponentService {
   private interval: NodeJS.Timeout | null = null;
 
-  constructor(flowId: string) {
+  constructor(@Inject('FLOW_ID') flowId: string) {
     super('numberGenerator', 'Number Generator', 'Generates random numbers periodically', flowId);
   }
 
@@ -31,11 +31,11 @@ export class NumberGeneratorComponent extends ComponentService {
       await this.emitEvent('numberGenerated', randomNumber);
       
       // Send HTMX update
-      await this.sendHtmxUpdate({
+      await this.sendHtmxUpdate('number-generator', {
         number: randomNumber,
         timestamp: Date.now(),
         flowId: this.flowId
-      }, 'number-generator');
+      });
     }, 1000);
   }
 

@@ -18,7 +18,7 @@ export class EventProcessor {
     const { flowId, componentId, eventName, data: eventData } = msg;
     this.logger.log(`[handleComponentEvent] [${flowId}.${componentId}.${eventName}] data: ${JSON.stringify(eventData)}`);
     
-    const component = this.componentRegistry.getComponent(componentId);
+    const component = this.componentRegistry.getComponentId(componentId);
     if (component) {
       this.logger.log(`Passing event to component: ${componentId}`);
       await component.handleEvent(eventName, eventData);
@@ -29,15 +29,18 @@ export class EventProcessor {
       if (connection) {
         const { toFlow, toComponent, toEvent } = connection;
         this.logger.log(`[forwardingComponentEvent] [${toFlow}.${toComponent}.${toEvent}]`);
-        const targetComponent = this.componentRegistry.getComponent(toComponent);
+        
+        // Convert flow-defined toComponent to registry-defined componentId
+        const targetComponent = this.componentRegistry.getComponentId(toComponent);
         if (targetComponent) {
+          this.logger.log(`Forwarding event to component: ${targetComponent.id}`);
           await targetComponent.handleEvent(toEvent, { ...eventData, flowId: toFlow });
         } else {
-          this.logger.warn(`Target component not found: ${toComponent}`);
+          this.logger.warn(`Target component not found: ${toComponent} in flow: ${toFlow}`);
         }
       }
     } else {
-      this.logger.warn(`Component not found: ${componentId}`);
+      this.logger.warn(`Component key not found: ${componentId}`);
     }
   }
 

@@ -43,12 +43,13 @@ export class FlowExecutorService {
       }
       
       this.componentRegistry.registerComponent(componentInstance);
+      this.componentRegistry.registerComponentId(component.id, componentInstance);
       
       this.logger.log(`Initializing component: ${component.componentId} for flow: ${flow.id}`);
       try {
         await this.amqpConnection.publish('flow_exchange', 'componentEvent', {
           flowId: flow.id,
-          componentId: component.componentId,
+          componentId: component.id,
           eventName: 'init',
           data: {},
         });

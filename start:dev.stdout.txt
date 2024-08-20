@@ -1,249 +1,82 @@
-c[[90m2:57:51 PM[0m] Starting compilation in watch mode...
-
-[[90m2:57:51 PM[0m] Found 0 errors. Watching for file changes.
-
-[32m[Nest] 59772  - [39m08/20/2024, 2:57:52 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
-[32m[Nest] 59772  - [39m08/20/2024, 2:57:52 PM [32m    LOG[39m [38;5;3m[AmqpConnection] [39m[32mTrying to connect to RabbitMQ broker (default)[39m
-[32m[Nest] 59772  - [39m08/20/2024, 2:57:52 PM [32m    LOG[39m [38;5;3m[RabbitMQModule] [39m[32mSuccessfully connected to RabbitMQ[39m
-[31m[Nest] 59772  - [39m08/20/2024, 2:57:52 PM [31m  ERROR[39m [38;5;3m[ExceptionHandler] [39m[31mNest can't resolve dependencies of the NumberGeneratorComponent (?). Please make sure that the argument String at index [0] is available in the AppModule context.
-
-Potential solutions:
-- Is AppModule a valid NestJS module?
-- If String is a provider, is it part of the current AppModule?
-- If String is exported from a separate @Module, is that module imported within AppModule?
-  @Module({
-    imports: [ /* the Module containing String */ ]
-  })
-[39m
-Error: Nest can't resolve dependencies of the NumberGeneratorComponent (?). Please make sure that the argument String at index [0] is available in the AppModule context.
-
-Potential solutions:
-- Is AppModule a valid NestJS module?
-- If String is a provider, is it part of the current AppModule?
-- If String is exported from a separate @Module, is that module imported within AppModule?
-  @Module({
-    imports: [ /* the Module containing String */ ]
-  })
-
-    at Injector.lookupComponentInParentModules (/home/travis/Projects/flow-based-programming/node_modules/@nestjs/core/injector/injector.js:254:19)
-    at async Injector.resolveComponentInstance (/home/travis/Projects/flow-based-programming/node_modules/@nestjs/core/injector/injector.js:207:33)
-    at async resolveParam (/home/travis/Projects/flow-based-programming/node_modules/@nestjs/core/injector/injector.js:128:38)
-    at async Promise.all (index 0)
-    at async Injector.resolveConstructorParams (/home/travis/Projects/flow-based-programming/node_modules/@nestjs/core/injector/injector.js:143:27)
-    at async Injector.loadInstance (/home/travis/Projects/flow-based-programming/node_modules/@nestjs/core/injector/injector.js:70:13)
-    at async Injector.loadProvider (/home/travis/Projects/flow-based-programming/node_modules/@nestjs/core/injector/injector.js:97:9)
-    at async /home/travis/Projects/flow-based-programming/node_modules/@nestjs/core/injector/instance-loader.js:56:13
-    at async Promise.all (index 6)
-    at async InstanceLoader.createInstancesOfProviders (/home/travis/Projects/flow-based-programming/node_modules/@nestjs/core/injector/instance-loader.js:55:9)
-c[[90m3:03:19 PM[0m] File change detected. Starting incremental compilation...
-
-[96msrc/processors/event.processor.ts[0m:[93m21[0m:[93m67[0m - [91merror[0m[90m TS2554: [0mExpected 1 arguments, but got 2.
-
-[7m21[0m     const component = this.componentRegistry.getComponent(flowId, componentId);
-[7m  [0m [91m                                                                  ~~~~~~~~~~~[0m
-
-[96msrc/processors/event.processor.ts[0m:[93m32[0m:[93m77[0m - [91merror[0m[90m TS2554: [0mExpected 1 arguments, but got 2.
-
-[7m32[0m         const targetComponent = this.componentRegistry.getComponent(flowId, toComponent);
-[7m  [0m [91m                                                                            ~~~~~~~~~~~[0m
-
-[96msrc/services/component-registry.service.ts[0m:[93m23[0m:[93m5[0m - [91merror[0m[90m TS2739: [0mType 'Map<string, Component>' is missing the following properties from type 'Component': id, name, flowId, handleEvent, emitEvent
-
-[7m23[0m     return component;
-[7m  [0m [91m    ~~~~~~~~~~~~~~~~~[0m
-
-[[90m3:03:19 PM[0m] Found 3 errors. Watching for file changes.
-
-c[[90m3:03:31 PM[0m] File change detected. Starting incremental compilation...
-
-[96msrc/processors/event.processor.ts[0m:[93m21[0m:[93m67[0m - [91merror[0m[90m TS2554: [0mExpected 1 arguments, but got 2.
-
-[7m21[0m     const component = this.componentRegistry.getComponent(flowId, componentId);
-[7m  [0m [91m                                                                  ~~~~~~~~~~~[0m
-
-[96msrc/processors/event.processor.ts[0m:[93m32[0m:[93m77[0m - [91merror[0m[90m TS2554: [0mExpected 1 arguments, but got 2.
-
-[7m32[0m         const targetComponent = this.componentRegistry.getComponent(flowId, toComponent);
-[7m  [0m [91m                                                                            ~~~~~~~~~~~[0m
-
-[96msrc/services/component-registry.service.ts[0m:[93m22[0m:[93m5[0m - [91merror[0m[90m TS2739: [0mType 'Map<string, Component>' is missing the following properties from type 'Component': id, name, flowId, handleEvent, emitEvent
-
-[7m22[0m     return component;
-[7m  [0m [91m    ~~~~~~~~~~~~~~~~~[0m
-
-[[90m3:03:31 PM[0m] Found 3 errors. Watching for file changes.
-
-c[[90m3:04:31 PM[0m] File change detected. Starting incremental compilation...
-
-[96msrc/processors/event.processor.ts[0m:[93m21[0m:[93m67[0m - [91merror[0m[90m TS2554: [0mExpected 1 arguments, but got 2.
-
-[7m21[0m     const component = this.componentRegistry.getComponent(flowId, componentId);
-[7m  [0m [91m                                                                  ~~~~~~~~~~~[0m
-
-[96msrc/processors/event.processor.ts[0m:[93m32[0m:[93m77[0m - [91merror[0m[90m TS2554: [0mExpected 1 arguments, but got 2.
-
-[7m32[0m         const targetComponent = this.componentRegistry.getComponent(flowId, toComponent);
-[7m  [0m [91m                                                                            ~~~~~~~~~~~[0m
-
-[[90m3:04:31 PM[0m] Found 2 errors. Watching for file changes.
-
-c[[90m3:04:47 PM[0m] File change detected. Starting incremental compilation...
-
-[96msrc/processors/event.processor.ts[0m:[93m21[0m:[93m67[0m - [91merror[0m[90m TS2554: [0mExpected 1 arguments, but got 2.
-
-[7m21[0m     const component = this.componentRegistry.getComponent(flowId, componentId);
-[7m  [0m [91m                                                                  ~~~~~~~~~~~[0m
-
-[96msrc/processors/event.processor.ts[0m:[93m32[0m:[93m77[0m - [91merror[0m[90m TS2554: [0mExpected 1 arguments, but got 2.
-
-[7m32[0m         const targetComponent = this.componentRegistry.getComponent(flowId, toComponent);
-[7m  [0m [91m                                                                            ~~~~~~~~~~~[0m
-
-[96msrc/services/component-registry.service.ts[0m:[93m12[0m:[93m41[0m - [91merror[0m[90m TS2345: [0mArgument of type 'Map<any, any>' is not assignable to parameter of type 'Component'.
-  Type 'Map<any, any>' is missing the following properties from type 'Component': id, name, flowId, handleEvent, emitEvent
-
-[7m12[0m       this.components.set(component.id, new Map());
-[7m  [0m [91m                                        ~~~~~~~~~[0m
-
-[96msrc/services/component-registry.service.ts[0m:[93m14[0m:[93m40[0m - [91merror[0m[90m TS2339: [0mProperty 'set' does not exist on type 'Component'.
-
-[7m14[0m     this.components.get(component.id)!.set(component.id, component);
-[7m  [0m [91m                                       ~~~[0m
-
-[96msrc/services/component-registry.service.ts[0m:[93m26[0m:[93m101[0m - [91merror[0m[90m TS2339: [0mProperty 'values' does not exist on type 'Component'.
-
-[7m26[0m     return Array.from(this.components.values()).flatMap(flowComponents => Array.from(flowComponents.values()));
-[7m  [0m [91m                                                                                                    ~~~~~~[0m
-
-[[90m3:04:47 PM[0m] Found 5 errors. Watching for file changes.
-
-c[[90m3:05:05 PM[0m] File change detected. Starting incremental compilation...
-
-[96msrc/processors/event.processor.ts[0m:[93m21[0m:[93m67[0m - [91merror[0m[90m TS2554: [0mExpected 1 arguments, but got 2.
-
-[7m21[0m     const component = this.componentRegistry.getComponent(flowId, componentId);
-[7m  [0m [91m                                                                  ~~~~~~~~~~~[0m
-
-[96msrc/processors/event.processor.ts[0m:[93m32[0m:[93m77[0m - [91merror[0m[90m TS2554: [0mExpected 1 arguments, but got 2.
-
-[7m32[0m         const targetComponent = this.componentRegistry.getComponent(flowId, toComponent);
-[7m  [0m [91m                                                                            ~~~~~~~~~~~[0m
-
-[[90m3:05:05 PM[0m] Found 2 errors. Watching for file changes.
-
-c[[90m3:06:25 PM[0m] File change detected. Starting incremental compilation...
-
-[[90m3:06:25 PM[0m] Found 0 errors. Watching for file changes.
-
-[32m[Nest] 60760  - [39m08/20/2024, 3:06:26 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
-[32m[Nest] 60760  - [39m08/20/2024, 3:06:26 PM [32m    LOG[39m [38;5;3m[AmqpConnection] [39m[32mTrying to connect to RabbitMQ broker (default)[39m
-[32m[Nest] 60760  - [39m08/20/2024, 3:06:26 PM [32m    LOG[39m [38;5;3m[RabbitMQModule] [39m[32mSuccessfully connected to RabbitMQ[39m
-[31m[Nest] 60760  - [39m08/20/2024, 3:06:26 PM [31m  ERROR[39m [38;5;3m[ExceptionHandler] [39m[31mNest can't resolve dependencies of the NumberGeneratorComponent (?). Please make sure that the argument String at index [0] is available in the AppModule context.
-
-Potential solutions:
-- Is AppModule a valid NestJS module?
-- If String is a provider, is it part of the current AppModule?
-- If String is exported from a separate @Module, is that module imported within AppModule?
-  @Module({
-    imports: [ /* the Module containing String */ ]
-  })
-[39m
-Error: Nest can't resolve dependencies of the NumberGeneratorComponent (?). Please make sure that the argument String at index [0] is available in the AppModule context.
-
-Potential solutions:
-- Is AppModule a valid NestJS module?
-- If String is a provider, is it part of the current AppModule?
-- If String is exported from a separate @Module, is that module imported within AppModule?
-  @Module({
-    imports: [ /* the Module containing String */ ]
-  })
-
-    at Injector.lookupComponentInParentModules (/home/travis/Projects/flow-based-programming/node_modules/@nestjs/core/injector/injector.js:254:19)
-    at async Injector.resolveComponentInstance (/home/travis/Projects/flow-based-programming/node_modules/@nestjs/core/injector/injector.js:207:33)
-    at async resolveParam (/home/travis/Projects/flow-based-programming/node_modules/@nestjs/core/injector/injector.js:128:38)
-    at async Promise.all (index 0)
-    at async Injector.resolveConstructorParams (/home/travis/Projects/flow-based-programming/node_modules/@nestjs/core/injector/injector.js:143:27)
-    at async Injector.loadInstance (/home/travis/Projects/flow-based-programming/node_modules/@nestjs/core/injector/injector.js:70:13)
-    at async Injector.loadProvider (/home/travis/Projects/flow-based-programming/node_modules/@nestjs/core/injector/injector.js:97:9)
-    at async /home/travis/Projects/flow-based-programming/node_modules/@nestjs/core/injector/instance-loader.js:56:13
-    at async Promise.all (index 6)
-    at async InstanceLoader.createInstancesOfProviders (/home/travis/Projects/flow-based-programming/node_modules/@nestjs/core/injector/instance-loader.js:55:9)
-c[[90m3:06:42 PM[0m] File change detected. Starting incremental compilation...
-
-[96msrc/components/number-generator.component.ts[0m:[93m9[0m:[93m91[0m - [91merror[0m[90m TS2663: [0mCannot find name 'flowId'. Did you mean the instance member 'this.flowId'?
-
-[7m9[0m     super('numberGenerator', 'Number Generator', 'Generates random numbers periodically', flowId);
-[7m [0m [91m                                                                                          ~~~~~~[0m
-
-[96msrc/services/flow-executor.service.ts[0m:[93m32[0m:[93m60[0m - [91merror[0m[90m TS2554: [0mExpected 0 arguments, but got 1.
-
-[7m32[0m           componentInstance = new NumberGeneratorComponent(flow.id);
-[7m  [0m [91m                                                           ~~~~~~~[0m
-
-[[90m3:06:42 PM[0m] Found 2 errors. Watching for file changes.
-
-c[[90m3:06:47 PM[0m] File change detected. Starting incremental compilation...
-
-[96msrc/components/number-generator.component.ts[0m:[93m9[0m:[93m5[0m - [91merror[0m[90m TS2554: [0mExpected 4 arguments, but got 3.
-
-[7m9[0m     super('numberGenerator', 'Number Generator', 'Generates random numbers periodically');
-[7m [0m [91m    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
-
-  [96msrc/base.component.ts[0m:[93m23[0m:[93m5[0m
-    [7m23[0m     public flowId: string
-    [7m  [0m [96m    ~~~~~~~~~~~~~~~~~~~~~[0m
-    An argument for 'flowId' was not provided.
-
-[96msrc/services/flow-executor.service.ts[0m:[93m32[0m:[93m60[0m - [91merror[0m[90m TS2554: [0mExpected 0 arguments, but got 1.
-
-[7m32[0m           componentInstance = new NumberGeneratorComponent(flow.id);
-[7m  [0m [91m                                                           ~~~~~~~[0m
-
-[[90m3:06:47 PM[0m] Found 2 errors. Watching for file changes.
-
-c[[90m3:06:54 PM[0m] File change detected. Starting incremental compilation...
-
-[96msrc/services/flow-executor.service.ts[0m:[93m32[0m:[93m60[0m - [91merror[0m[90m TS2554: [0mExpected 0 arguments, but got 1.
-
-[7m32[0m           componentInstance = new NumberGeneratorComponent(flow.id);
-[7m  [0m [91m                                                           ~~~~~~~[0m
-
-[[90m3:06:54 PM[0m] Found 1 error. Watching for file changes.
-
-c[[90m3:07:44 PM[0m] File change detected. Starting incremental compilation...
-
-[[90m3:07:44 PM[0m] Found 0 errors. Watching for file changes.
-
-[32m[Nest] 60957  - [39m08/20/2024, 3:07:44 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
-[32m[Nest] 60957  - [39m08/20/2024, 3:07:44 PM [32m    LOG[39m [38;5;3m[AmqpConnection] [39m[32mTrying to connect to RabbitMQ broker (default)[39m
-[32m[Nest] 60957  - [39m08/20/2024, 3:07:44 PM [32m    LOG[39m [38;5;3m[RabbitMQModule] [39m[32mSuccessfully connected to RabbitMQ[39m
-[31m[Nest] 60957  - [39m08/20/2024, 3:07:44 PM [31m  ERROR[39m [38;5;3m[ExceptionHandler] [39m[31mNest can't resolve dependencies of the NumberGeneratorComponent (?). Please make sure that the argument String at index [0] is available in the AppModule context.
-
-Potential solutions:
-- Is AppModule a valid NestJS module?
-- If String is a provider, is it part of the current AppModule?
-- If String is exported from a separate @Module, is that module imported within AppModule?
-  @Module({
-    imports: [ /* the Module containing String */ ]
-  })
-[39m
-Error: Nest can't resolve dependencies of the NumberGeneratorComponent (?). Please make sure that the argument String at index [0] is available in the AppModule context.
-
-Potential solutions:
-- Is AppModule a valid NestJS module?
-- If String is a provider, is it part of the current AppModule?
-- If String is exported from a separate @Module, is that module imported within AppModule?
-  @Module({
-    imports: [ /* the Module containing String */ ]
-  })
-
-    at Injector.lookupComponentInParentModules (/home/travis/Projects/flow-based-programming/node_modules/@nestjs/core/injector/injector.js:254:19)
-    at async Injector.resolveComponentInstance (/home/travis/Projects/flow-based-programming/node_modules/@nestjs/core/injector/injector.js:207:33)
-    at async resolveParam (/home/travis/Projects/flow-based-programming/node_modules/@nestjs/core/injector/injector.js:128:38)
-    at async Promise.all (index 0)
-    at async Injector.resolveConstructorParams (/home/travis/Projects/flow-based-programming/node_modules/@nestjs/core/injector/injector.js:143:27)
-    at async Injector.loadInstance (/home/travis/Projects/flow-based-programming/node_modules/@nestjs/core/injector/injector.js:70:13)
-    at async Injector.loadProvider (/home/travis/Projects/flow-based-programming/node_modules/@nestjs/core/injector/injector.js:97:9)
-    at async /home/travis/Projects/flow-based-programming/node_modules/@nestjs/core/injector/instance-loader.js:56:13
-    at async Promise.all (index 6)
-    at async InstanceLoader.createInstancesOfProviders (/home/travis/Projects/flow-based-programming/node_modules/@nestjs/core/injector/instance-loader.js:55:9)
+c[[90m4:13:37 PM[0m] Starting compilation in watch mode...
+
+[[90m4:13:38 PM[0m] Found 0 errors. Watching for file changes.
+
+[32m[Nest] 68308  - [39m08/20/2024, 4:13:39 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 68308  - [39m08/20/2024, 4:13:39 PM [32m    LOG[39m [38;5;3m[AmqpConnection] [39m[32mTrying to connect to RabbitMQ broker (default)[39m
+[32m[Nest] 68308  - [39m08/20/2024, 4:13:39 PM [32m    LOG[39m [38;5;3m[RabbitMQModule] [39m[32mSuccessfully connected to RabbitMQ[39m
+[32m[Nest] 68308  - [39m08/20/2024, 4:13:39 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDiscoveryModule dependencies initialized[39m[38;5;3m +7ms[39m
+[32m[Nest] 68308  - [39m08/20/2024, 4:13:39 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRabbitMQModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 68308  - [39m08/20/2024, 4:13:39 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +0ms[39m
+[2024-08-20T21:13:39.141Z] [LOG] Starting main application...
+[2024-08-20T21:13:39.142Z] [LOG] [NestFactory] Starting Nest application...
+[2024-08-20T21:13:39.145Z] [LOG] [AmqpConnection] Trying to connect to RabbitMQ broker (default)
+[2024-08-20T21:13:39.145Z] [LOG] [RabbitMQModule] Successfully connected to RabbitMQ
+[2024-08-20T21:13:39.146Z] [LOG] [InstanceLoader] DiscoveryModule dependencies initialized
+[2024-08-20T21:13:39.146Z] [LOG] [InstanceLoader] RabbitMQModule dependencies initialized
+[2024-08-20T21:13:39.146Z] [LOG] [InstanceLoader] AppModule dependencies initialized
+[2024-08-20T21:13:39.152Z] [LOG] [WebSocketsController] NumberGeneratorComponent subscribed to the "client-event" message
+[2024-08-20T21:13:39.153Z] [LOG] [WebSocketsController] NumberMultiplierComponent subscribed to the "client-event" message
+[2024-08-20T21:13:39.153Z] [LOG] [WebSocketsController] EventTriggerComponent subscribed to the "client-event" message
+[2024-08-20T21:13:39.154Z] [LOG] [RoutesResolver] AppController {/}:
+[2024-08-20T21:13:39.155Z] [LOG] [RouterExplorer] Mapped {/, GET} route
+[2024-08-20T21:13:39.155Z] [LOG] [RouterExplorer] Mapped {/trigger-event, POST} route
+[2024-08-20T21:13:39.156Z] [LOG] [ComponentRegistry] Registering component: numberGenerator
+[2024-08-20T21:13:39.156Z] [LOG] [ComponentRegistry] Registering component: numberMultiplier
+[2024-08-20T21:13:39.156Z] [LOG] [ComponentRegistry] Registering component: eventTrigger
+[2024-08-20T21:13:39.157Z] [LOG] [RabbitMQModule] Initializing RabbitMQ Handlers
+[2024-08-20T21:13:39.159Z] [LOG] [RabbitMQModule] Registering rabbitmq handlers from EventProcessor
+[2024-08-20T21:13:39.159Z] [LOG] [RabbitMQModule] EventProcessor.handleComponentEvent {subscribe} -> flow_exchange::componentEvent::component_event_queue
+[2024-08-20T21:13:39.159Z] [LOG] [RabbitMQModule] EventProcessor.createConnection {subscribe} -> flow_exchange::createConnection::create_connection_queue
+[2024-08-20T21:13:39.159Z] [LOG] [RabbitMQModule] Initializing RabbitMQ Handlers
+[2024-08-20T21:13:39.159Z] [LOG] [RabbitMQModule] Registering rabbitmq handlers from EventProcessor
+[2024-08-20T21:13:39.160Z] [LOG] [RabbitMQModule] EventProcessor.handleComponentEvent {subscribe} -> flow_exchange::componentEvent::component_event_queue
+[2024-08-20T21:13:39.160Z] [LOG] [RabbitMQModule] EventProcessor.createConnection {subscribe} -> flow_exchange::createConnection::create_connection_queue
+[2024-08-20T21:13:39.160Z] [LOG] [NestApplication] Nest application successfully started
+[2024-08-20T21:13:39.160Z] [LOG] Starting flow execution...
+[2024-08-20T21:13:39.160Z] [LOG] [FlowExecutorService] Executing flow: example-flow
+[2024-08-20T21:13:39.160Z] [LOG] [FlowExecutorService] Creating connection: gen1.numberGenerated -> mult1.numberReceived
+[2024-08-20T21:13:39.212Z] [LOG] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
+[2024-08-20T21:13:39.213Z] [LOG] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
+[2024-08-20T21:13:39.219Z] [LOG] [AmqpConnection] Successfully connected a RabbitMQ channel "AmqpConnection"
+[2024-08-20T21:13:39.220Z] [LOG] [AmqpConnection] Successfully connected a RabbitMQ channel "AmqpConnection"
+[2024-08-20T21:13:39.220Z] [LOG] [ComponentRegistry] Registering component: eventTrigger
+[2024-08-20T21:13:39.220Z] [LOG] [FlowExecutorService] Initializing component: eventTrigger for flow: example-flow
+[2024-08-20T21:13:39.221Z] [LOG] [EventProcessor] Received createConnection: example-flow.gen1.numberGenerated -> mult1.numberReceived
+[2024-08-20T21:13:39.221Z] [LOG] [EventProcessor] Connection created: example-flow.gen1.numberGenerated -> mult1.numberReceived
+[2024-08-20T21:13:39.222Z] [WARN] [AmqpConnection] Received response: [{"success":true,"message":"Connection created successfully"}] from subscribe handler [createConnection]. Subscribe handlers should only return void
+[2024-08-20T21:13:39.222Z] [LOG] [EventProcessor] [handleComponentEvent] [example-flow.main.init] data: {}
+[2024-08-20T21:13:39.222Z] [LOG] [EventProcessor] Passing event to component: main
+[2024-08-20T21:13:39.222Z] [LOG] EventTrigger handling event: init
+[2024-08-20T21:13:39.223Z] [LOG] [ComponentRegistry] Registering component: numberGenerator
+[2024-08-20T21:13:39.223Z] [LOG] [FlowExecutorService] Initializing component: numberGenerator for flow: example-flow
+[2024-08-20T21:13:39.223Z] [LOG] [EventProcessor] [handleComponentEvent] [example-flow.gen1.init] data: {}
+[2024-08-20T21:13:39.223Z] [LOG] [EventProcessor] Passing event to component: gen1
+[2024-08-20T21:13:39.223Z] [LOG] NumberGenerator (example-flow) handling event: init
+[2024-08-20T21:13:39.223Z] [LOG] [ComponentRegistry] Registering component: numberMultiplier
+[2024-08-20T21:13:39.223Z] [LOG] [FlowExecutorService] Initializing component: numberMultiplier for flow: example-flow
+[2024-08-20T21:13:39.225Z] [LOG] Application is running on: http://localhost:3000
+[2024-08-20T21:13:39.226Z] [LOG] [EventProcessor] [handleComponentEvent] [example-flow.mult1.init] data: {}
+[2024-08-20T21:13:39.226Z] [LOG] [EventProcessor] Passing event to component: mult1
+[2024-08-20T21:13:39.226Z] [LOG] NumberMultiplier handling event: init
+[2024-08-20T21:13:43.576Z] [LOG] [AppController] [trigger-event] [example-flow] [gen1] [start]
+[2024-08-20T21:13:43.576Z] [LOG] EventTrigger handling event: triggerEvent
+[2024-08-20T21:13:43.577Z] [LOG] [EventProcessor] [handleComponentEvent] [your-flow-id-here.gen1.start] data: "{}"
+[2024-08-20T21:13:43.577Z] [LOG] [EventProcessor] Passing event to component: gen1
+[2024-08-20T21:13:43.577Z] [LOG] NumberGenerator (example-flow) handling event: start
+[2024-08-20T21:13:43.577Z] [LOG] NumberGenerator (example-flow) starting number generation
+[2024-08-20T21:13:43.577Z] [LOG] NumberGenerator (example-flow) startGenerating method called
+[2024-08-20T21:13:44.578Z] [LOG] NumberGenerator (example-flow) generated number: 0.03374476547851235
+[2024-08-20T21:13:44.578Z] [LOG] Emitting event: numberGenerated, flowId: example-flow, data: 0.03374476547851235
+/home/travis/Projects/flow-based-programming/src/base.component.ts:32
+    await this.amqpConnection.publish('flow_exchange', 'componentEvent', {
+                              ^
+
+
+TypeError: Cannot read properties of undefined (reading 'publish')
+    at NumberGeneratorComponent.emitEvent (/home/travis/Projects/flow-based-programming/src/base.component.ts:32:31)
+    at Timeout._onTimeout (/home/travis/Projects/flow-based-programming/src/components/number-generator.component.ts:31:18)
+    at listOnTimeout (node:internal/timers:581:17)
+    at process.processTimers (node:internal/timers:519:7)
+
+Node.js v20.16.0

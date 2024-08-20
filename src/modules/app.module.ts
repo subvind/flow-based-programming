@@ -27,6 +27,10 @@ import { AppController } from '../controllers/app.controller';
     EventProcessor,
     ComponentRegistry,
     FlowExecutorService,
+    {
+      provide: 'FLOW_ID',
+      useValue: 'your-flow-id-here', // Or use a factory if it's dynamic
+    },
     NumberGeneratorComponent,
     NumberMultiplierComponent,
     EventTriggerComponent,
