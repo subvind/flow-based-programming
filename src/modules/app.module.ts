@@ -35,6 +35,10 @@ import { AppController } from '../controllers/app.controller';
       provide: 'COMPONENT_ID',
       useValue: 'your-component-id-here', // Or use a factory if it's dynamic
     },
+    {
+      provide: 'WEB_SOCKET_SERVER',
+      useValue: 'your-wss-here', // Or use a factory if it's dynamic
+    },
     NumberGeneratorComponent,
     NumberMultiplierComponent,
     EventTriggerComponent,

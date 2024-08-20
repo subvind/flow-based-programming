@@ -5,9 +5,13 @@ import { Flow } from '../interfaces/flow.interface';
 import { NumberGeneratorComponent } from '../components/number-generator.component';
 import { NumberMultiplierComponent } from '../components/number-multiplier.component';
 import { EventTriggerComponent } from '../components/event-trigger.component';
+import { WebSocketGateway, WebSocketServer, SubscribeMessage, MessageBody } from '@nestjs/websockets';
+import { Server } from 'socket.io';
 
+@WebSocketGateway()
 @Injectable()
 export class FlowExecutorService {
+  @WebSocketServer() server: Server;
   private readonly logger = new Logger(FlowExecutorService.name);
 
   constructor(
@@ -29,13 +33,13 @@ export class FlowExecutorService {
       let componentInstance;
       switch (component.componentId) {
         case 'numberGenerator':
-          componentInstance = new NumberGeneratorComponent(flow.id, component.id, this.amqpConnection);
+          componentInstance = new NumberGeneratorComponent(flow.id, component.id, this.amqpConnection, this.server);
           break;
         case 'numberMultiplier':
-          componentInstance = new NumberMultiplierComponent(flow.id, component.id, this.amqpConnection);
+          componentInstance = new NumberMultiplierComponent(flow.id, component.id, this.amqpConnection, this.server);
           break;
         case 'eventTrigger':
-          componentInstance = new EventTriggerComponent(flow.id, component.id, this.amqpConnection);
+          componentInstance = new EventTriggerComponent(flow.id, component.id, this.amqpConnection, this.server);
           break;
         default:
           this.logger.warn(`Unknown component type: ${component.componentId}`);

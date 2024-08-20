@@ -10,16 +10,16 @@ import * as path from 'path';
 @WebSocketGateway()
 @Injectable()
 export abstract class ComponentService implements Component {
-  @WebSocketServer() server: Server;
   protected readonly logger: CustomLogger;
-
+  
   constructor(
     public id: string,
     public name: string,
     public description: string,
     public flowId: string,
     public componentId: string,
-    @Inject(AmqpConnection) protected amqpConnection: AmqpConnection
+    @Inject(AmqpConnection) protected amqpConnection: AmqpConnection,
+    @Inject(Server) protected server: Server
   ) {
     this.logger = new CustomLogger(this.id, amqpConnection);
   }
@@ -50,12 +50,16 @@ export abstract class ComponentService implements Component {
   protected async sendHtmxUpdate(templateId: string, data: any) {
     const htmxContent = await this.generateHtmxContent(data, templateId);
     
-    this.server.emit('htmx-update', {
-      flowId: this.flowId,
-      componentId: this.id,
-      templateId,
-      content: htmxContent
-    });
+    if (this.server) {
+      this.server.emit('htmx-update', {
+        flowId: this.flowId,
+        componentId: this.id,
+        templateId,
+        content: htmxContent
+      });
+    } else {
+      this.logger.warn('WebSocket server is not initialized');
+    }
   }
 
   private async generateHtmxContent(data: any, templateId: string): Promise<string> {
