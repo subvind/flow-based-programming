@@ -13,9 +13,10 @@ export class EventTriggerComponent extends ComponentService {
     if (eventName === 'triggerEvent') {
       const { flowId, componentId, eventId } = data;
       await this.publish({
+        flowId,
         componentId,
         eventName: eventId,
-        data: {},
+        data: data.data,
       });
     }
   }

@@ -30,6 +30,7 @@ export async function bootstrapApp(logger: CustomLogger): Promise<any> {
   const exampleFlow: Flow = {
     id: 'example-flow',
     components: [
+      { id: 'main', componentId: 'eventTrigger' },
       { id: 'gen1', componentId: 'numberGenerator' },
       { id: 'mult1', componentId: 'numberMultiplier' },
     ],

@@ -21,19 +21,20 @@ export class FlowExecutorService {
       await this.amqpConnection.publish('flow_exchange', 'createConnection', connection);
     }
 
-    // Start components
+    // Init components
     for (const component of flow.components) {
       const componentInstance = this.componentRegistry.getComponent(component.componentId);
       if (componentInstance) {
-        this.logger.log(`Starting component: ${component.componentId}`);
+        this.logger.log(`Initializing component: ${component.componentId}`);
         try {
           await this.amqpConnection.publish('flow_exchange', 'componentEvent', {
+            flowId: flow.id,
             componentId: component.componentId,
-            eventName: 'start',
+            eventName: 'init',
             data: {},
           });
         } catch (error) {
-          this.logger.error(`Error starting component ${component.componentId}:`, error);
+          this.logger.error(`Error initing component ${component.componentId}:`, error);
         }
       } else {
         this.logger.warn(`Component not found: ${component.componentId}`);

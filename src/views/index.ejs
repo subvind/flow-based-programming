@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flow-Based Programming Example</title>
-    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+    <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/json-enc.js"></script>
     <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
@@ -17,10 +18,16 @@
 
     <div id="number-generator" class="component">
         <h2>Number Generator</h2>
-        <button hx-post="/trigger-event" hx-vals='{"flowId": "example-flow", "componentId": "gen1", "eventId": "start"}'>
+        <button hx-post="/trigger-event" 
+                hx-ext='json-enc'
+                hx-headers='{"Content-Type": "application/json"}'
+                hx-vals='{"flowId": "example-flow", "componentId": "gen1", "eventId": "start", "data": {}}'>
             Start Generating
         </button>
-        <button hx-post="/trigger-event" hx-vals='{"flowId": "example-flow", "componentId": "gen1", "eventId": "stop"}'>
+        <button hx-post="/trigger-event" 
+                hx-ext='json-enc'
+                hx-headers='{"Content-Type": "application/json"}'
+                hx-vals='{"flowId": "example-flow", "componentId": "gen1", "eventId": "stop", "data": {}}'>
             Stop Generating
         </button>
         <div id="generator-output"></div>
