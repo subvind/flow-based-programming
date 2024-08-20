@@ -10,25 +10,28 @@ import * as path from 'path';
 @WebSocketGateway()
 @Injectable()
 export abstract class ComponentService implements Component {
-  @Inject(AmqpConnection)
-  protected amqpConnection: AmqpConnection;
-  protected readonly logger: CustomLogger;
-
   @WebSocketServer() server: Server;
+  protected readonly logger: CustomLogger;
 
   constructor(
     public id: string,
     public name: string,
     public description: string,
-    public flowId: string
+    public flowId: string,
+    public componentId: string,
+    @Inject(AmqpConnection) protected amqpConnection: AmqpConnection
   ) {
-    this.logger = new CustomLogger(this.id, this.amqpConnection);
+    this.logger = new CustomLogger(this.id, amqpConnection);
   }
 
   abstract handleEvent(eventName: string, data: any): Promise<void>;
 
   async emitEvent(eventName: string, data: any): Promise<void> {
     this.logger.log(`Emitting event: ${eventName}, flowId: ${this.flowId}, data: ${JSON.stringify(data)}`);
+    if (!this.amqpConnection) {
+      this.logger.error('AmqpConnection is not initialized');
+      return;
+    }
     await this.amqpConnection.publish('flow_exchange', 'componentEvent', {
       flowId: this.flowId,
       componentId: this.id,
@@ -71,6 +74,10 @@ export abstract class ComponentService implements Component {
   }
 
   async publish(message: any): Promise<void> {
+    if (!this.amqpConnection) {
+      this.logger.error('AmqpConnection is not initialized');
+      return;
+    }
     try {
       await this.amqpConnection.publish('flow_exchange', 'componentEvent', {
         ...message,

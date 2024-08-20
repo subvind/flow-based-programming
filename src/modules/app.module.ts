@@ -31,6 +31,10 @@ import { AppController } from '../controllers/app.controller';
       provide: 'FLOW_ID',
       useValue: 'your-flow-id-here', // Or use a factory if it's dynamic
     },
+    {
+      provide: 'COMPONENT_ID',
+      useValue: 'your-component-id-here', // Or use a factory if it's dynamic
+    },
     NumberGeneratorComponent,
     NumberMultiplierComponent,
     EventTriggerComponent,

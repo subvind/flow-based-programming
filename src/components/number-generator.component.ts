@@ -1,12 +1,17 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { ComponentService } from '../base.component';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 @Injectable()
 export class NumberGeneratorComponent extends ComponentService {
   private interval: NodeJS.Timeout | null = null;
 
-  constructor(@Inject('FLOW_ID') flowId: string) {
-    super('numberGenerator', 'Number Generator', 'Generates random numbers periodically', flowId);
+  constructor(
+    @Inject('FLOW_ID') flowId: string,
+    @Inject('COMPONENT_ID') componentId: string,
+    @Inject(AmqpConnection) amqpConnection: AmqpConnection
+  ) {
+    super('numberGenerator', 'Number Generator', 'Generates random numbers periodically', flowId, componentId, amqpConnection);
   }
 
   async handleEvent(eventName: string, data: any): Promise<void> {

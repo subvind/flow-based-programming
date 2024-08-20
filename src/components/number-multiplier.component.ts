@@ -1,10 +1,15 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { ComponentService } from '../base.component';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 @Injectable()
 export class NumberMultiplierComponent extends ComponentService {
-  constructor(@Inject('FLOW_ID') flowId: string) {
-    super('numberMultiplier', 'Number Multiplier', 'Multiplies received number by 2', flowId);
+  constructor(
+    @Inject('FLOW_ID') flowId: string,
+    @Inject('COMPONENT_ID') componentId: string,
+    @Inject(AmqpConnection) amqpConnection: AmqpConnection
+  ) {
+    super('numberMultiplier', 'Number Multiplier', 'Multiplies received number by 2', flowId, componentId, amqpConnection);
   }
 
   async handleEvent(eventName: string, data: any): Promise<void> {

@@ -29,13 +29,13 @@ export class FlowExecutorService {
       let componentInstance;
       switch (component.componentId) {
         case 'numberGenerator':
-          componentInstance = new NumberGeneratorComponent(flow.id);
+          componentInstance = new NumberGeneratorComponent(flow.id, component.id, this.amqpConnection);
           break;
         case 'numberMultiplier':
-          componentInstance = new NumberMultiplierComponent(flow.id);
+          componentInstance = new NumberMultiplierComponent(flow.id, component.id, this.amqpConnection);
           break;
         case 'eventTrigger':
-          componentInstance = new EventTriggerComponent(flow.id);
+          componentInstance = new EventTriggerComponent(flow.id, component.id, this.amqpConnection);
           break;
         default:
           this.logger.warn(`Unknown component type: ${component.componentId}`);
