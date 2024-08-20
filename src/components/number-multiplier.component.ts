@@ -3,8 +3,8 @@ import { ComponentService } from '../base.component';
 
 @Injectable()
 export class NumberMultiplierComponent extends ComponentService {
-  constructor() {
-    super('numberMultiplier', 'Number Multiplier', 'Multiplies received number by 2');
+  constructor(flowId: string) {
+    super('numberMultiplier', 'Number Multiplier', 'Multiplies received number by 2', flowId);
   }
 
   async handleEvent(eventName: string, data: any): Promise<void> {

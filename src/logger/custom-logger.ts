@@ -60,7 +60,7 @@ export class CustomLogger extends ConsoleLogger {
   }
 
   static write_to_file(message: string) {
-    const logFile = path.join(process.cwd(), 'STDOUT.txt');
+    const logFile = path.join(process.cwd(), 'start:dev.stdout.txt');
     fs.appendFile(logFile, message, (err) => {
       if (err) {
         console.error('Failed to write to log file:', err);
@@ -69,7 +69,7 @@ export class CustomLogger extends ConsoleLogger {
   }
 
   static clearSTDOUT() {
-    const logFile = path.join(process.cwd(), 'STDOUT.txt');
+    const logFile = path.join(process.cwd(), 'start:dev.stdout.txt');
     try {
       fs.writeFileSync(logFile, '');
       console.log(`Log file cleared at ${logFile}`);

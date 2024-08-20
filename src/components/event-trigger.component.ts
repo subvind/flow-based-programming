@@ -4,8 +4,8 @@ import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 @Injectable()
 export class EventTriggerComponent extends ComponentService {
-  constructor() {
-    super('eventTrigger', 'Event Trigger', 'Handles HTMX requests and triggers events');
+  constructor(flowId: string) {
+    super('eventTrigger', 'Event Trigger', 'Handles HTMX requests and triggers events', flowId);
   }
 
   async handleEvent(eventName: string, data: any): Promise<void> {

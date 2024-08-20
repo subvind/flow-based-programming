@@ -8,7 +8,7 @@
     "copy-templates": "cp -R src/templates dist/",
     "build": "nest build && npm run copy-templates",
     "start": "node dist/main.js",
-    "start:dev": "nest start --watch 2>&1 | tee STDOUT.txt"
+    "start:dev": "nest start --watch 2>&1 | tee start:dev.stdout.txt"
   },
   "dependencies": {
     "@golevelup/nestjs-rabbitmq": "^5.4.0",
