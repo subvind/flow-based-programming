@@ -6,10 +6,10 @@ import * as path from 'path';
 @Injectable()
 export class CustomLogger extends ConsoleLogger {
   constructor(
-    private componentId: string,
+    private logId: string,
     @Inject(AmqpConnection) private amqpConnection: AmqpConnection
   ) {
-    super(componentId);
+    super(logId);
     this.setLogLevels(['log', 'error', 'warn', 'debug', 'verbose']);
   }
 
@@ -41,18 +41,7 @@ export class CustomLogger extends ConsoleLogger {
 
   private printMessage(message: string, logLevel: string, context?: string) {
     const output = context ? `[${context}] ${message}` : message;
-    console.log(`[${this.getNow()}] [${logLevel.toUpperCase()}] ${output}`);
-  }
-
-  private async emitLogEvent(level: string, message: string) {
-    await this.amqpConnection.publish('flow_exchange', 'componentEvent', {
-      componentId: this.componentId,
-      eventName: 'logger',
-      data: {
-        level,
-        message,
-      },
-    });
+    console.log(`[${this.getNow()}] [${logLevel.toUpperCase()}] [${this.logId}] ${output}`);
   }
 
   private getNow(): string {

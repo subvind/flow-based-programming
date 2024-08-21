@@ -1,3 +1,4 @@
+import { CustomLogger } from 'src/logger/custom-logger';
 import { Injectable, Inject } from '@nestjs/common';
 import { ComponentService } from '../base.component';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
@@ -5,6 +6,7 @@ import { Server } from 'socket.io';
 
 @Injectable()
 export class NumberGeneratorComponent extends ComponentService {
+  public logger;
   private interval: NodeJS.Timeout | null = null;
 
   constructor(
@@ -14,6 +16,9 @@ export class NumberGeneratorComponent extends ComponentService {
     @Inject('WEB_SOCKET_SERVER') webSocketServer: Server
   ) {
     super('numberGenerator', 'Number Generator', 'Generates random numbers periodically', flowId, componentId, amqpConnection, webSocketServer);
+    this.flowId = flowId;
+    this.componentId = componentId;
+    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
   }
 
   async handleEvent(eventId: string, data: any): Promise<void> {
@@ -46,7 +51,8 @@ export class NumberGeneratorComponent extends ComponentService {
       await this.sendHtmxUpdate('number-generator', {
         number: randomNumber,
         timestamp: Date.now(),
-        flowId: this.flowId
+        flowId: this.flowId,
+        componentId: this.componentId
       });
     }, 1000);
   }
