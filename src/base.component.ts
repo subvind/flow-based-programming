@@ -48,9 +48,10 @@ export abstract class ComponentService implements Component {
   }
 
   protected async sendHtmxUpdate(templateId: string, data: any) {
-    const htmxContent = await this.generateHtmxContent(data, templateId);
+    const htmxContent = await this.generateHtmxContent(templateId, data);
     
     if (this.server) {
+      this.logger.log(htmxContent)
       this.server.emit('htmx-update', {
         flowId: this.flowId,
         componentId: this.componentId,
@@ -62,7 +63,7 @@ export abstract class ComponentService implements Component {
     }
   }
 
-  private async generateHtmxContent(data: any, templateId: string): Promise<string> {
+  private async generateHtmxContent(templateId: string, data: any): Promise<string> {
     const templatePath = path.resolve(__dirname, `./templates/${templateId}.ejs`);
     try {
       return await ejs.renderFile(templatePath, { 

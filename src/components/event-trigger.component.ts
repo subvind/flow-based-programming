@@ -7,14 +7,14 @@ import { Server } from 'socket.io';
 @Injectable()
 export class EventTriggerComponent extends ComponentService {
   public logger;
-  
+
   constructor(
     @Inject('FLOW_ID') flowId: string,
     @Inject('COMPONENT_ID') componentId: string,
     @Inject(AmqpConnection) amqpConnection: AmqpConnection,
-    @Inject('WEB_SOCKET_SERVER') protected webSocketServer: Server
+    @Inject('WEB_SOCKET_SERVER') protected server: Server
   ) {
-    super('eventTrigger', 'Event Trigger', 'Handles HTMX requests and triggers events', flowId, componentId, amqpConnection, webSocketServer);
+    super('eventTrigger', 'Event Trigger', 'Handles HTMX requests and triggers events', flowId, componentId, amqpConnection, server);
     this.flowId = flowId;
     this.componentId = componentId;
     this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);

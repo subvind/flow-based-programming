@@ -12,9 +12,9 @@ export class NumberMultiplierComponent extends ComponentService {
     @Inject('FLOW_ID') flowId: string,
     @Inject('COMPONENT_ID') componentId: string,
     @Inject(AmqpConnection) amqpConnection: AmqpConnection,
-    @Inject('WEB_SOCKET_SERVER') protected webSocketServer: Server
+    @Inject('WEB_SOCKET_SERVER') protected server: Server
   ) {
-    super('numberMultiplier', 'Number Multiplier', 'Multiplies received number by 2', flowId, componentId, amqpConnection, webSocketServer);
+    super('numberMultiplier', 'Number Multiplier', 'Multiplies received number by 2', flowId, componentId, amqpConnection, server);
     this.flowId = flowId;
     this.componentId = componentId;
     this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
@@ -36,9 +36,7 @@ export class NumberMultiplierComponent extends ComponentService {
       await this.sendHtmxUpdate('number-multiplier', {
         input: inputNumber,
         result: result,
-        timestamp: Date.now(),
-        flowId: this.flowId,
-        componentId: this.componentId
+        timestamp: Date.now()
       });
     }
   }
