@@ -272,117 +272,6 @@ export function dot(a: V3, b: V3): number {
 
 You will now be given the actual INPUT you must work with.
 
-<FILE path="/home/travis/Projects/flow-based-programming/src/initializers/app.initialize.ts">
-import { ComponentRegistry } from '../services/component-registry.service';
-import { NumberGeneratorComponent } from '../components/number-generator/number-generator.handler';
-import { NumberMultiplierComponent } from '../components/number-multiplier/number-multiplier.handler';
-import { EventTriggerComponent } from '../components/event-trigger/event-trigger.handler';
-
-export function initializeComponents(
-  componentRegistry: ComponentRegistry,
-  numberGeneratorComponent: NumberGeneratorComponent,
-  numberMultiplierComponent: NumberMultiplierComponent,
-  eventTriggerComponent: EventTriggerComponent
-): void {
-  // Register components
-  componentRegistry.registerComponent(numberGeneratorComponent);
-  componentRegistry.registerComponent(numberMultiplierComponent);
-  componentRegistry.registerComponent(eventTriggerComponent);
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/components/number-generator/number-generator.handler.ts">
-import { CustomLogger } from 'src/logger/custom-logger';
-import { Injectable, Inject } from '@nestjs/common';
-import { ComponentService } from '../../base.component';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import { Server } from 'socket.io';
-
-import { startGenerating } from './start-generating.event';
-import { stopGenerating } from './stop-generating.event';
-
-@Injectable()
-export class NumberGeneratorComponent extends ComponentService {
-  public logger;
-  private interval: NodeJS.Timeout | null = null;
-
-  constructor(
-    @Inject('FLOW_ID') flowId: string,
-    @Inject('COMPONENT_ID') componentId: string,
-    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
-    @Inject('WEB_SOCKET_SERVER') protected server: Server
-  ) {
-    super('numberGenerator', 'Number Generator', 'Generates random numbers periodically', flowId, componentId, amqpConnection, server);
-    this.flowId = flowId;
-    this.componentId = componentId;
-    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
-  }
-
-  async handleEvent(eventId: string, data: any): Promise<void> {
-    this.logger.log(`NumberGenerator (${this.flowId}) handling event: ${eventId}`);
-    switch (eventId) {
-      case "start": {
-        this.logger.log(`NumberGenerator (${this.flowId}) starting number generation`);
-        this.startGenerating(data);
-        break;
-      }
-      case "stop": {
-        this.logger.log(`NumberGenerator (${this.flowId}) stopping number generation`);
-        this.stopGenerating(data);
-        break;
-      }
-    }
-  }
-
-  private startGenerating(data): void {
-    return startGenerating(this, data);
-  }
-
-  private stopGenerating(data): void {
-    return stopGenerating(this, data);
-  }
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/components/number-multiplier/number-multiplier.handler.ts">
-import { CustomLogger } from 'src/logger/custom-logger';
-import { Injectable, Inject } from '@nestjs/common';
-import { ComponentService } from '../../base.component';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import { Server } from 'socket.io';
-
-import { numberReceived } from './number-received.event';
-
-@Injectable()
-export class NumberMultiplierComponent extends ComponentService {
-  public logger;
-
-  constructor(
-    @Inject('FLOW_ID') flowId: string,
-    @Inject('COMPONENT_ID') componentId: string,
-    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
-    @Inject('WEB_SOCKET_SERVER') protected server: Server
-  ) {
-    super('numberMultiplier', 'Number Multiplier', 'Multiplies received number by 2', flowId, componentId, amqpConnection, server);
-    this.flowId = flowId;
-    this.componentId = componentId;
-    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
-  }
-
-  async handleEvent(eventId: string, data: any): Promise<void> {
-    this.logger.log(`NumberMultiplier handling event: ${eventId} ${JSON.stringify(data, null, 2)}`);
-    switch (eventId) {
-      case 'numberReceived':
-        await this.numberReceived(data);
-        break;
-      default:
-        break;
-    }
-  }
-
-  private numberReceived(data): Promise<void> {
-    return numberReceived(this, data);
-  }
-}
-</FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/components/event-trigger/event-trigger.handler.ts">
 import { CustomLogger } from 'src/logger/custom-logger';
 import { Injectable, Inject } from '@nestjs/common';
@@ -423,6 +312,115 @@ export class EventTriggerComponent extends ComponentService {
   }
 }
 </FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/components/event-trigger/trigger-event.event.ts">
+export async function triggerEvent(flow, data): Promise<void> {
+  const { flowId, componentId, eventId } = data;
+  return await flow.publish(flowId, componentId, eventId, data);
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/modules/app.module.ts">
+import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
+import { ComponentRegistry } from '../services/component-registry.service';
+import { FlowExecutorService } from '../services/flow-executor.service';
+import { EventProcessor } from '../processors/event.processor';
+import { CustomLogger } from '../logger/custom-logger';
+import { AppController } from '../controllers/app.controller';
+
+import { initializeAppModule, components } from 'src/initializers/app.initialize';
+
+const metadata = {
+  imports: [
+    RabbitMQModule.forRoot(RabbitMQModule, {
+      exchanges: [
+        {
+          name: 'flow_exchange',
+          type: 'topic',
+        },
+      ],
+      uri: 'amqp://localhost:5672',
+      connectionInitOptions: { wait: false },
+    }),
+  ],
+  controllers: [AppController],
+  providers: [
+    EventProcessor,
+    ComponentRegistry,
+    FlowExecutorService,
+    {
+      provide: 'FLOW_ID',
+      useValue: 'example-flow', // Use a default flow ID
+    },
+    {
+      provide: 'COMPONENT_ID',
+      useFactory: () => `component-${Date.now()}`, // Generate a unique component ID
+    },
+    {
+      provide: 'WEB_SOCKET_SERVER',
+      useValue: null, // This will be set later in the FlowExecutorService
+    },
+    ...components,
+    CustomLogger
+  ],
+  exports: [EventProcessor],
+}
+
+export const AppModule = initializeAppModule(metadata)
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/services/flow-executor.service.ts">
+import { Injectable, Logger } from '@nestjs/common';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { ComponentRegistry } from './component-registry.service';
+import { Flow } from '../interfaces/flow.interface';
+import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { Server } from 'socket.io';
+import { initializeComponents } from 'src/initializers/components.initialize';
+
+@WebSocketGateway()
+@Injectable()
+export class FlowExecutorService {
+  @WebSocketServer() server: Server;
+  private readonly logger = new Logger(FlowExecutorService.name);
+
+  constructor(
+    private amqpConnection: AmqpConnection,
+    private componentRegistry: ComponentRegistry
+  ) {}
+
+  async executeFlow(flow: Flow) {
+    this.logger.log(`Executing flow: ${flow.id}`);
+
+    // Create connections
+    for (const connection of flow.connections) {
+      this.logger.log(`Creating connection: ${connection.fromComponent}.${connection.fromEvent} -> ${connection.toComponent}.${connection.toEvent}`);
+      await this.amqpConnection.publish('flow_exchange', 'createConnection', { ...connection, flowId: flow.id });
+    }
+
+    // Init components
+    for (const component of flow.components) {
+      this.logger.log(`Initializing component: ${component.componentId} (${component.componentRef}) for flow: ${flow.id}`);
+      
+      // initialize a new component instance
+      let componentInstance = initializeComponents(flow, component, this.amqpConnection, this.server);
+
+      // register new instance with component registery 
+      this.componentRegistry.registerComponent(componentInstance);
+ 
+      // publish init eventId command 
+      try {
+        await this.amqpConnection.publish('flow_exchange', 'componentEvent', {
+          flowId: flow.id,
+          componentId: component.componentId,
+          componentRef: component.componentRef,
+          eventId: 'init',
+          data: {},
+        });
+      } catch (error) {
+        this.logger.error(`Error initializing component ${component.componentId} for flow ${flow.id}:`, error);
+      }
+    }
+  }
+}
+</FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/services/component-registry.service.ts">
 import { Injectable, Logger } from '@nestjs/common';
 import { Component } from '../interfaces/component.interface';
@@ -445,39 +443,6 @@ export class ComponentRegistry {
       this.logger.warn(`Component not found: ${key}`);
     }
     return component;
-  }
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/controllers/app.controller.ts">
-import { Logger, Controller, Get, Post, Render, Body, Res, Req, UseGuards, Query } from '@nestjs/common';
-import { Response, Request } from 'express';
-import { EventTriggerComponent } from '../components/event-trigger/event-trigger.handler';
-
-@Controller()
-export class AppController {
-  private readonly logger = new Logger('AppController');
-
-  constructor(private eventTriggerComponent: EventTriggerComponent) {}
-
-  @Get()
-  @Render('index')
-  async root(@Req() req: Request) {
-    return { message: 'Flow Based Programming' };
-  }
-
-  @Post('trigger-event')
-  async trigger_event(
-    @Body() body: { 
-      flowId: string; 
-      componentId: string; 
-      eventId: string, 
-      data: any 
-    }, 
-    @Res() res: Response
-  ) {
-    this.logger.log(`[trigger-event] [${body.flowId}] [${body.componentId}] [${body.eventId}]`)
-    await this.eventTriggerComponent.handleEvent('triggerEvent', body);
-    res.sendStatus(200);
   }
 }
 </FILE>
@@ -544,59 +509,30 @@ export class EventProcessor {
   }
 }
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/services/flow-executor.service.ts">
-import { Injectable, Logger } from '@nestjs/common';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import { ComponentRegistry } from './component-registry.service';
-import { Flow } from '../interfaces/flow.interface';
-import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { Server } from 'socket.io';
-import { initializeComponents } from 'src/initializers/components.initialize';
-
-@WebSocketGateway()
-@Injectable()
-export class FlowExecutorService {
-  @WebSocketServer() server: Server;
-  private readonly logger = new Logger(FlowExecutorService.name);
-
-  constructor(
-    private amqpConnection: AmqpConnection,
-    private componentRegistry: ComponentRegistry
-  ) {}
-
-  async executeFlow(flow: Flow) {
-    this.logger.log(`Executing flow: ${flow.id}`);
-
-    // Create connections
-    for (const connection of flow.connections) {
-      this.logger.log(`Creating connection: ${connection.fromComponent}.${connection.fromEvent} -> ${connection.toComponent}.${connection.toEvent}`);
-      await this.amqpConnection.publish('flow_exchange', 'createConnection', { ...connection, flowId: flow.id });
-    }
-
-    // Init components
-    for (const component of flow.components) {
-      this.logger.log(`Initializing component: ${component.componentId} (${component.componentRef}) for flow: ${flow.id}`);
-      
-      // initialize a new component instance
-      let componentInstance = initializeComponents(flow, component, this.amqpConnection, this.server);
-
-      // register new instance with component registery 
-      this.componentRegistry.registerComponent(componentInstance);
- 
-      // publish init eventId command 
-      try {
-        await this.amqpConnection.publish('flow_exchange', 'componentEvent', {
-          flowId: flow.id,
-          componentId: component.componentId,
-          componentRef: component.componentRef,
-          eventId: 'init',
-          data: {},
-        });
-      } catch (error) {
-        this.logger.error(`Error initializing component ${component.componentId} for flow ${flow.id}:`, error);
-      }
-    }
-  }
+<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/flow.interface.ts">
+export interface Flow {
+  id: string;
+  components: {
+    componentId: string;
+    componentRef: string;
+  }[];
+  connections: {
+    fromComponent: string;
+    fromEvent: string;
+    toComponent: string;
+    toEvent: string;
+  }[];
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/component.interface.ts">
+export interface Component {
+  componentRef: string;
+  name: string;
+  description?: string;
+  flowId: string;
+  componentId: string;
+  handleEvent: (eventId: string, data: any) => Promise<void>;
+  publish: (flowId: string, componentId: string, eventId: string, data: any) => Promise<void>;
 }
 </FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/logger/custom-logger.ts">
@@ -670,15 +606,84 @@ export class CustomLogger extends ConsoleLogger {
   }
 }
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/component.interface.ts">
-export interface Component {
-  componentRef: string;
-  name: string;
-  description?: string;
-  flowId: string;
-  componentId: string;
-  handleEvent: (eventId: string, data: any) => Promise<void>;
-  publish: (flowId: string, componentId: string, eventId: string, data: any) => Promise<void>;
+<FILE path="/home/travis/Projects/flow-based-programming/src/base.component.ts">
+import { Inject, Injectable } from '@nestjs/common';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { Component } from './interfaces/component.interface';
+import { CustomLogger } from './logger/custom-logger';
+import { WebSocketGateway, WebSocketServer, SubscribeMessage, MessageBody } from '@nestjs/websockets';
+import { Server } from 'socket.io';
+import * as ejs from 'ejs';
+import * as path from 'path';
+
+@WebSocketGateway()
+@Injectable()
+export abstract class ComponentService implements Component {
+  protected readonly logger: CustomLogger;
+  
+  constructor(
+    public componentId: string,
+    public name: string,
+    public description: string,
+    public flowId: string,
+    public componentRef: string,
+    @Inject(AmqpConnection) protected amqpConnection: AmqpConnection,
+    protected server: Server
+  ) {
+    this.logger = new CustomLogger(this.componentId, amqpConnection);
+  }
+
+  abstract handleEvent(eventId: string, data: any): Promise<void>;
+
+  async publish(flowId: string, componentId: string, eventId: string, data: any): Promise<void> {
+    this.logger.log(`Emitting event: ${eventId}, flowId: ${this.flowId}, data: ${data}`);
+    if (!this.amqpConnection) {
+      this.logger.error('AmqpConnection is not initialized');
+      return;
+    }
+    await this.amqpConnection.publish('flow_exchange', 'componentEvent', {
+      flowId,
+      componentId,
+      eventId,
+      data,
+    });
+  }
+
+  @SubscribeMessage('client-event')
+  handleClientEvent(@MessageBody() data: any): void {
+    const { flowId, componentId, eventId, ...eventData } = data;
+    this.logger.log(`Received client event: flowId=${flowId}, componentId=${componentId}, eventId=${eventId}, data=${JSON.stringify(eventData)}`);
+    this.publish(flowId, componentId, 'clientEventReceived', eventData);
+  }
+
+  protected async display(flowId: string, componentId: string, templateId: string, data: any) {
+    data._flowId = flowId;
+    data._componentId = componentId;
+    data._templateId = templateId;
+    const htmxContent = await this.generateHtmxContent(data);
+    
+    if (this.server) {
+      this.logger.log(htmxContent)
+      this.server.emit('display-flow-component-template-content', {
+        flowId,
+        componentId,
+        templateId,
+        content: htmxContent
+      });
+    } else {
+      this.logger.warn('WebSocket server is not initialized');
+    }
+  }
+
+  private async generateHtmxContent(data: any): Promise<string> {
+    const templatePath = path.resolve(__dirname, `./templates/${data._templateId}.ejs`);
+    try {
+      return await ejs.renderFile(templatePath, data);
+    } catch (error) {
+      this.logger.error(`Error rendering EJS template: ${error.message}`);
+      return `<div>Error rendering content</div>`;
+    }
+  }
 }
 </FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/bootstrap/app.bootstrap.ts">
@@ -735,110 +740,479 @@ export async function bootstrapApp(logger: CustomLogger): Promise<any> {
   return app;
 }
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/main.ts">
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './modules/app.module';
-import { CustomLogger } from './logger/custom-logger';
-import { bootstrapApp } from './bootstrap/app.bootstrap';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-
-async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule);
-  
-  // Get the AmqpConnection from the app context
-  const amqpConnection = app.get(AmqpConnection);
-  
-  // Create the CustomLogger with the AmqpConnection
-  const logger = new CustomLogger('Bootstrap', amqpConnection);
-  
-  try {
-    logger.log('Starting main application...');
-    const mainApp = await bootstrapApp(logger);
-
-    process.on('SIGINT', async () => {
-      CustomLogger.clearSTDOUT();
-      await mainApp.close();
-      process.exit();
-    });
-  } catch (error) {
-    logger.error(`Bootstrap error: ${error.message}`, error.stack);
-    process.exit(1);
-  }
-}
-
-bootstrap().catch((error) => {
-  console.error('Unhandled bootstrap error:', error);
-  process.exit(1);
-});
-</FILE>
-<FILE path="src/modules/app.module.ts" TARGET>
+<FILE path="/home/travis/Projects/flow-based-programming/src/initializers/app.initialize.ts">
 import { Module, OnModuleInit } from '@nestjs/common';
-import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { ComponentRegistry } from '../services/component-registry.service';
-import { FlowExecutorService } from '../services/flow-executor.service';
-import { EventProcessor } from '../processors/event.processor';
+
 import { NumberGeneratorComponent } from '../components/number-generator/number-generator.handler';
 import { NumberMultiplierComponent } from '../components/number-multiplier/number-multiplier.handler';
 import { EventTriggerComponent } from '../components/event-trigger/event-trigger.handler';
-import { CustomLogger } from '../logger/custom-logger';
-import { AppController } from '../controllers/app.controller';
-import { initializeComponents } from '../initializers/app.initialize';
 
-@Module({
-  imports: [
-    RabbitMQModule.forRoot(RabbitMQModule, {
-      exchanges: [
-        {
-          name: 'flow_exchange',
-          type: 'topic',
-        },
-      ],
-      uri: 'amqp://localhost:5672',
-      connectionInitOptions: { wait: false },
-    }),
-  ],
-  controllers: [AppController],
-  providers: [
-    EventProcessor,
-    ComponentRegistry,
-    FlowExecutorService,
-    {
-      provide: 'FLOW_ID',
-      useValue: 'example-flow', // Use a default flow ID
-    },
-    {
-      provide: 'COMPONENT_ID',
-      useFactory: () => `component-${Date.now()}`, // Generate a unique component ID
-    },
-    {
-      provide: 'WEB_SOCKET_SERVER',
-      useValue: null, // This will be set later in the FlowExecutorService
-    },
-    NumberGeneratorComponent,
-    NumberMultiplierComponent,
-    EventTriggerComponent,
-    CustomLogger
-  ],
-  exports: [EventProcessor],
-})
-export class AppModule implements OnModuleInit {
-  constructor(
-    private componentRegistry: ComponentRegistry,
-    private numberGeneratorComponent: NumberGeneratorComponent,
-    private numberMultiplierComponent: NumberMultiplierComponent,
-    private eventTriggerComponent: EventTriggerComponent
-  ) {}
+export function initializeAppModule(metadata): any {
+  @Module(metadata)
+  class AppModule implements OnModuleInit {
+    constructor(
+      private componentRegistry: ComponentRegistry,
+      private numberGeneratorComponent: NumberGeneratorComponent,
+      private numberMultiplierComponent: NumberMultiplierComponent,
+      private eventTriggerComponent: EventTriggerComponent
+    ) {}
 
-  onModuleInit() {
-    initializeComponents(
-      this.componentRegistry,
-      this.numberGeneratorComponent,
-      this.numberMultiplierComponent,
-      this.eventTriggerComponent
-    );
+    onModuleInit() {
+      // Register components
+      this.componentRegistry.registerComponent(this.numberGeneratorComponent);
+      this.componentRegistry.registerComponent(this.numberMultiplierComponent);
+      this.componentRegistry.registerComponent(this.eventTriggerComponent);
+    }
+  }
+
+  return AppModule;
+}
+
+export const components = [
+  NumberGeneratorComponent,
+  NumberMultiplierComponent,
+  EventTriggerComponent,
+]
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/initializers/components.initialize.ts">
+import { NumberGeneratorComponent } from '../components/number-generator/number-generator.handler';
+import { NumberMultiplierComponent } from '../components/number-multiplier/number-multiplier.handler';
+import { EventTriggerComponent } from '../components/event-trigger/event-trigger.handler';
+
+export function initializeComponents(flow, component, amqpConnection, server) {
+  let componentInstance;
+  switch (component.componentRef) {
+    case 'numberGenerator':
+      componentInstance = new NumberGeneratorComponent(
+        flow.id, 
+        component.componentId, 
+        amqpConnection, 
+        server
+      );
+      break;
+    case 'numberMultiplier':
+      componentInstance = new NumberMultiplierComponent(
+        flow.id, 
+        component.componentId, 
+        amqpConnection, 
+        server
+      );
+      break;
+    case 'eventTrigger':
+      componentInstance = new EventTriggerComponent(
+        flow.id, 
+        component.componentId, 
+        amqpConnection, 
+        server
+      );
+      break;
+    default:
+      this.logger.warn(`Unknown component type: ${component.componentRef}`);
+      break;
+  }
+  return componentInstance;
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/views/index.ejs">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flow-Based Programming Example</title>
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/json-enc.js"></script>
+  <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+    .component { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; }
+    h2 { margin-top: 0; }
+  </style>
+</head>
+<body>
+  <h1>Flow-Based Programming Example</h1>
+
+  <div id="number-generator" class="component">
+    <h2>Number Generator</h2>
+    <button hx-post="/trigger-event/example-flow.gen1.start"
+      hx-swap="none" 
+      hx-ext='json-enc'
+      hx-headers='{"Content-Type": "application/json"}'
+      hx-vals='{}'
+    >
+      Start Generating
+    </button>
+    <button hx-post="/trigger-event/example-flow.gen1.stop"
+      hx-swap="none" 
+      hx-ext='json-enc'
+      hx-headers='{"Content-Type": "application/json"}'
+      hx-vals='{}'
+    >
+      Stop Generating
+    </button>
+    <div id="example-flow.gen1.number-generator"></div>
+  </div>
+
+  <div id="number-multiplier" class="component">
+    <h2>Number Multiplier</h2>
+    <div id="example-flow.mult1.number-multiplier"></div>
+  </div>
+
+  <script>
+    const socket = io();
+
+    socket.on('display-flow-component-template-content', function(display) {
+      const targetId = `${display.flowId}.${display.componentId}.${display.templateId}`;
+      const targetElement = document.getElementById(targetId);
+      if (targetElement) {
+        targetElement.outerHTML = display.content;
+      }
+    });
+
+    htmx.on("htmx:configRequest", (event) => {
+      event.detail.headers['Content-Type'] = 'application/json';
+    });
+  </script>
+</body>
+</html>
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/start:dev.stdout.txt">
+c[[90m4:09:36 PM[0m] Starting compilation in watch mode...
+
+[[90m4:09:37 PM[0m] Found 0 errors. Watching for file changes.
+
+[32m[Nest] 155203  - [39m08/21/2024, 4:09:37 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 155203  - [39m08/21/2024, 4:09:37 PM [32m    LOG[39m [38;5;3m[AmqpConnection] [39m[32mTrying to connect to RabbitMQ broker (default)[39m
+[32m[Nest] 155203  - [39m08/21/2024, 4:09:37 PM [32m    LOG[39m [38;5;3m[RabbitMQModule] [39m[32mSuccessfully connected to RabbitMQ[39m
+[32m[Nest] 155203  - [39m08/21/2024, 4:09:37 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDiscoveryModule dependencies initialized[39m[38;5;3m +7ms[39m
+[32m[Nest] 155203  - [39m08/21/2024, 4:09:37 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRabbitMQModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 155203  - [39m08/21/2024, 4:09:37 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +0ms[39m
+[2024-08-21T21:09:37.866Z] [LOG] [Bootstrap] Starting main application...
+[2024-08-21T21:09:37.867Z] [LOG] [Bootstrap] [NestFactory] Starting Nest application...
+[2024-08-21T21:09:37.869Z] [LOG] [Bootstrap] [AmqpConnection] Trying to connect to RabbitMQ broker (default)
+[2024-08-21T21:09:37.869Z] [LOG] [Bootstrap] [RabbitMQModule] Successfully connected to RabbitMQ
+[2024-08-21T21:09:37.870Z] [LOG] [Bootstrap] [InstanceLoader] DiscoveryModule dependencies initialized
+[2024-08-21T21:09:37.870Z] [LOG] [Bootstrap] [InstanceLoader] RabbitMQModule dependencies initialized
+[2024-08-21T21:09:37.870Z] [LOG] [Bootstrap] [InstanceLoader] AppModule dependencies initialized
+[2024-08-21T21:09:37.877Z] [LOG] [Bootstrap] [WebSocketsController] NumberGeneratorComponent subscribed to the "client-event" message
+[2024-08-21T21:09:37.877Z] [LOG] [Bootstrap] [WebSocketsController] NumberMultiplierComponent subscribed to the "client-event" message
+[2024-08-21T21:09:37.877Z] [LOG] [Bootstrap] [WebSocketsController] EventTriggerComponent subscribed to the "client-event" message
+[2024-08-21T21:09:37.879Z] [LOG] [Bootstrap] [RoutesResolver] AppController {/}:
+[2024-08-21T21:09:37.880Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/, GET} route
+[2024-08-21T21:09:37.880Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/trigger-event, POST} route
+[2024-08-21T21:09:37.881Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724274577869
+[2024-08-21T21:09:37.881Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724274577869
+[2024-08-21T21:09:37.881Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724274577869
+[2024-08-21T21:09:37.881Z] [LOG] [Bootstrap] [RabbitMQModule] Initializing RabbitMQ Handlers
+[2024-08-21T21:09:37.883Z] [LOG] [Bootstrap] [RabbitMQModule] Registering rabbitmq handlers from EventProcessor
+[2024-08-21T21:09:37.883Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.handleComponentEvent {subscribe} -> flow_exchange::componentEvent::component_event_queue
+[2024-08-21T21:09:37.884Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.createConnection {subscribe} -> flow_exchange::createConnection::create_connection_queue
+[2024-08-21T21:09:37.884Z] [LOG] [Bootstrap] [RabbitMQModule] Initializing RabbitMQ Handlers
+[2024-08-21T21:09:37.884Z] [LOG] [Bootstrap] [RabbitMQModule] Registering rabbitmq handlers from EventProcessor
+[2024-08-21T21:09:37.884Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.handleComponentEvent {subscribe} -> flow_exchange::componentEvent::component_event_queue
+[2024-08-21T21:09:37.884Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.createConnection {subscribe} -> flow_exchange::createConnection::create_connection_queue
+[2024-08-21T21:09:37.884Z] [LOG] [Bootstrap] [NestApplication] Nest application successfully started
+[2024-08-21T21:09:37.884Z] [LOG] [Bootstrap] Starting flow execution...
+[2024-08-21T21:09:37.885Z] [LOG] [Bootstrap] [FlowExecutorService] Executing flow: example-flow
+[2024-08-21T21:09:37.885Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: gen1.numberGenerated -> mult1.numberReceived
+[2024-08-21T21:09:37.938Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
+[2024-08-21T21:09:37.940Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
+[2024-08-21T21:09:37.947Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected a RabbitMQ channel "AmqpConnection"
+[2024-08-21T21:09:37.947Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected a RabbitMQ channel "AmqpConnection"
+[2024-08-21T21:09:37.948Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.gen1.numberGenerated -> mult1.numberReceived
+[2024-08-21T21:09:37.948Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.gen1.numberGenerated -> mult1.numberReceived
+[2024-08-21T21:09:37.948Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: main (eventTrigger) for flow: example-flow
+[2024-08-21T21:09:37.948Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.main
+[2024-08-21T21:09:37.948Z] [WARN] [Bootstrap] [AmqpConnection] Received response: [{"success":true,"message":"Connection created successfully"}] from subscribe handler [createConnection]. Subscribe handlers should only return void
+[2024-08-21T21:09:37.949Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.main.init] data: {}
+[2024-08-21T21:09:37.949Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: main
+[2024-08-21T21:09:37.949Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: gen1 (numberGenerator) for flow: example-flow
+[2024-08-21T21:09:37.949Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.gen1
+[2024-08-21T21:09:37.994Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: mult1 (numberMultiplier) for flow: example-flow
+[2024-08-21T21:09:37.994Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.mult1
+[2024-08-21T21:09:37.994Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.init] data: {}
+[2024-08-21T21:09:37.994Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
+[2024-08-21T21:09:37.995Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: init
+[2024-08-21T21:09:37.995Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.mult1.init] data: {}
+[2024-08-21T21:09:37.995Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: mult1
+[2024-08-21T21:09:37.995Z] [LOG] [example-flow.mult1] NumberMultiplier handling event: init {}
+[2024-08-21T21:09:37.997Z] [LOG] [Bootstrap] Application is running on: http://localhost:3000
+c[[90m4:27:13 PM[0m] File change detected. Starting incremental compilation...
+
+[[90m4:27:14 PM[0m] Found 0 errors. Watching for file changes.
+
+[32m[Nest] 157252  - [39m08/21/2024, 4:27:14 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 157252  - [39m08/21/2024, 4:27:14 PM [32m    LOG[39m [38;5;3m[AmqpConnection] [39m[32mTrying to connect to RabbitMQ broker (default)[39m
+[32m[Nest] 157252  - [39m08/21/2024, 4:27:14 PM [32m    LOG[39m [38;5;3m[RabbitMQModule] [39m[32mSuccessfully connected to RabbitMQ[39m
+[32m[Nest] 157252  - [39m08/21/2024, 4:27:14 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDiscoveryModule dependencies initialized[39m[38;5;3m +7ms[39m
+[32m[Nest] 157252  - [39m08/21/2024, 4:27:14 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRabbitMQModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 157252  - [39m08/21/2024, 4:27:14 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +0ms[39m
+[2024-08-21T21:27:14.330Z] [LOG] [Bootstrap] Starting main application...
+[2024-08-21T21:27:14.331Z] [LOG] [Bootstrap] [NestFactory] Starting Nest application...
+[2024-08-21T21:27:14.333Z] [LOG] [Bootstrap] [AmqpConnection] Trying to connect to RabbitMQ broker (default)
+[2024-08-21T21:27:14.334Z] [LOG] [Bootstrap] [RabbitMQModule] Successfully connected to RabbitMQ
+[2024-08-21T21:27:14.335Z] [LOG] [Bootstrap] [InstanceLoader] DiscoveryModule dependencies initialized
+[2024-08-21T21:27:14.335Z] [LOG] [Bootstrap] [InstanceLoader] RabbitMQModule dependencies initialized
+[2024-08-21T21:27:14.335Z] [LOG] [Bootstrap] [InstanceLoader] AppModule dependencies initialized
+[2024-08-21T21:27:14.342Z] [LOG] [Bootstrap] [WebSocketsController] NumberGeneratorComponent subscribed to the "client-event" message
+[2024-08-21T21:27:14.342Z] [LOG] [Bootstrap] [WebSocketsController] NumberMultiplierComponent subscribed to the "client-event" message
+[2024-08-21T21:27:14.342Z] [LOG] [Bootstrap] [WebSocketsController] EventTriggerComponent subscribed to the "client-event" message
+[2024-08-21T21:27:14.344Z] [LOG] [Bootstrap] [RoutesResolver] AppController {/}:
+[2024-08-21T21:27:14.345Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/, GET} route
+[2024-08-21T21:27:14.345Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/trigger-event, POST} route
+[2024-08-21T21:27:14.346Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724275634333
+[2024-08-21T21:27:14.346Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724275634333
+[2024-08-21T21:27:14.346Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724275634333
+[2024-08-21T21:27:14.347Z] [LOG] [Bootstrap] [RabbitMQModule] Initializing RabbitMQ Handlers
+[2024-08-21T21:27:14.348Z] [LOG] [Bootstrap] [RabbitMQModule] Registering rabbitmq handlers from EventProcessor
+[2024-08-21T21:27:14.349Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.handleComponentEvent {subscribe} -> flow_exchange::componentEvent::component_event_queue
+[2024-08-21T21:27:14.349Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.createConnection {subscribe} -> flow_exchange::createConnection::create_connection_queue
+[2024-08-21T21:27:14.349Z] [LOG] [Bootstrap] [RabbitMQModule] Initializing RabbitMQ Handlers
+[2024-08-21T21:27:14.350Z] [LOG] [Bootstrap] [RabbitMQModule] Registering rabbitmq handlers from EventProcessor
+[2024-08-21T21:27:14.350Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.handleComponentEvent {subscribe} -> flow_exchange::componentEvent::component_event_queue
+[2024-08-21T21:27:14.350Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.createConnection {subscribe} -> flow_exchange::createConnection::create_connection_queue
+[2024-08-21T21:27:14.350Z] [LOG] [Bootstrap] [NestApplication] Nest application successfully started
+[2024-08-21T21:27:14.350Z] [LOG] [Bootstrap] Starting flow execution...
+[2024-08-21T21:27:14.350Z] [LOG] [Bootstrap] [FlowExecutorService] Executing flow: example-flow
+[2024-08-21T21:27:14.350Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: gen1.numberGenerated -> mult1.numberReceived
+[2024-08-21T21:27:14.401Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
+[2024-08-21T21:27:14.403Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
+[2024-08-21T21:27:14.410Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected a RabbitMQ channel "AmqpConnection"
+[2024-08-21T21:27:14.411Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected a RabbitMQ channel "AmqpConnection"
+[2024-08-21T21:27:14.412Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.gen1.numberGenerated -> mult1.numberReceived
+[2024-08-21T21:27:14.412Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.gen1.numberGenerated -> mult1.numberReceived
+[2024-08-21T21:27:14.412Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: main (eventTrigger) for flow: example-flow
+[2024-08-21T21:27:14.412Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.main
+[2024-08-21T21:27:14.412Z] [WARN] [Bootstrap] [AmqpConnection] Received response: [{"success":true,"message":"Connection created successfully"}] from subscribe handler [createConnection]. Subscribe handlers should only return void
+[2024-08-21T21:27:14.413Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.main.init] data: {}
+[2024-08-21T21:27:14.413Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: main
+[2024-08-21T21:27:14.413Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: gen1 (numberGenerator) for flow: example-flow
+[2024-08-21T21:27:14.413Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.gen1
+[2024-08-21T21:27:14.454Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: mult1 (numberMultiplier) for flow: example-flow
+[2024-08-21T21:27:14.454Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.mult1
+[2024-08-21T21:27:14.455Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.init] data: {}
+[2024-08-21T21:27:14.455Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
+[2024-08-21T21:27:14.455Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: init
+[2024-08-21T21:27:14.456Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.mult1.init] data: {}
+[2024-08-21T21:27:14.456Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: mult1
+[2024-08-21T21:27:14.456Z] [LOG] [example-flow.mult1] NumberMultiplier handling event: init {}
+[2024-08-21T21:27:14.458Z] [LOG] [Bootstrap] Application is running on: http://localhost:3000
+c[[90m4:28:03 PM[0m] File change detected. Starting incremental compilation...
+
+[[90m4:28:03 PM[0m] Found 0 errors. Watching for file changes.
+
+[32m[Nest] 157403  - [39m08/21/2024, 4:28:03 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 157403  - [39m08/21/2024, 4:28:03 PM [32m    LOG[39m [38;5;3m[AmqpConnection] [39m[32mTrying to connect to RabbitMQ broker (default)[39m
+[32m[Nest] 157403  - [39m08/21/2024, 4:28:03 PM [32m    LOG[39m [38;5;3m[RabbitMQModule] [39m[32mSuccessfully connected to RabbitMQ[39m
+[32m[Nest] 157403  - [39m08/21/2024, 4:28:03 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDiscoveryModule dependencies initialized[39m[38;5;3m +8ms[39m
+[32m[Nest] 157403  - [39m08/21/2024, 4:28:03 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRabbitMQModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 157403  - [39m08/21/2024, 4:28:03 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +1ms[39m
+[2024-08-21T21:28:03.942Z] [LOG] [Bootstrap] Starting main application...
+[2024-08-21T21:28:03.943Z] [LOG] [Bootstrap] [NestFactory] Starting Nest application...
+[2024-08-21T21:28:03.945Z] [LOG] [Bootstrap] [AmqpConnection] Trying to connect to RabbitMQ broker (default)
+[2024-08-21T21:28:03.945Z] [LOG] [Bootstrap] [RabbitMQModule] Successfully connected to RabbitMQ
+[2024-08-21T21:28:03.946Z] [LOG] [Bootstrap] [InstanceLoader] DiscoveryModule dependencies initialized
+[2024-08-21T21:28:03.946Z] [LOG] [Bootstrap] [InstanceLoader] RabbitMQModule dependencies initialized
+[2024-08-21T21:28:03.946Z] [LOG] [Bootstrap] [InstanceLoader] AppModule dependencies initialized
+[2024-08-21T21:28:03.953Z] [LOG] [Bootstrap] [WebSocketsController] NumberGeneratorComponent subscribed to the "client-event" message
+[2024-08-21T21:28:03.953Z] [LOG] [Bootstrap] [WebSocketsController] NumberMultiplierComponent subscribed to the "client-event" message
+[2024-08-21T21:28:03.953Z] [LOG] [Bootstrap] [WebSocketsController] EventTriggerComponent subscribed to the "client-event" message
+[2024-08-21T21:28:03.955Z] [LOG] [Bootstrap] [RoutesResolver] AppController {/}:
+[2024-08-21T21:28:03.956Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/, GET} route
+[2024-08-21T21:28:03.956Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/trigger-event, POST} route
+[2024-08-21T21:28:03.957Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724275683945
+[2024-08-21T21:28:03.957Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724275683945
+[2024-08-21T21:28:03.957Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724275683945
+[2024-08-21T21:28:03.957Z] [LOG] [Bootstrap] [RabbitMQModule] Initializing RabbitMQ Handlers
+[2024-08-21T21:28:03.959Z] [LOG] [Bootstrap] [RabbitMQModule] Registering rabbitmq handlers from EventProcessor
+[2024-08-21T21:28:03.960Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.handleComponentEvent {subscribe} -> flow_exchange::componentEvent::component_event_queue
+[2024-08-21T21:28:03.960Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.createConnection {subscribe} -> flow_exchange::createConnection::create_connection_queue
+[2024-08-21T21:28:03.960Z] [LOG] [Bootstrap] [RabbitMQModule] Initializing RabbitMQ Handlers
+[2024-08-21T21:28:03.960Z] [LOG] [Bootstrap] [RabbitMQModule] Registering rabbitmq handlers from EventProcessor
+[2024-08-21T21:28:03.960Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.handleComponentEvent {subscribe} -> flow_exchange::componentEvent::component_event_queue
+[2024-08-21T21:28:03.960Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.createConnection {subscribe} -> flow_exchange::createConnection::create_connection_queue
+[2024-08-21T21:28:03.960Z] [LOG] [Bootstrap] [NestApplication] Nest application successfully started
+[2024-08-21T21:28:03.960Z] [LOG] [Bootstrap] Starting flow execution...
+[2024-08-21T21:28:03.960Z] [LOG] [Bootstrap] [FlowExecutorService] Executing flow: example-flow
+[2024-08-21T21:28:03.960Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: gen1.numberGenerated -> mult1.numberReceived
+[2024-08-21T21:28:04.012Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
+[2024-08-21T21:28:04.013Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
+[2024-08-21T21:28:04.018Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected a RabbitMQ channel "AmqpConnection"
+[2024-08-21T21:28:04.019Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected a RabbitMQ channel "AmqpConnection"
+[2024-08-21T21:28:04.020Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: main (eventTrigger) for flow: example-flow
+[2024-08-21T21:28:04.020Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.main
+[2024-08-21T21:28:04.021Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.gen1.numberGenerated -> mult1.numberReceived
+[2024-08-21T21:28:04.021Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.gen1.numberGenerated -> mult1.numberReceived
+[2024-08-21T21:28:04.021Z] [WARN] [Bootstrap] [AmqpConnection] Received response: [{"success":true,"message":"Connection created successfully"}] from subscribe handler [createConnection]. Subscribe handlers should only return void
+[2024-08-21T21:28:04.021Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: gen1 (numberGenerator) for flow: example-flow
+[2024-08-21T21:28:04.021Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.gen1
+[2024-08-21T21:28:04.021Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.main.init] data: {}
+[2024-08-21T21:28:04.021Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: main
+[2024-08-21T21:28:04.022Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.init] data: {}
+[2024-08-21T21:28:04.022Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
+[2024-08-21T21:28:04.022Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: init
+[2024-08-21T21:28:04.022Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: mult1 (numberMultiplier) for flow: example-flow
+[2024-08-21T21:28:04.022Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.mult1
+[2024-08-21T21:28:04.024Z] [LOG] [Bootstrap] Application is running on: http://localhost:3000
+[2024-08-21T21:28:04.024Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.mult1.init] data: {}
+[2024-08-21T21:28:04.024Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: mult1
+[2024-08-21T21:28:04.024Z] [LOG] [example-flow.mult1] NumberMultiplier handling event: init {}
+c[[90m4:29:14 PM[0m] File change detected. Starting incremental compilation...
+
+[[90m4:29:14 PM[0m] Found 0 errors. Watching for file changes.
+
+[32m[Nest] 157535  - [39m08/21/2024, 4:29:14 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 157535  - [39m08/21/2024, 4:29:14 PM [32m    LOG[39m [38;5;3m[AmqpConnection] [39m[32mTrying to connect to RabbitMQ broker (default)[39m
+[32m[Nest] 157535  - [39m08/21/2024, 4:29:14 PM [32m    LOG[39m [38;5;3m[RabbitMQModule] [39m[32mSuccessfully connected to RabbitMQ[39m
+[32m[Nest] 157535  - [39m08/21/2024, 4:29:14 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDiscoveryModule dependencies initialized[39m[38;5;3m +4ms[39m
+[32m[Nest] 157535  - [39m08/21/2024, 4:29:14 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRabbitMQModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 157535  - [39m08/21/2024, 4:29:14 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +0ms[39m
+[2024-08-21T21:29:14.868Z] [LOG] [Bootstrap] Starting main application...
+[2024-08-21T21:29:14.868Z] [LOG] [Bootstrap] [NestFactory] Starting Nest application...
+[2024-08-21T21:29:14.870Z] [LOG] [Bootstrap] [AmqpConnection] Trying to connect to RabbitMQ broker (default)
+[2024-08-21T21:29:14.870Z] [LOG] [Bootstrap] [RabbitMQModule] Successfully connected to RabbitMQ
+[2024-08-21T21:29:14.870Z] [LOG] [Bootstrap] [InstanceLoader] DiscoveryModule dependencies initialized
+[2024-08-21T21:29:14.870Z] [LOG] [Bootstrap] [InstanceLoader] RabbitMQModule dependencies initialized
+[2024-08-21T21:29:14.870Z] [LOG] [Bootstrap] [InstanceLoader] AppModule dependencies initialized
+[2024-08-21T21:29:14.874Z] [LOG] [Bootstrap] [WebSocketsController] NumberGeneratorComponent subscribed to the "client-event" message
+[2024-08-21T21:29:14.874Z] [LOG] [Bootstrap] [WebSocketsController] NumberMultiplierComponent subscribed to the "client-event" message
+[2024-08-21T21:29:14.874Z] [LOG] [Bootstrap] [WebSocketsController] EventTriggerComponent subscribed to the "client-event" message
+[2024-08-21T21:29:14.875Z] [LOG] [Bootstrap] [RoutesResolver] AppController {/}:
+[2024-08-21T21:29:14.876Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/, GET} route
+[2024-08-21T21:29:14.876Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/trigger-event/:fce, POST} route
+[2024-08-21T21:29:14.876Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724275754869
+[2024-08-21T21:29:14.876Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724275754869
+[2024-08-21T21:29:14.876Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724275754869
+[2024-08-21T21:29:14.877Z] [LOG] [Bootstrap] [RabbitMQModule] Initializing RabbitMQ Handlers
+[2024-08-21T21:29:14.878Z] [LOG] [Bootstrap] [RabbitMQModule] Registering rabbitmq handlers from EventProcessor
+[2024-08-21T21:29:14.878Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.handleComponentEvent {subscribe} -> flow_exchange::componentEvent::component_event_queue
+[2024-08-21T21:29:14.878Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.createConnection {subscribe} -> flow_exchange::createConnection::create_connection_queue
+[2024-08-21T21:29:14.878Z] [LOG] [Bootstrap] [RabbitMQModule] Initializing RabbitMQ Handlers
+[2024-08-21T21:29:14.878Z] [LOG] [Bootstrap] [RabbitMQModule] Registering rabbitmq handlers from EventProcessor
+[2024-08-21T21:29:14.878Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.handleComponentEvent {subscribe} -> flow_exchange::componentEvent::component_event_queue
+[2024-08-21T21:29:14.878Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.createConnection {subscribe} -> flow_exchange::createConnection::create_connection_queue
+[2024-08-21T21:29:14.879Z] [LOG] [Bootstrap] [NestApplication] Nest application successfully started
+[2024-08-21T21:29:14.879Z] [LOG] [Bootstrap] Starting flow execution...
+[2024-08-21T21:29:14.879Z] [LOG] [Bootstrap] [FlowExecutorService] Executing flow: example-flow
+[2024-08-21T21:29:14.879Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: gen1.numberGenerated -> mult1.numberReceived
+[2024-08-21T21:29:14.928Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
+[2024-08-21T21:29:14.929Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
+[2024-08-21T21:29:14.933Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected a RabbitMQ channel "AmqpConnection"
+[2024-08-21T21:29:14.933Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected a RabbitMQ channel "AmqpConnection"
+[2024-08-21T21:29:14.933Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.gen1.numberGenerated -> mult1.numberReceived
+[2024-08-21T21:29:14.934Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.gen1.numberGenerated -> mult1.numberReceived
+[2024-08-21T21:29:14.934Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: main (eventTrigger) for flow: example-flow
+[2024-08-21T21:29:14.934Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.main
+[2024-08-21T21:29:14.934Z] [WARN] [Bootstrap] [AmqpConnection] Received response: [{"success":true,"message":"Connection created successfully"}] from subscribe handler [createConnection]. Subscribe handlers should only return void
+[2024-08-21T21:29:14.934Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.main.init] data: {}
+[2024-08-21T21:29:14.934Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: main
+[2024-08-21T21:29:14.934Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: gen1 (numberGenerator) for flow: example-flow
+[2024-08-21T21:29:14.934Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.gen1
+[2024-08-21T21:29:14.977Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: mult1 (numberMultiplier) for flow: example-flow
+[2024-08-21T21:29:14.977Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.mult1
+[2024-08-21T21:29:14.978Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.init] data: {}
+[2024-08-21T21:29:14.978Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
+[2024-08-21T21:29:14.978Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: init
+[2024-08-21T21:29:14.979Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.mult1.init] data: {}
+[2024-08-21T21:29:14.979Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: mult1
+[2024-08-21T21:29:14.979Z] [LOG] [example-flow.mult1] NumberMultiplier handling event: init {}
+[2024-08-21T21:29:14.980Z] [LOG] [Bootstrap] Application is running on: http://localhost:3000
+c[[90m4:29:32 PM[0m] File change detected. Starting incremental compilation...
+
+[[90m4:29:32 PM[0m] Found 0 errors. Watching for file changes.
+
+[32m[Nest] 157673  - [39m08/21/2024, 4:29:33 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 157673  - [39m08/21/2024, 4:29:33 PM [32m    LOG[39m [38;5;3m[AmqpConnection] [39m[32mTrying to connect to RabbitMQ broker (default)[39m
+[32m[Nest] 157673  - [39m08/21/2024, 4:29:33 PM [32m    LOG[39m [38;5;3m[RabbitMQModule] [39m[32mSuccessfully connected to RabbitMQ[39m
+[32m[Nest] 157673  - [39m08/21/2024, 4:29:33 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDiscoveryModule dependencies initialized[39m[38;5;3m +7ms[39m
+[32m[Nest] 157673  - [39m08/21/2024, 4:29:33 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRabbitMQModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 157673  - [39m08/21/2024, 4:29:33 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +0ms[39m
+[2024-08-21T21:29:33.042Z] [LOG] [Bootstrap] Starting main application...
+[2024-08-21T21:29:33.042Z] [LOG] [Bootstrap] [NestFactory] Starting Nest application...
+[2024-08-21T21:29:33.045Z] [LOG] [Bootstrap] [AmqpConnection] Trying to connect to RabbitMQ broker (default)
+[2024-08-21T21:29:33.045Z] [LOG] [Bootstrap] [RabbitMQModule] Successfully connected to RabbitMQ
+[2024-08-21T21:29:33.046Z] [LOG] [Bootstrap] [InstanceLoader] DiscoveryModule dependencies initialized
+[2024-08-21T21:29:33.046Z] [LOG] [Bootstrap] [InstanceLoader] RabbitMQModule dependencies initialized
+[2024-08-21T21:29:33.046Z] [LOG] [Bootstrap] [InstanceLoader] AppModule dependencies initialized
+[2024-08-21T21:29:33.052Z] [LOG] [Bootstrap] [WebSocketsController] NumberGeneratorComponent subscribed to the "client-event" message
+[2024-08-21T21:29:33.053Z] [LOG] [Bootstrap] [WebSocketsController] NumberMultiplierComponent subscribed to the "client-event" message
+[2024-08-21T21:29:33.053Z] [LOG] [Bootstrap] [WebSocketsController] EventTriggerComponent subscribed to the "client-event" message
+[2024-08-21T21:29:33.054Z] [LOG] [Bootstrap] [RoutesResolver] AppController {/}:
+[2024-08-21T21:29:33.055Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/, GET} route
+[2024-08-21T21:29:33.055Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/trigger-event/:flow-component-event, POST} route
+[2024-08-21T21:29:33.056Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724275773044
+[2024-08-21T21:29:33.056Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724275773044
+[2024-08-21T21:29:33.056Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724275773044
+[2024-08-21T21:29:33.057Z] [LOG] [Bootstrap] [RabbitMQModule] Initializing RabbitMQ Handlers
+[2024-08-21T21:29:33.058Z] [LOG] [Bootstrap] [RabbitMQModule] Registering rabbitmq handlers from EventProcessor
+[2024-08-21T21:29:33.059Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.handleComponentEvent {subscribe} -> flow_exchange::componentEvent::component_event_queue
+[2024-08-21T21:29:33.059Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.createConnection {subscribe} -> flow_exchange::createConnection::create_connection_queue
+[2024-08-21T21:29:33.059Z] [LOG] [Bootstrap] [RabbitMQModule] Initializing RabbitMQ Handlers
+[2024-08-21T21:29:33.059Z] [LOG] [Bootstrap] [RabbitMQModule] Registering rabbitmq handlers from EventProcessor
+[2024-08-21T21:29:33.060Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.handleComponentEvent {subscribe} -> flow_exchange::componentEvent::component_event_queue
+[2024-08-21T21:29:33.060Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.createConnection {subscribe} -> flow_exchange::createConnection::create_connection_queue
+[2024-08-21T21:29:33.060Z] [LOG] [Bootstrap] [NestApplication] Nest application successfully started
+[2024-08-21T21:29:33.060Z] [LOG] [Bootstrap] Starting flow execution...
+[2024-08-21T21:29:33.060Z] [LOG] [Bootstrap] [FlowExecutorService] Executing flow: example-flow
+[2024-08-21T21:29:33.060Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: gen1.numberGenerated -> mult1.numberReceived
+[2024-08-21T21:29:33.111Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
+[2024-08-21T21:29:33.112Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
+[2024-08-21T21:29:33.118Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected a RabbitMQ channel "AmqpConnection"
+[2024-08-21T21:29:33.119Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected a RabbitMQ channel "AmqpConnection"
+[2024-08-21T21:29:33.120Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.gen1.numberGenerated -> mult1.numberReceived
+[2024-08-21T21:29:33.120Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.gen1.numberGenerated -> mult1.numberReceived
+[2024-08-21T21:29:33.120Z] [WARN] [Bootstrap] [AmqpConnection] Received response: [{"success":true,"message":"Connection created successfully"}] from subscribe handler [createConnection]. Subscribe handlers should only return void
+[2024-08-21T21:29:33.120Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: main (eventTrigger) for flow: example-flow
+[2024-08-21T21:29:33.120Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.main
+[2024-08-21T21:29:33.121Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: gen1 (numberGenerator) for flow: example-flow
+[2024-08-21T21:29:33.121Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.gen1
+[2024-08-21T21:29:33.121Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.main.init] data: {}
+[2024-08-21T21:29:33.121Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: main
+[2024-08-21T21:29:33.121Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.init] data: {}
+[2024-08-21T21:29:33.121Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
+[2024-08-21T21:29:33.121Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: init
+[2024-08-21T21:29:33.121Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: mult1 (numberMultiplier) for flow: example-flow
+[2024-08-21T21:29:33.121Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.mult1
+[2024-08-21T21:29:33.123Z] [LOG] [Bootstrap] Application is running on: http://localhost:3000
+[2024-08-21T21:29:33.124Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.mult1.init] data: {}
+[2024-08-21T21:29:33.124Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: mult1
+[2024-08-21T21:29:33.124Z] [LOG] [example-flow.mult1] NumberMultiplier handling event: init {}
+
+</FILE>
+<FILE path="src/controllers/app.controller.ts" TARGET>
+import { Logger, Controller, Get, Post, Render, Body, Res, Req, UseGuards, Query } from '@nestjs/common';
+import { Response, Request } from 'express';
+import { EventTriggerComponent } from '../components/event-trigger/event-trigger.handler';
+
+@Controller()
+export class AppController {
+  private readonly logger = new Logger('AppController');
+
+  constructor(private eventTriggerComponent: EventTriggerComponent) {}
+
+  @Get()
+  @Render('index')
+  async root(@Req() req: Request) {
+    return { message: 'Flow Based Programming' };
+  }
+
+  @Post('trigger-event/:flow-component-event')
+  async trigger_event(
+    @Body() body: { 
+      flowId: string; 
+      componentId: string; 
+      eventId: string, 
+      data: any 
+    }, 
+    @Res() res: Response
+  ) {
+    this.logger.log(`[trigger-event] [${body.flowId}] [${body.componentId}] [${body.eventId}]`)
+    await this.eventTriggerComponent.handleEvent('triggerEvent', body);
+    res.sendStatus(200);
   }
 }
 </FILE>
 <REQUEST>
-break out component parts including imports and AppModule class into app.initialize.ts while leaving the rest of the code there.
+trigger event should accept ids through params instead of body
 </REQUEST>

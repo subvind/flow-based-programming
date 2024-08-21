@@ -18,19 +18,19 @@
 
   <div id="number-generator" class="component">
     <h2>Number Generator</h2>
-    <button hx-post="/trigger-event"
+    <button hx-post="/trigger-event/example-flow.gen1.start"
       hx-swap="none" 
       hx-ext='json-enc'
       hx-headers='{"Content-Type": "application/json"}'
-      hx-vals='{"flowId": "example-flow", "componentId": "gen1", "eventId": "start", "data": {}}'
+      hx-vals='{}'
     >
       Start Generating
     </button>
-    <button hx-post="/trigger-event"
+    <button hx-post="/trigger-event/example-flow.gen1.stop"
       hx-swap="none" 
       hx-ext='json-enc'
       hx-headers='{"Content-Type": "application/json"}'
-      hx-vals='{"flowId": "example-flow", "componentId": "gen1", "eventId": "stop", "data": {}}'
+      hx-vals='{}'
     >
       Stop Generating
     </button>
@@ -45,12 +45,11 @@
   <script>
     const socket = io();
 
-    socket.on('htmx-update', function(display) {
-      const targetId = `${display.flowId}.${display.componentId}.${display.templateId}`;
-      console.log('htmx-update targetId', targetId)
+    socket.on('display-flow-component-template-content', function(event) {
+      const targetId = `${event.flowId}.${event.componentId}.${event.templateId}`;
       const targetElement = document.getElementById(targetId);
       if (targetElement) {
-        targetElement.outerHTML = display.content;
+        targetElement.outerHTML = event.content;
       }
     });
 

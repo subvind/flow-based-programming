@@ -27,7 +27,7 @@ export abstract class ComponentService implements Component {
   abstract handleEvent(eventId: string, data: any): Promise<void>;
 
   async publish(flowId: string, componentId: string, eventId: string, data: any): Promise<void> {
-    this.logger.log(`Emitting event: ${eventId}, flowId: ${this.flowId}, data: ${data}`);
+    this.logger.log(`Publishing: ${flowId}.${componentId}.${eventId} -> ${data}`);
     if (!this.amqpConnection) {
       this.logger.error('AmqpConnection is not initialized');
       return;
@@ -55,7 +55,7 @@ export abstract class ComponentService implements Component {
     
     if (this.server) {
       this.logger.log(htmxContent)
-      this.server.emit('htmx-update', {
+      this.server.emit('display-flow-component-template-content', {
         flowId,
         componentId,
         templateId,

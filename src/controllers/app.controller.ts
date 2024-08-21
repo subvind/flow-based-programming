@@ -1,4 +1,4 @@
-import { Logger, Controller, Get, Post, Render, Body, Res, Req, UseGuards, Query } from '@nestjs/common';
+import { Logger, Controller, Get, Post, Render, Body, Param, Res, Req } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { EventTriggerComponent } from '../components/event-trigger/event-trigger.handler';
 
@@ -14,18 +14,22 @@ export class AppController {
     return { message: 'Flow Based Programming' };
   }
 
-  @Post('trigger-event')
-  async trigger_event(
-    @Body() body: { 
-      flowId: string; 
-      componentId: string; 
-      eventId: string, 
-      data: any 
-    }, 
+  @Post('trigger-event/:flowComponentEvent')
+  async triggerEvent(
+    @Param('flowComponentEvent') flowComponentEvent: string,
+    @Body() data: any,
     @Res() res: Response
   ) {
-    this.logger.log(`[trigger-event] [${body.flowId}] [${body.componentId}] [${body.eventId}]`)
-    await this.eventTriggerComponent.handleEvent('triggerEvent', body);
+    const fceArray = flowComponentEvent.split('.');
+    const flowId = fceArray[0];
+    const componentId = fceArray[1];
+    const eventId = fceArray[2];
+    
+    this.logger.log(`[trigger-event] [${flowId}] [${componentId}] [${eventId}]`);
+    data._flowId = flowId;
+    data._componentId = componentId;
+    data._eventId = eventId;
+    await this.eventTriggerComponent.handleEvent('triggerEvent', data);
     res.sendStatus(200);
   }
 }
