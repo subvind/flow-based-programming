@@ -1,8 +1,11 @@
 import { CustomLogger } from 'src/logger/custom-logger';
 import { Injectable, Inject } from '@nestjs/common';
-import { ComponentService } from '../base.component';
+import { ComponentService } from '../../base.component';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { Server } from 'socket.io';
+
+import { startGenerating } from './start-generating.event';
+import { stopGenerating } from './stop-generating.event';
 
 @Injectable()
 export class NumberGeneratorComponent extends ComponentService {
@@ -26,42 +29,22 @@ export class NumberGeneratorComponent extends ComponentService {
     switch (eventId) {
       case "start": {
         this.logger.log(`NumberGenerator (${this.flowId}) starting number generation`);
-        this.startGenerating();
+        this.startGenerating(data);
         break;
       }
       case "stop": {
         this.logger.log(`NumberGenerator (${this.flowId}) stopping number generation`);
-        this.stopGenerating();
+        this.stopGenerating(data);
         break;
       }
     }
   }
 
-  private startGenerating(): void {
-    this.logger.log(`NumberGenerator (${this.flowId}) startGenerating method called`);
-    if (this.interval) {
-      clearInterval(this.interval);
-    }
-    this.interval = setInterval(async () => {
-      var randomNumber = Math.random();
-      this.logger.log(`NumberGenerator (${this.flowId}) generated number: ${randomNumber}`);
-      await this.publish(this.flowId, this.componentId, 'numberGenerated', randomNumber);
-      
-      // Send HTMX update
-      await this.sendHtmxUpdate('number-generator', {
-        number: randomNumber,
-        timestamp: Date.now(),
-        flowId: this.flowId,
-        componentId: this.componentId
-      });
-    }, 1000);
+  private startGenerating(data): void {
+    return startGenerating(this, data);
   }
 
-  private stopGenerating(): void {
-    this.logger.log(`NumberGenerator (${this.flowId}) stopGenerating method called`);
-    if (this.interval) {
-      clearInterval(this.interval);
-      this.interval = null;
-    }
+  private stopGenerating(data): void {
+    return stopGenerating(this, data);
   }
 }

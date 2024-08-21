@@ -1,8 +1,10 @@
 import { CustomLogger } from 'src/logger/custom-logger';
 import { Injectable, Inject } from '@nestjs/common';
-import { ComponentService } from '../base.component';
+import { ComponentService } from '../../base.component';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { Server } from 'socket.io';
+
+import { triggerEvent } from './trigger-event.event';
 
 @Injectable()
 export class EventTriggerComponent extends ComponentService {
@@ -20,11 +22,17 @@ export class EventTriggerComponent extends ComponentService {
     this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
   }
 
-  async handleEvent(_eventId: string, data: any): Promise<void> {
-    this.logger.log(`EventTrigger handling event: ${_eventId}`);
-    if (_eventId === 'triggerEvent') {
-      const { flowId, componentId, eventId } = data;
-      await this.publish(flowId, componentId, eventId, data);
+  async handleEvent(eventId: string, data: any): Promise<void> {
+    switch (eventId) {
+      case 'triggerEvent':
+        await this.triggerEvent(data);
+        break;
+      default:
+        break;
     }
+  }
+
+  private async triggerEvent(data): Promise<void> {
+    return await triggerEvent(this, data);
   }
 }

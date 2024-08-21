@@ -3,9 +3,9 @@ import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { ComponentRegistry } from '../services/component-registry.service';
 import { FlowExecutorService } from '../services/flow-executor.service';
 import { EventProcessor } from '../processors/event.processor';
-import { NumberGeneratorComponent } from '../components/number-generator.component';
-import { NumberMultiplierComponent } from '../components/number-multiplier.component';
-import { EventTriggerComponent } from '../components/event-trigger.component';
+import { NumberGeneratorComponent } from '../components/number-generator/number-generator.handler';
+import { NumberMultiplierComponent } from '../components/number-multiplier/number-multiplier.handler';
+import { EventTriggerComponent } from '../components/event-trigger/event-trigger.handler';
 import { CustomLogger } from '../logger/custom-logger';
 import { AppController } from '../controllers/app.controller';
 

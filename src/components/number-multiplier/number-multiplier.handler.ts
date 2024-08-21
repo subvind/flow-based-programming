@@ -1,8 +1,10 @@
 import { CustomLogger } from 'src/logger/custom-logger';
 import { Injectable, Inject } from '@nestjs/common';
-import { ComponentService } from '../base.component';
+import { ComponentService } from '../../base.component';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { Server } from 'socket.io';
+
+import { numberReceived } from './number-received.event';
 
 @Injectable()
 export class NumberMultiplierComponent extends ComponentService {
@@ -22,22 +24,16 @@ export class NumberMultiplierComponent extends ComponentService {
 
   async handleEvent(eventId: string, data: any): Promise<void> {
     this.logger.log(`NumberMultiplier handling event: ${eventId} ${JSON.stringify(data, null, 2)}`);
-    if (eventId === 'numberReceived') {
-      const inputNumber = typeof data === 'number' ? data : parseFloat(data);
-      if (isNaN(inputNumber)) {
-        this.logger.warn(`Received invalid number: ${JSON.stringify(data, null, 2)}`);
-        return;
-      }
-      const result = inputNumber * 2;
-      this.logger.log(`NumberMultiplier received ${inputNumber}, multiplied result: ${result}`);
-      await this.publish(this.flowId, this.componentId, 'numberMultiplied', result);
-
-      // Send HTMX update
-      await this.sendHtmxUpdate('number-multiplier', {
-        input: inputNumber,
-        result: result,
-        timestamp: Date.now()
-      });
+    switch (eventId) {
+      case 'numberReceived':
+        await this.numberReceived(data);
+        break;
+      default:
+        break;
     }
+  }
+
+  private numberReceived(data): Promise<void> {
+    return numberReceived(this, data);
   }
 }

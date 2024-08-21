@@ -1,6 +1,6 @@
 import { Logger, Controller, Get, Post, Render, Body, Res, Req, UseGuards, Query } from '@nestjs/common';
 import { Response, Request } from 'express';
-import { EventTriggerComponent } from '../components/event-trigger.component';
+import { EventTriggerComponent } from '../components/event-trigger/event-trigger.handler';
 
 @Controller()
 export class AppController {

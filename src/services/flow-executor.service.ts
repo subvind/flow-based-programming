@@ -2,11 +2,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { ComponentRegistry } from './component-registry.service';
 import { Flow } from '../interfaces/flow.interface';
-import { NumberGeneratorComponent } from '../components/number-generator.component';
-import { NumberMultiplierComponent } from '../components/number-multiplier.component';
-import { EventTriggerComponent } from '../components/event-trigger.component';
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
+import { initializeComponents } from 'src/initializers/components.initialize';
 
 @WebSocketGateway()
 @Injectable()
@@ -31,24 +29,14 @@ export class FlowExecutorService {
     // Init components
     for (const component of flow.components) {
       this.logger.log(`Initializing component: ${component.componentId} (${component.componentRef}) for flow: ${flow.id}`);
-      let componentInstance;
-      switch (component.componentRef) {
-        case 'numberGenerator':
-          componentInstance = new NumberGeneratorComponent(flow.id, component.componentId, this.amqpConnection, this.server);
-          break;
-        case 'numberMultiplier':
-          componentInstance = new NumberMultiplierComponent(flow.id, component.componentId, this.amqpConnection, this.server);
-          break;
-        case 'eventTrigger':
-          componentInstance = new EventTriggerComponent(flow.id, component.componentId, this.amqpConnection, this.server);
-          break;
-        default:
-          this.logger.warn(`Unknown component type: ${component.componentRef}`);
-          continue;
-      }
-
-      this.componentRegistry.registerComponent(componentInstance);
       
+      // initialize a new component instance
+      let componentInstance = initializeComponents(flow, component, this.amqpConnection, this.server);
+
+      // register new instance with component registery 
+      this.componentRegistry.registerComponent(componentInstance);
+ 
+      // publish init eventId command 
       try {
         await this.amqpConnection.publish('flow_exchange', 'componentEvent', {
           flowId: flow.id,
