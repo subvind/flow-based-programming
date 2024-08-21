@@ -33,7 +33,7 @@ export class EventProcessor {
         const targetComponent = this.componentRegistry.getComponent(toFlow, toComponent);
         if (targetComponent) {
           this.logger.log(`Forwarding event to component: ${targetComponent.componentId}`);
-          await targetComponent.handleEvent(toEvent, { ...eventData, flowId: toFlow });
+          await targetComponent.handleEvent(toEvent, eventData);
         } else {
           this.logger.warn(`Target component not found: ${toComponent} in flow: ${toFlow}`);
         }

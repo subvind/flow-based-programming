@@ -20,16 +20,21 @@ export class NumberMultiplierComponent extends ComponentService {
     this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
   }
 
-  async handleEvent(eventId: string, data: number): Promise<void> {
+  async handleEvent(eventId: string, data: any): Promise<void> {
     this.logger.log(`NumberMultiplier handling event: ${eventId} ${JSON.stringify(data, null, 2)}`);
     if (eventId === 'numberReceived') {
-      const result = data * 2;
-      this.logger.log(`NumberMultiplier received ${data}, multiplied result: ${result}`);
+      const inputNumber = typeof data === 'number' ? data : parseFloat(data);
+      if (isNaN(inputNumber)) {
+        this.logger.warn(`Received invalid number: ${JSON.stringify(data, null, 2)}`);
+        return;
+      }
+      const result = inputNumber * 2;
+      this.logger.log(`NumberMultiplier received ${inputNumber}, multiplied result: ${result}`);
       await this.publish(this.flowId, this.componentId, 'numberMultiplied', result);
 
       // Send HTMX update
       await this.sendHtmxUpdate('number-multiplier', {
-        input: data,
+        input: inputNumber,
         result: result,
         timestamp: Date.now(),
         flowId: this.flowId,
