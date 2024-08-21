@@ -5,7 +5,7 @@ import { EventProcessor } from '../processors/event.processor';
 import { CustomLogger } from '../logger/custom-logger';
 import { AppController } from '../controllers/app.controller';
 
-import { initializeAppModule, components } from 'src/initializers/app.initialize';
+import { initializeAppModule, components } from '../initializers/app.initialize';
 
 const metadata = {
   imports: [

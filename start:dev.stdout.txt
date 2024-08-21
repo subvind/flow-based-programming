@@ -1,60 +1,60 @@
-c[[90m4:48:29 PM[0m] Starting compilation in watch mode...
+c[[90m6:17:15 PM[0m] Starting compilation in watch mode...
 
-[[90m4:48:30 PM[0m] Found 0 errors. Watching for file changes.
+[[90m6:17:15 PM[0m] Found 0 errors. Watching for file changes.
 
-[32m[Nest] 160413  - [39m08/21/2024, 4:48:30 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
-[32m[Nest] 160413  - [39m08/21/2024, 4:48:30 PM [32m    LOG[39m [38;5;3m[AmqpConnection] [39m[32mTrying to connect to RabbitMQ broker (default)[39m
-[32m[Nest] 160413  - [39m08/21/2024, 4:48:30 PM [32m    LOG[39m [38;5;3m[RabbitMQModule] [39m[32mSuccessfully connected to RabbitMQ[39m
-[32m[Nest] 160413  - [39m08/21/2024, 4:48:30 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDiscoveryModule dependencies initialized[39m[38;5;3m +7ms[39m
-[32m[Nest] 160413  - [39m08/21/2024, 4:48:30 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRabbitMQModule dependencies initialized[39m[38;5;3m +1ms[39m
-[32m[Nest] 160413  - [39m08/21/2024, 4:48:30 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +0ms[39m
-[2024-08-21T21:48:30.293Z] [LOG] [Bootstrap] Starting main application...
-[2024-08-21T21:48:30.294Z] [LOG] [Bootstrap] [NestFactory] Starting Nest application...
-[2024-08-21T21:48:30.296Z] [LOG] [Bootstrap] [AmqpConnection] Trying to connect to RabbitMQ broker (default)
-[2024-08-21T21:48:30.297Z] [LOG] [Bootstrap] [RabbitMQModule] Successfully connected to RabbitMQ
-[2024-08-21T21:48:30.297Z] [LOG] [Bootstrap] [InstanceLoader] DiscoveryModule dependencies initialized
-[2024-08-21T21:48:30.298Z] [LOG] [Bootstrap] [InstanceLoader] RabbitMQModule dependencies initialized
-[2024-08-21T21:48:30.298Z] [LOG] [Bootstrap] [InstanceLoader] AppModule dependencies initialized
-[2024-08-21T21:48:30.305Z] [LOG] [Bootstrap] [WebSocketsController] NumberGeneratorComponent subscribed to the "client-event" message
-[2024-08-21T21:48:30.305Z] [LOG] [Bootstrap] [WebSocketsController] NumberMultiplierComponent subscribed to the "client-event" message
-[2024-08-21T21:48:30.305Z] [LOG] [Bootstrap] [WebSocketsController] EventTriggerComponent subscribed to the "client-event" message
-[2024-08-21T21:48:30.307Z] [LOG] [Bootstrap] [RoutesResolver] AppController {/}:
-[2024-08-21T21:48:30.308Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/, GET} route
-[2024-08-21T21:48:30.308Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/trigger-event/:flowComponentEvent, POST} route
-[2024-08-21T21:48:30.309Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724276910296
-[2024-08-21T21:48:30.309Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724276910296
-[2024-08-21T21:48:30.309Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724276910296
-[2024-08-21T21:48:30.309Z] [LOG] [Bootstrap] [RabbitMQModule] Initializing RabbitMQ Handlers
-[2024-08-21T21:48:30.311Z] [LOG] [Bootstrap] [RabbitMQModule] Registering rabbitmq handlers from EventProcessor
-[2024-08-21T21:48:30.312Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.handleComponentEvent {subscribe} -> flow_exchange::componentEvent::component_event_queue
-[2024-08-21T21:48:30.312Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.createConnection {subscribe} -> flow_exchange::createConnection::create_connection_queue
-[2024-08-21T21:48:30.312Z] [LOG] [Bootstrap] [RabbitMQModule] Initializing RabbitMQ Handlers
-[2024-08-21T21:48:30.312Z] [LOG] [Bootstrap] [RabbitMQModule] Registering rabbitmq handlers from EventProcessor
-[2024-08-21T21:48:30.312Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.handleComponentEvent {subscribe} -> flow_exchange::componentEvent::component_event_queue
-[2024-08-21T21:48:30.312Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.createConnection {subscribe} -> flow_exchange::createConnection::create_connection_queue
-[2024-08-21T21:48:30.312Z] [LOG] [Bootstrap] [NestApplication] Nest application successfully started
-[2024-08-21T21:48:30.313Z] [LOG] [Bootstrap] Starting flow execution...
-[2024-08-21T21:48:30.313Z] [LOG] [Bootstrap] [FlowExecutorService] Executing flow: example-flow
-[2024-08-21T21:48:30.313Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: gen1.numberGenerated -> mult1.numberReceived
-[2024-08-21T21:48:30.361Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
-[2024-08-21T21:48:30.363Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
-[2024-08-21T21:48:30.368Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected a RabbitMQ channel "AmqpConnection"
-[2024-08-21T21:48:30.369Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected a RabbitMQ channel "AmqpConnection"
-[2024-08-21T21:48:30.370Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.gen1.numberGenerated -> mult1.numberReceived
-[2024-08-21T21:48:30.370Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.gen1.numberGenerated -> mult1.numberReceived
-[2024-08-21T21:48:30.370Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: main (eventTrigger) for flow: example-flow
-[2024-08-21T21:48:30.370Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.main
-[2024-08-21T21:48:30.370Z] [WARN] [Bootstrap] [AmqpConnection] Received response: [{"success":true,"message":"Connection created successfully"}] from subscribe handler [createConnection]. Subscribe handlers should only return void
-[2024-08-21T21:48:30.371Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.main.init] data: {}
-[2024-08-21T21:48:30.371Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: main
-[2024-08-21T21:48:30.371Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: gen1 (numberGenerator) for flow: example-flow
-[2024-08-21T21:48:30.371Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.gen1
-[2024-08-21T21:48:30.414Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: mult1 (numberMultiplier) for flow: example-flow
-[2024-08-21T21:48:30.414Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.mult1
-[2024-08-21T21:48:30.415Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.init] data: {}
-[2024-08-21T21:48:30.415Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
-[2024-08-21T21:48:30.415Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: init
-[2024-08-21T21:48:30.415Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.mult1.init] data: {}
-[2024-08-21T21:48:30.415Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: mult1
-[2024-08-21T21:48:30.415Z] [LOG] [example-flow.mult1] NumberMultiplier handling event: init {}
-[2024-08-21T21:48:30.417Z] [LOG] [Bootstrap] Application is running on: http://localhost:3000
+[32m[Nest] 170187  - [39m08/21/2024, 6:17:16 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 170187  - [39m08/21/2024, 6:17:16 PM [32m    LOG[39m [38;5;3m[AmqpConnection] [39m[32mTrying to connect to RabbitMQ broker (default)[39m
+[32m[Nest] 170187  - [39m08/21/2024, 6:17:16 PM [32m    LOG[39m [38;5;3m[RabbitMQModule] [39m[32mSuccessfully connected to RabbitMQ[39m
+[32m[Nest] 170187  - [39m08/21/2024, 6:17:16 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDiscoveryModule dependencies initialized[39m[38;5;3m +8ms[39m
+[32m[Nest] 170187  - [39m08/21/2024, 6:17:16 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRabbitMQModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 170187  - [39m08/21/2024, 6:17:16 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +0ms[39m
+[2024-08-21T23:17:16.044Z] [LOG] [Bootstrap] Starting main application...
+[2024-08-21T23:17:16.044Z] [LOG] [Bootstrap] [NestFactory] Starting Nest application...
+[2024-08-21T23:17:16.046Z] [LOG] [Bootstrap] [AmqpConnection] Trying to connect to RabbitMQ broker (default)
+[2024-08-21T23:17:16.047Z] [LOG] [Bootstrap] [RabbitMQModule] Successfully connected to RabbitMQ
+[2024-08-21T23:17:16.047Z] [LOG] [Bootstrap] [InstanceLoader] DiscoveryModule dependencies initialized
+[2024-08-21T23:17:16.048Z] [LOG] [Bootstrap] [InstanceLoader] RabbitMQModule dependencies initialized
+[2024-08-21T23:17:16.048Z] [LOG] [Bootstrap] [InstanceLoader] AppModule dependencies initialized
+[2024-08-21T23:17:16.054Z] [LOG] [Bootstrap] [WebSocketsController] NumberGeneratorComponent subscribed to the "client-event" message
+[2024-08-21T23:17:16.055Z] [LOG] [Bootstrap] [WebSocketsController] NumberMultiplierComponent subscribed to the "client-event" message
+[2024-08-21T23:17:16.055Z] [LOG] [Bootstrap] [WebSocketsController] EventTriggerComponent subscribed to the "client-event" message
+[2024-08-21T23:17:16.056Z] [LOG] [Bootstrap] [RoutesResolver] AppController {/}:
+[2024-08-21T23:17:16.057Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/, GET} route
+[2024-08-21T23:17:16.058Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/trigger-event/:flowComponentEvent, POST} route
+[2024-08-21T23:17:16.058Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724282236046
+[2024-08-21T23:17:16.058Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724282236046
+[2024-08-21T23:17:16.059Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724282236046
+[2024-08-21T23:17:16.059Z] [LOG] [Bootstrap] [RabbitMQModule] Initializing RabbitMQ Handlers
+[2024-08-21T23:17:16.061Z] [LOG] [Bootstrap] [RabbitMQModule] Registering rabbitmq handlers from EventProcessor
+[2024-08-21T23:17:16.061Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.handleComponentEvent {subscribe} -> flow_exchange::componentEvent::component_event_queue
+[2024-08-21T23:17:16.061Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.createConnection {subscribe} -> flow_exchange::createConnection::create_connection_queue
+[2024-08-21T23:17:16.061Z] [LOG] [Bootstrap] [RabbitMQModule] Initializing RabbitMQ Handlers
+[2024-08-21T23:17:16.062Z] [LOG] [Bootstrap] [RabbitMQModule] Registering rabbitmq handlers from EventProcessor
+[2024-08-21T23:17:16.062Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.handleComponentEvent {subscribe} -> flow_exchange::componentEvent::component_event_queue
+[2024-08-21T23:17:16.062Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.createConnection {subscribe} -> flow_exchange::createConnection::create_connection_queue
+[2024-08-21T23:17:16.062Z] [LOG] [Bootstrap] [NestApplication] Nest application successfully started
+[2024-08-21T23:17:16.062Z] [LOG] [Bootstrap] Starting flow execution...
+[2024-08-21T23:17:16.062Z] [LOG] [Bootstrap] [FlowExecutorService] Executing flow: example-flow
+[2024-08-21T23:17:16.062Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: gen1.numberGenerated -> mult1.numberReceived
+[2024-08-21T23:17:16.064Z] [LOG] [Bootstrap] Application is running on: http://localhost:3000
+[2024-08-21T23:17:16.118Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
+[2024-08-21T23:17:16.120Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
+[2024-08-21T23:17:16.127Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected a RabbitMQ channel "AmqpConnection"
+[2024-08-21T23:17:16.127Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected a RabbitMQ channel "AmqpConnection"
+[2024-08-21T23:17:16.128Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.gen1.numberGenerated -> mult1.numberReceived
+[2024-08-21T23:17:16.128Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.gen1.numberGenerated -> mult1.numberReceived
+[2024-08-21T23:17:16.128Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: main (eventTrigger) for flow: example-flow
+[2024-08-21T23:17:16.128Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.main
+[2024-08-21T23:17:16.129Z] [WARN] [Bootstrap] [AmqpConnection] Received response: [{"success":true,"message":"Connection created successfully"}] from subscribe handler [createConnection]. Subscribe handlers should only return void
+[2024-08-21T23:17:16.129Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.main.init] data: {}
+[2024-08-21T23:17:16.129Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: main
+[2024-08-21T23:17:16.129Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: gen1 (numberGenerator) for flow: example-flow
+[2024-08-21T23:17:16.129Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.gen1
+[2024-08-21T23:17:16.173Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: mult1 (numberMultiplier) for flow: example-flow
+[2024-08-21T23:17:16.174Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.mult1
+[2024-08-21T23:17:16.174Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.init] data: {}
+[2024-08-21T23:17:16.174Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
+[2024-08-21T23:17:16.174Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: init
+[2024-08-21T23:17:16.175Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.mult1.init] data: {}
+[2024-08-21T23:17:16.175Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: mult1
+[2024-08-21T23:17:16.175Z] [LOG] [example-flow.mult1] NumberMultiplier handling event: init {}

@@ -4,7 +4,7 @@ import { ComponentRegistry } from './component-registry.service';
 import { Flow } from '../interfaces/flow.interface';
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { initializeComponents } from 'src/initializers/components.initialize';
+import { initializeComponent } from '../initializers/component.initialize';
 
 @WebSocketGateway()
 @Injectable()
@@ -31,7 +31,7 @@ export class FlowExecutorService {
       this.logger.log(`Initializing component: ${component.componentId} (${component.componentRef}) for flow: ${flow.id}`);
       
       // initialize a new component instance
-      let componentInstance = initializeComponents(flow, component, this.amqpConnection, this.server);
+      let componentInstance = initializeComponent(flow, component, this.amqpConnection, this.server);
 
       // register new instance with component registery 
       this.componentRegistry.registerComponent(componentInstance);

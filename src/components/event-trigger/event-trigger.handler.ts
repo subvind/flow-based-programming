@@ -1,6 +1,6 @@
-import { CustomLogger } from 'src/logger/custom-logger';
+import { CustomLogger } from '../../logger/custom-logger';
 import { Injectable, Inject } from '@nestjs/common';
-import { ComponentService } from '../../base.component';
+import { ComponentService } from '../../bases/component.base';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { Server } from 'socket.io';
 

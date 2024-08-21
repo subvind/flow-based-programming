@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import { Component } from './interfaces/component.interface';
-import { CustomLogger } from './logger/custom-logger';
+import { Component } from '../interfaces/component.interface';
+import { CustomLogger } from '../logger/custom-logger';
 import { WebSocketGateway, WebSocketServer, SubscribeMessage, MessageBody } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import * as ejs from 'ejs';
@@ -67,7 +67,7 @@ export abstract class ComponentService implements Component {
   }
 
   private async generateHtmxContent(data: any): Promise<string> {
-    const templatePath = path.resolve(__dirname, `./templates/${data._templateId}.ejs`);
+    const templatePath = path.resolve(__dirname, `../templates/${data._templateId}.ejs`);
     try {
       return await ejs.renderFile(templatePath, data);
     } catch (error) {
