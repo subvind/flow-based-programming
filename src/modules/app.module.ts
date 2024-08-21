@@ -1,15 +1,13 @@
-import { Module, OnModuleInit } from '@nestjs/common';
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { ComponentRegistry } from '../services/component-registry.service';
 import { FlowExecutorService } from '../services/flow-executor.service';
 import { EventProcessor } from '../processors/event.processor';
-import { NumberGeneratorComponent } from '../components/number-generator/number-generator.handler';
-import { NumberMultiplierComponent } from '../components/number-multiplier/number-multiplier.handler';
-import { EventTriggerComponent } from '../components/event-trigger/event-trigger.handler';
 import { CustomLogger } from '../logger/custom-logger';
 import { AppController } from '../controllers/app.controller';
 
-@Module({
+import { initializeAppModule, components } from 'src/initializers/app.initialize';
+
+const metadata = {
   imports: [
     RabbitMQModule.forRoot(RabbitMQModule, {
       exchanges: [
@@ -39,25 +37,10 @@ import { AppController } from '../controllers/app.controller';
       provide: 'WEB_SOCKET_SERVER',
       useValue: null, // This will be set later in the FlowExecutorService
     },
-    NumberGeneratorComponent,
-    NumberMultiplierComponent,
-    EventTriggerComponent,
+    ...components,
     CustomLogger
   ],
   exports: [EventProcessor],
-})
-export class AppModule implements OnModuleInit {
-  constructor(
-    private componentRegistry: ComponentRegistry,
-    private numberGeneratorComponent: NumberGeneratorComponent,
-    private numberMultiplierComponent: NumberMultiplierComponent,
-    private eventTriggerComponent: EventTriggerComponent
-  ) {}
-
-  onModuleInit() {
-    // Register components
-    this.componentRegistry.registerComponent(this.numberGeneratorComponent);
-    this.componentRegistry.registerComponent(this.numberMultiplierComponent);
-    this.componentRegistry.registerComponent(this.eventTriggerComponent);
-  }
 }
+
+export const AppModule = initializeAppModule(metadata)
