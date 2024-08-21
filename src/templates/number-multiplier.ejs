@@ -1,5 +1,5 @@
-<div>
-  <p>Last received number: <%= data.input %></p>
-  <p>Multiplied result: <%= data.result %></p>
-  <p>Processed at: <%= new Date(data.timestamp).toLocaleString() %></p>
+<div id="<%= _flowId %>.<%= _componentId %>.<%= _templateId %>">
+  <p>Last received number: <%= input %></p>
+  <p>Multiplied result: <%= result %></p>
+  <p>Processed at: <%= new Date(timestamp).toLocaleString() %></p>
 </div>

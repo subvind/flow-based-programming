@@ -1,4 +1,7 @@
 export function startGenerating (flow, data) {
+  const fid = flow.flowId;
+  const cid = flow.componentId;
+
   flow.logger.log(`NumberGenerator (${flow.flowId}) startGenerating method called`);
   if (flow.interval) {
     clearInterval(flow.interval);
@@ -6,14 +9,12 @@ export function startGenerating (flow, data) {
   flow.interval = setInterval(async () => {
     var randomNumber = Math.random();
     flow.logger.log(`NumberGenerator (${flow.flowId}) generated number: ${randomNumber}`);
-    await flow.publish(flow.flowId, flow.componentId, 'numberGenerated', randomNumber);
+    await flow.publish(fid, cid, 'numberGenerated', randomNumber);
     
     // Send HTMX update
-    await flow.sendHtmxUpdate('number-generator', {
+    await flow.display(fid, cid, 'number-generator', {
       number: randomNumber,
-      timestamp: Date.now(),
-      flowId: flow.flowId,
-      componentId: flow.componentId
+      timestamp: Date.now()
     });
   }, 1000);
 }

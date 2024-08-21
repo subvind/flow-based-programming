@@ -47,14 +47,17 @@ export abstract class ComponentService implements Component {
     this.publish(flowId, componentId, 'clientEventReceived', eventData);
   }
 
-  protected async sendHtmxUpdate(templateId: string, data: any) {
-    const htmxContent = await this.generateHtmxContent(templateId, data);
+  protected async display(flowId: string, componentId: string, templateId: string, data: any) {
+    data._flowId = flowId;
+    data._componentId = componentId;
+    data._templateId = templateId;
+    const htmxContent = await this.generateHtmxContent(data);
     
     if (this.server) {
       this.logger.log(htmxContent)
       this.server.emit('htmx-update', {
-        flowId: this.flowId,
-        componentId: this.componentId,
+        flowId,
+        componentId,
         templateId,
         content: htmxContent
       });
@@ -63,15 +66,10 @@ export abstract class ComponentService implements Component {
     }
   }
 
-  private async generateHtmxContent(templateId: string, data: any): Promise<string> {
-    const templatePath = path.resolve(__dirname, `./templates/${templateId}.ejs`);
+  private async generateHtmxContent(data: any): Promise<string> {
+    const templatePath = path.resolve(__dirname, `./templates/${data._templateId}.ejs`);
     try {
-      return await ejs.renderFile(templatePath, { 
-        flowId: this.flowId, 
-        componentId: this.componentId, 
-        templateId, 
-        data
-      });
+      return await ejs.renderFile(templatePath, data);
     } catch (error) {
       this.logger.error(`Error rendering EJS template: ${error.message}`);
       return `<div>Error rendering content</div>`;
