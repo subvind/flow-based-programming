@@ -29,15 +29,15 @@ import { AppController } from '../controllers/app.controller';
     FlowExecutorService,
     {
       provide: 'FLOW_ID',
-      useValue: 'your-flow-id-here', // Or use a factory if it's dynamic
+      useValue: 'example-flow', // Use a default flow ID
     },
     {
       provide: 'COMPONENT_ID',
-      useValue: 'your-component-id-here', // Or use a factory if it's dynamic
+      useFactory: () => `component-${Date.now()}`, // Generate a unique component ID
     },
     {
       provide: 'WEB_SOCKET_SERVER',
-      useValue: 'your-wss-here', // Or use a factory if it's dynamic
+      useValue: null, // This will be set later in the FlowExecutorService
     },
     NumberGeneratorComponent,
     NumberMultiplierComponent,
@@ -55,8 +55,9 @@ export class AppModule implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    // this.componentRegistry.registerComponentName(this.numberGeneratorComponent);
-    // this.componentRegistry.registerComponentName(this.numberMultiplierComponent);
-    // this.componentRegistry.registerComponentName(this.eventTriggerComponent);
+    // Register components
+    this.componentRegistry.registerComponent(this.numberGeneratorComponent);
+    this.componentRegistry.registerComponent(this.numberMultiplierComponent);
+    this.componentRegistry.registerComponent(this.eventTriggerComponent);
   }
 }

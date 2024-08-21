@@ -30,7 +30,7 @@ export class FlowExecutorService {
 
     // Init components
     for (const component of flow.components) {
-      this.logger.log(`Initializing component: ${component.componentId} for flow: ${flow.id}`);
+      this.logger.log(`Initializing component: ${component.componentId} (${component.componentRef}) for flow: ${flow.id}`);
       let componentInstance;
       switch (component.componentRef) {
         case 'numberGenerator':
@@ -53,6 +53,7 @@ export class FlowExecutorService {
         await this.amqpConnection.publish('flow_exchange', 'componentEvent', {
           flowId: flow.id,
           componentId: component.componentId,
+          componentRef: component.componentRef,
           eventId: 'init',
           data: {},
         });

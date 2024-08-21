@@ -7,13 +7,13 @@ export class ComponentRegistry {
   private readonly logger = new Logger(ComponentRegistry.name);
 
   registerComponent(component: Component) {
-    const key = `${component.flowId}.${component.componentId}`;
+    const key = `${component.flowId}.${component.componentRef}`;
     this.logger.log(`Registering component: ${key}`);
     this.components.set(key, component);
   }
 
-  getComponent(flowId: string, componentId: string): Component | undefined {
-    const key = `${flowId}.${componentId}`;
+  getComponent(flowId: string, componentRef: string): Component | undefined {
+    const key = `${flowId}.${componentRef}`;
     const component = this.components.get(key);
     if (!component) {
       this.logger.warn(`Component not found: ${key}`);
