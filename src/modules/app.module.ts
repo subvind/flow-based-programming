@@ -55,8 +55,8 @@ export class AppModule implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    this.componentRegistry.registerComponent(this.numberGeneratorComponent);
-    this.componentRegistry.registerComponent(this.numberMultiplierComponent);
-    this.componentRegistry.registerComponent(this.eventTriggerComponent);
+    // this.componentRegistry.registerComponentName(this.numberGeneratorComponent);
+    // this.componentRegistry.registerComponentName(this.numberMultiplierComponent);
+    // this.componentRegistry.registerComponentName(this.eventTriggerComponent);
   }
 }

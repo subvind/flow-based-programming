@@ -1,8 +1,8 @@
 export interface Flow {
   id: string;
   components: {
-    id: string;
     componentId: string;
+    componentRef: string;
   }[];
   connections: {
     fromComponent: string;

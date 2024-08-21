@@ -14,17 +14,17 @@ export class EventProcessor {
     routingKey: 'componentEvent',
     queue: 'component_event_queue',
   })
-  async handleComponentEvent(msg: {flowId: string, componentId: string, eventName: string, data: any}) {
-    const { flowId, componentId, eventName, data: eventData } = msg;
-    this.logger.log(`[handleComponentEvent] [${flowId}.${componentId}.${eventName}] data: ${JSON.stringify(eventData)}`);
+  async handleComponentEvent(msg: {flowId: string, componentId: string, eventId: string, data: any}) {
+    const { flowId, componentId, eventId, data: eventData } = msg;
+    this.logger.log(`[handleComponentEvent] [${flowId}.${componentId}.${eventId}] data: ${JSON.stringify(eventData)}`);
     
     const component = this.componentRegistry.getComponentId(componentId);
     if (component) {
       this.logger.log(`Passing event to component: ${componentId}`);
-      await component.handleEvent(eventName, eventData);
+      await component.handleEvent(eventId, eventData);
 
       // Check if there's a connection for this event
-      const connectionKey = `${flowId}.${componentId}.${eventName}`;
+      const connectionKey = `${flowId}.${componentId}.${eventId}`;
       const connection = this.connections.get(connectionKey);
       if (connection) {
         const { toFlow, toComponent, toEvent } = connection;
@@ -33,14 +33,14 @@ export class EventProcessor {
         // Convert flow-defined toComponent to registry-defined componentId
         const targetComponent = this.componentRegistry.getComponentId(toComponent);
         if (targetComponent) {
-          this.logger.log(`Forwarding event to component: ${targetComponent.id}`);
+          this.logger.log(`Forwarding event to component: ${targetComponent.componentId}`);
           await targetComponent.handleEvent(toEvent, { ...eventData, flowId: toFlow });
         } else {
           this.logger.warn(`Target component not found: ${toComponent} in flow: ${toFlow}`);
         }
       }
     } else {
-      this.logger.warn(`Component key not found: ${componentId}`);
+      this.logger.warn(`componentId not found in register: ${componentId}`);
     }
   }
 

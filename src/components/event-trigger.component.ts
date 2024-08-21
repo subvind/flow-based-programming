@@ -14,16 +14,11 @@ export class EventTriggerComponent extends ComponentService {
     super('eventTrigger', 'Event Trigger', 'Handles HTMX requests and triggers events', flowId, componentId, amqpConnection, webSocketServer);
   }
 
-  async handleEvent(eventName: string, data: any): Promise<void> {
-    this.logger.log(`EventTrigger handling event: ${eventName}`);
-    if (eventName === 'triggerEvent') {
+  async handleEvent(_eventId: string, data: any): Promise<void> {
+    this.logger.log(`EventTrigger handling event: ${_eventId}`);
+    if (_eventId === 'triggerEvent') {
       const { flowId, componentId, eventId } = data;
-      await this.publish({
-        flowId,
-        componentId,
-        eventName: eventId,
-        data: data.data,
-      });
+      await this.publish(flowId, componentId, eventId, data);
     }
   }
 }

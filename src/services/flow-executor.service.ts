@@ -30,31 +30,33 @@ export class FlowExecutorService {
 
     // Init components
     for (const component of flow.components) {
+      console.log('component.componentId', component.componentId)
       let componentInstance;
-      switch (component.componentId) {
+      switch (component.componentRef) {
         case 'numberGenerator':
-          componentInstance = new NumberGeneratorComponent(flow.id, component.id, this.amqpConnection, this.server);
+          componentInstance = new NumberGeneratorComponent(flow.id, component.componentId, this.amqpConnection, this.server);
           break;
         case 'numberMultiplier':
-          componentInstance = new NumberMultiplierComponent(flow.id, component.id, this.amqpConnection, this.server);
+          componentInstance = new NumberMultiplierComponent(flow.id, component.componentId, this.amqpConnection, this.server);
           break;
         case 'eventTrigger':
-          componentInstance = new EventTriggerComponent(flow.id, component.id, this.amqpConnection, this.server);
+          componentInstance = new EventTriggerComponent(flow.id, component.componentId, this.amqpConnection, this.server);
           break;
         default:
           this.logger.warn(`Unknown component type: ${component.componentId}`);
           continue;
       }
-      
-      this.componentRegistry.registerComponent(componentInstance);
-      this.componentRegistry.registerComponentId(component.id, componentInstance);
+
+      console.log('component.componentId', componentInstance.componentId)
+      // this.componentRegistry.registerComponentName(componentInstance);
+      this.componentRegistry.registerComponentId(componentInstance);
       
       this.logger.log(`Initializing component: ${component.componentId} for flow: ${flow.id}`);
       try {
         await this.amqpConnection.publish('flow_exchange', 'componentEvent', {
           flowId: flow.id,
-          componentId: component.id,
-          eventName: 'init',
+          componentId: component.componentId,
+          eventId: 'init',
           data: {},
         });
       } catch (error) {

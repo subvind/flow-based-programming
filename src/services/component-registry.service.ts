@@ -3,37 +3,20 @@ import { Component } from '../interfaces/component.interface';
 
 @Injectable()
 export class ComponentRegistry {
-  private keys: Map<string, Component> = new Map();
-  private components: Map<string, Component> = new Map();
+  private idComponents: Map<string, Component> = new Map();
   private readonly logger = new Logger(ComponentRegistry.name);
 
-  registerComponent(component: Component) {
-    this.logger.log(`Registering component: ${component.id}`);
-    this.components.set(component.id, component);
+  registerComponentId(component: Component) {
+    this.logger.log(`Registering componentId: ${component.componentId}`);
+    console.log('set', component.componentId)
+    this.idComponents.set(component.componentId, component);
   }
 
-  getComponent(id: string): Component | undefined {
-    const component = this.components.get(id);
+  getComponentId (componentId: string): Component | undefined {
+    const component = this.idComponents.get(componentId);
     if (!component) {
-      this.logger.warn(`Component id not found: ${id}`);
+      this.logger.warn(`componentId not found: ${componentId}`);
     }
     return component;
-  }
-
-  registerComponentId(key, id) {
-    const component = this.getComponent(id.id);
-    this.keys.set(key, component);
-  }
-
-  getComponentId (key): Component | undefined {
-    const component = this.keys.get(key);
-    if (!component) {
-      this.logger.warn(`Component key not found: ${key}`);
-    }
-    return component;
-  }
-
-  getAllComponents(): Component[] {
-    return Array.from(this.components.values());
   }
 }

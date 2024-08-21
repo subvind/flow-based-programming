@@ -13,38 +13,38 @@ export abstract class ComponentService implements Component {
   protected readonly logger: CustomLogger;
   
   constructor(
-    public id: string,
+    public componentId: string,
     public name: string,
     public description: string,
     public flowId: string,
-    public componentId: string,
+    public componentRef: string,
     @Inject(AmqpConnection) protected amqpConnection: AmqpConnection,
-    @Inject(Server) protected server: Server
+    protected server: Server
   ) {
-    this.logger = new CustomLogger(this.id, amqpConnection);
+    this.logger = new CustomLogger(this.componentId, amqpConnection);
   }
 
-  abstract handleEvent(eventName: string, data: any): Promise<void>;
+  abstract handleEvent(eventId: string, data: any): Promise<void>;
 
-  async emitEvent(eventName: string, data: any): Promise<void> {
-    this.logger.log(`Emitting event: ${eventName}, flowId: ${this.flowId}, data: ${JSON.stringify(data)}`);
+  async publish(flowId: string, componentId: string, eventId: string, data: any): Promise<void> {
+    this.logger.log(`Emitting event: ${eventId}, flowId: ${this.flowId}, data: ${JSON.stringify(data)}`);
     if (!this.amqpConnection) {
       this.logger.error('AmqpConnection is not initialized');
       return;
     }
     await this.amqpConnection.publish('flow_exchange', 'componentEvent', {
-      flowId: this.flowId,
-      componentId: this.id,
-      eventName,
+      flowId,
+      componentId,
+      eventId,
       data,
     });
   }
 
   @SubscribeMessage('client-event')
   handleClientEvent(@MessageBody() data: any): void {
-    const { componentId, eventId, ...eventData } = data;
-    this.logger.log(`Received client event: flowId=${this.flowId}, componentId=${componentId}, eventId=${eventId}, data=${JSON.stringify(eventData)}`);
-    this.emitEvent('clientEventReceived', { componentId, eventId, data: eventData });
+    const { flowId, componentId, eventId, ...eventData } = data;
+    this.logger.log(`Received client event: flowId=${flowId}, componentId=${componentId}, eventId=${eventId}, data=${JSON.stringify(eventData)}`);
+    this.publish(flowId, componentId, 'clientEventReceived', eventData);
   }
 
   protected async sendHtmxUpdate(templateId: string, data: any) {
@@ -53,7 +53,7 @@ export abstract class ComponentService implements Component {
     if (this.server) {
       this.server.emit('htmx-update', {
         flowId: this.flowId,
-        componentId: this.id,
+        componentId: this.componentId,
         templateId,
         content: htmxContent
       });
@@ -66,30 +66,14 @@ export abstract class ComponentService implements Component {
     const templatePath = path.resolve(__dirname, `./templates/${templateId}.ejs`);
     try {
       return await ejs.renderFile(templatePath, { 
-        data, 
         flowId: this.flowId, 
-        componentId: this.id, 
-        templateId 
+        componentId: this.componentId, 
+        templateId, 
+        data
       });
     } catch (error) {
       this.logger.error(`Error rendering EJS template: ${error.message}`);
       return `<div>Error rendering content</div>`;
-    }
-  }
-
-  async publish(message: any): Promise<void> {
-    if (!this.amqpConnection) {
-      this.logger.error('AmqpConnection is not initialized');
-      return;
-    }
-    try {
-      await this.amqpConnection.publish('flow_exchange', 'componentEvent', {
-        ...message,
-        flowId: this.flowId,
-      });
-    } catch (error) {
-      this.logger.error(`Error publishing message: ${error.message}`);
-      throw error;
     }
   }
 }

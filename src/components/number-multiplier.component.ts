@@ -14,12 +14,12 @@ export class NumberMultiplierComponent extends ComponentService {
     super('numberMultiplier', 'Number Multiplier', 'Multiplies received number by 2', flowId, componentId, amqpConnection, webSocketServer);
   }
 
-  async handleEvent(eventName: string, data: any): Promise<void> {
-    this.logger.log(`NumberMultiplier handling event: ${eventName}`);
-    if (eventName === 'numberReceived') {
+  async handleEvent(eventId: string, data: any): Promise<void> {
+    this.logger.log(`NumberMultiplier handling event: ${eventId}`);
+    if (eventId === 'numberReceived') {
       const result = data * 2;
       this.logger.log(`NumberMultiplier received ${data}, multiplied result: ${result}`);
-      await this.emitEvent('numberMultiplied', result);
+      await this.publish(this.flowId, this.componentId, 'numberMultiplied', result);
 
       // Send HTMX update
       await this.sendHtmxUpdate('number-multiplier', {

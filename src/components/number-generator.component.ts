@@ -11,14 +11,14 @@ export class NumberGeneratorComponent extends ComponentService {
     @Inject('FLOW_ID') flowId: string,
     @Inject('COMPONENT_ID') componentId: string,
     @Inject(AmqpConnection) amqpConnection: AmqpConnection,
-    @Inject(Server) webSocketServer: Server
+    @Inject('WEB_SOCKET_SERVER') webSocketServer: Server
   ) {
     super('numberGenerator', 'Number Generator', 'Generates random numbers periodically', flowId, componentId, amqpConnection, webSocketServer);
   }
 
-  async handleEvent(eventName: string, data: any): Promise<void> {
-    this.logger.log(`NumberGenerator (${this.flowId}) handling event: ${eventName}`);
-    switch (eventName) {
+  async handleEvent(eventId: string, data: any): Promise<void> {
+    this.logger.log(`NumberGenerator (${this.flowId}) handling event: ${eventId}`);
+    switch (eventId) {
       case "start": {
         this.logger.log(`NumberGenerator (${this.flowId}) starting number generation`);
         this.startGenerating();
@@ -40,7 +40,7 @@ export class NumberGeneratorComponent extends ComponentService {
     this.interval = setInterval(async () => {
       var randomNumber = Math.random();
       this.logger.log(`NumberGenerator (${this.flowId}) generated number: ${randomNumber}`);
-      await this.emitEvent('numberGenerated', randomNumber);
+      await this.publish(this.flowId, this.componentId, 'numberGenerated', randomNumber);
       
       // Send HTMX update
       await this.sendHtmxUpdate('number-generator', {

@@ -4,7 +4,6 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import * as cookieParser from 'cookie-parser';
 import { FlowExecutorService } from '../services/flow-executor.service';
 import { Flow } from '../interfaces/flow.interface';
-import { ComponentRegistry } from '../services/component-registry.service';
 import { CustomLogger } from '../logger/custom-logger';
 import { resolve } from 'path';
 
@@ -23,16 +22,15 @@ export async function bootstrapApp(logger: CustomLogger): Promise<any> {
   });
 
   const flowExecutor = app.get(FlowExecutorService);
-  const componentRegistry = app.get(ComponentRegistry);
 
   await app.init();
 
   const exampleFlow: Flow = {
     id: 'example-flow',
     components: [
-      { id: 'main', componentId: 'eventTrigger' },
-      { id: 'gen1', componentId: 'numberGenerator' },
-      { id: 'mult1', componentId: 'numberMultiplier' },
+      { componentId: 'main', componentRef: 'eventTrigger' },
+      { componentId: 'gen1', componentRef: 'numberGenerator' },
+      { componentId: 'mult1', componentRef: 'numberMultiplier' },
     ],
     connections: [
       {
