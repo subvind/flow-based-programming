@@ -3,19 +3,20 @@ import { Component } from '../interfaces/component.interface';
 
 @Injectable()
 export class ComponentRegistry {
-  private idComponents: Map<string, Component> = new Map();
+  private components: Map<string, Component> = new Map();
   private readonly logger = new Logger(ComponentRegistry.name);
 
-  registerComponentId(component: Component) {
-    this.logger.log(`Registering componentId: ${component.componentId}`);
-    console.log('set', component.componentId)
-    this.idComponents.set(component.componentId, component);
+  registerComponent(component: Component) {
+    const key = `${component.flowId}.${component.componentId}`;
+    this.logger.log(`Registering component: ${key}`);
+    this.components.set(key, component);
   }
 
-  getComponentId (componentId: string): Component | undefined {
-    const component = this.idComponents.get(componentId);
+  getComponent(flowId: string, componentId: string): Component | undefined {
+    const key = `${flowId}.${componentId}`;
+    const component = this.components.get(key);
     if (!component) {
-      this.logger.warn(`componentId not found: ${componentId}`);
+      this.logger.warn(`Component not found: ${key}`);
     }
     return component;
   }

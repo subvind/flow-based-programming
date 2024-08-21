@@ -5,7 +5,7 @@ import { Flow } from '../interfaces/flow.interface';
 import { NumberGeneratorComponent } from '../components/number-generator.component';
 import { NumberMultiplierComponent } from '../components/number-multiplier.component';
 import { EventTriggerComponent } from '../components/event-trigger.component';
-import { WebSocketGateway, WebSocketServer, SubscribeMessage, MessageBody } from '@nestjs/websockets';
+import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 
 @WebSocketGateway()
@@ -30,7 +30,7 @@ export class FlowExecutorService {
 
     // Init components
     for (const component of flow.components) {
-      console.log('component.componentId', component.componentId)
+      this.logger.log(`Initializing component: ${component.componentId} for flow: ${flow.id}`);
       let componentInstance;
       switch (component.componentRef) {
         case 'numberGenerator':
@@ -43,15 +43,12 @@ export class FlowExecutorService {
           componentInstance = new EventTriggerComponent(flow.id, component.componentId, this.amqpConnection, this.server);
           break;
         default:
-          this.logger.warn(`Unknown component type: ${component.componentId}`);
+          this.logger.warn(`Unknown component type: ${component.componentRef}`);
           continue;
       }
 
-      console.log('component.componentId', componentInstance.componentId)
-      // this.componentRegistry.registerComponentName(componentInstance);
-      this.componentRegistry.registerComponentId(componentInstance);
+      this.componentRegistry.registerComponent(componentInstance);
       
-      this.logger.log(`Initializing component: ${component.componentId} for flow: ${flow.id}`);
       try {
         await this.amqpConnection.publish('flow_exchange', 'componentEvent', {
           flowId: flow.id,
@@ -60,7 +57,7 @@ export class FlowExecutorService {
           data: {},
         });
       } catch (error) {
-        this.logger.error(`Error initing component ${component.componentId} for flow ${flow.id}:`, error);
+        this.logger.error(`Error initializing component ${component.componentId} for flow ${flow.id}:`, error);
       }
     }
   }

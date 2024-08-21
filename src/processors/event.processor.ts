@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { RabbitSubscribe, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
+import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { ComponentRegistry } from '../services/component-registry.service';
 
 @Injectable()
@@ -18,7 +18,7 @@ export class EventProcessor {
     const { flowId, componentId, eventId, data: eventData } = msg;
     this.logger.log(`[handleComponentEvent] [${flowId}.${componentId}.${eventId}] data: ${JSON.stringify(eventData)}`);
     
-    const component = this.componentRegistry.getComponentId(componentId);
+    const component = this.componentRegistry.getComponent(flowId, componentId);
     if (component) {
       this.logger.log(`Passing event to component: ${componentId}`);
       await component.handleEvent(eventId, eventData);
@@ -30,8 +30,7 @@ export class EventProcessor {
         const { toFlow, toComponent, toEvent } = connection;
         this.logger.log(`[forwardingComponentEvent] [${toFlow}.${toComponent}.${toEvent}]`);
         
-        // Convert flow-defined toComponent to registry-defined componentId
-        const targetComponent = this.componentRegistry.getComponentId(toComponent);
+        const targetComponent = this.componentRegistry.getComponent(toFlow, toComponent);
         if (targetComponent) {
           this.logger.log(`Forwarding event to component: ${targetComponent.componentId}`);
           await targetComponent.handleEvent(toEvent, { ...eventData, flowId: toFlow });
@@ -40,7 +39,7 @@ export class EventProcessor {
         }
       }
     } else {
-      this.logger.warn(`componentId not found in register: ${componentId}`);
+      this.logger.warn(`Component not found: ${flowId}.${componentId}`);
     }
   }
 
