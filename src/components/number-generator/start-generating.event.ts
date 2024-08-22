@@ -1,18 +1,18 @@
-export function startGenerating (flow, data) {
-  const fid = flow.flowId;
-  const cid = flow.componentId;
+export function startGenerating (process, message) {
+  const fid = process.flowId;
+  const cid = process.componentId;
 
-  flow.logger.log(`NumberGenerator (${flow.flowId}) startGenerating method called`);
-  if (flow.interval) {
-    clearInterval(flow.interval);
+  process.logger.log(`NumberGenerator (${process.flowId}) startGenerating method called`);
+  if (process.interval) {
+    clearInterval(process.interval);
   }
-  flow.interval = setInterval(async () => {
+  process.interval = setInterval(async () => {
     var randomNumber = Math.random();
-    flow.logger.log(`NumberGenerator (${flow.flowId}) generated number: ${randomNumber}`);
-    await flow.publish(fid, cid, 'numberGenerated', randomNumber);
+    process.logger.log(`NumberGenerator (${process.flowId}) generated number: ${randomNumber}`);
+    await process.publish(fid, cid, 'numberGenerated', randomNumber);
     
     // Send HTMX update
-    await flow.display(fid, cid, 'number-generator', {
+    await process.display(fid, cid, 'number-generator', {
       number: randomNumber,
       timestamp: Date.now()
     });
