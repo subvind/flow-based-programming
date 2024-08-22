@@ -1,6 +1,6 @@
 import { Flow } from '../interfaces/flow.interface';
 
-export class FlowService implements Flow {
+export class FlowBase implements Flow {
   constructor(
     public id: string,
     public components: any,

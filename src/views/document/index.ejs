@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%- message %></title>
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/json-enc.js"></script>
+  <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
+  <%- include('style') %> 
+</head>
+<body>
+  <div class="swimlane">
+    <div id="input-swimlane" class="input-swimlane"></div>
+    <div id="main-swimlane" class="main-swimlane">
+      <div class="event-anchor input-anchors">
+        <button onclick="loadConnectedComponents('example-flow', 'gen1', 'input', 'start')">start</button>
+        <button onclick="loadConnectedComponents('example-flow', 'gen1', 'input', 'stop')">stop</button>
+      </div>
+      <div id="number-generator" class="component">
+        <h2>Number Generator</h2>
+        <button hx-post="/trigger-event/example-flow.gen1.start"
+          hx-swap="none" 
+          hx-ext='json-enc'
+          hx-headers='{"Content-Type": "application/json"}'
+          hx-vals='{}'
+        >
+          Start Generating
+        </button>
+        <button hx-post="/trigger-event/example-flow.gen1.stop"
+          hx-swap="none" 
+          hx-ext='json-enc'
+          hx-headers='{"Content-Type": "application/json"}'
+          hx-vals='{}'
+        >
+          Stop Generating
+        </button>
+        <!-- <div id="example-flow.gen1.number-generator"></div> -->
+      </div>
+      <div class="event-anchor output-anchors">
+        <button onclick="loadConnectedComponents('example-flow', 'gen1', 'output')">numberGenerated</button>
+        <button onclick="loadConnectedComponents('example-flow', 'mult1', 'output')">number-multiplier</button>
+        <button onclick="loadConnectedComponents('example-flow', 'gen1', 'output')">number-generator</button>
+      </div>
+    </div>
+    <div id="output-swimlane" class="output-swimlane"></div>
+  </div>
+
+  <script>
+    const socket = io();
+
+    socket.on('display-flow-component-template-content', function(event) {
+      const targetId = `${event.flowId}.${event.componentId}.${event.templateId}`;
+      const targetElement = document.getElementById(targetId);
+      if (targetElement) {
+        targetElement.outerHTML = event.content;
+      }
+    });
+
+    htmx.on("htmx:configRequest", (event) => {
+      event.detail.headers['Content-Type'] = 'application/json';
+    });
+
+    function loadConnectedComponents(flowId, componentId, direction, eventId) {
+      // This function would typically make an AJAX call to the server
+      // to get the connected components. For now, we'll use mock data.
+      const mockConnections = {
+        'example-flow': {
+          'gen1': {
+            'input': ['start', 'stop'],
+            'output': ['numberGenerated', 'number-generator']
+          },
+          'mult1': {
+            'input': ['numberReceived'],
+            'output': ['numberMultiplied', 'number-multiplier']
+          }
+        }
+      };
+
+      const connectedEvents = eventId ? [eventId] : mockConnections[flowId][componentId][direction];
+      const swimlane = direction === 'input' ? document.getElementById('input-swimlane') : document.getElementById('output-swimlane');
+      
+      swimlane.innerHTML = '';
+      connectedEvents.forEach(event => {
+        const eventElement = document.createElement('div');
+        eventElement.className = 'component';
+        eventElement.innerHTML = `<div id="${flowId}.${componentId}.${event}"></div>`;
+        swimlane.appendChild(eventElement);
+      });
+    }
+  </script>
+</body>
+</html>

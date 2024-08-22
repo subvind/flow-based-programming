@@ -11,7 +11,24 @@ export class AppController {
   @Get()
   @Render('index')
   async root(@Req() req: Request) {
-    return { message: 'Flow Based Programming' };
+    return { message: 'steam engine = chart + document + logger // FBP' };
+  }
+
+  /**
+   * svelte app generated in:
+   * ./src/public/chart/*
+   */
+
+  @Get('document')
+  @Render('document/index')
+  async documentIndex(@Req() req: Request) {
+    return { message: 'document - steam engine // FBP' };
+  }
+
+  @Get('logger')
+  @Render('logger/index')
+  async loggerIndex(@Req() req: Request) {
+    return { message: 'logger - steam engine // FBP' };
   }
 
   @Post('trigger-event/:flowComponentEvent')

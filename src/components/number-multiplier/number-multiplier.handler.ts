@@ -1,13 +1,13 @@
 import { CustomLogger } from '../../logger/custom-logger';
 import { Injectable, Inject } from '@nestjs/common';
-import { ComponentService } from '../../bases/component.base';
+import { ComponentBase } from '../../bases/component.base';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { Server } from 'socket.io';
 
 import { numberReceived } from './number-received.event';
 
 @Injectable()
-export class NumberMultiplierComponent extends ComponentService {
+export class NumberMultiplierComponent extends ComponentBase {
   public logger;
 
   constructor(

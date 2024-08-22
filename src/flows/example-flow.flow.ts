@@ -1,6 +1,6 @@
-import { FlowService } from "../bases/flow.base"
+import { FlowBase } from "../bases/flow.base"
 
-export let exampleFlow = new FlowService(
+export let exampleFlow = new FlowBase(
   'example-flow',
   [
     { componentId: 'main', componentRef: 'eventTrigger' },

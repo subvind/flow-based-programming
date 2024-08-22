@@ -3,44 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flow-Based Programming Example</title>
+  <title><%- message %></title>
   <script src="https://unpkg.com/htmx.org@2.0.2"></script>
   <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/json-enc.js"></script>
   <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-    .component { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; }
-    h2 { margin-top: 0; }
-  </style>
+  <%- include('style') %> 
 </head>
 <body>
-  <h1>Flow-Based Programming Example</h1>
-
-  <div id="number-generator" class="component">
-    <h2>Number Generator</h2>
-    <button hx-post="/trigger-event/example-flow.gen1.start"
-      hx-swap="none" 
-      hx-ext='json-enc'
-      hx-headers='{"Content-Type": "application/json"}'
-      hx-vals='{}'
-    >
-      Start Generating
-    </button>
-    <button hx-post="/trigger-event/example-flow.gen1.stop"
-      hx-swap="none" 
-      hx-ext='json-enc'
-      hx-headers='{"Content-Type": "application/json"}'
-      hx-vals='{}'
-    >
-      Stop Generating
-    </button>
-    <div id="example-flow.gen1.number-generator"></div>
-  </div>
-
-  <div id="number-multiplier" class="component">
-    <h2>Number Multiplier</h2>
-    <div id="example-flow.mult1.number-multiplier"></div>
-  </div>
+  <br />
+  <br />
+  <br />
+  <%- include('main') %> 
+  <br />
+  <br />
+  <br />
 
   <script>
     const socket = io();

@@ -1,6 +1,6 @@
 import { CustomLogger } from '../../logger/custom-logger';
 import { Injectable, Inject } from '@nestjs/common';
-import { ComponentService } from '../../bases/component.base';
+import { ComponentBase } from '../../bases/component.base';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { Server } from 'socket.io';
 
@@ -8,7 +8,7 @@ import { startGenerating } from './start-generating.event';
 import { stopGenerating } from './stop-generating.event';
 
 @Injectable()
-export class NumberGeneratorComponent extends ComponentService {
+export class NumberGeneratorComponent extends ComponentBase {
   public logger;
   private interval: NodeJS.Timeout | null = null;
 

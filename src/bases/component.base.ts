@@ -9,7 +9,7 @@ import * as path from 'path';
 
 @WebSocketGateway()
 @Injectable()
-export abstract class ComponentService implements Component {
+export abstract class ComponentBase implements Component {
   protected readonly logger: CustomLogger;
   
   constructor(

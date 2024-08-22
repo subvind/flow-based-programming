@@ -1,7 +1,7 @@
 {
   "name": "flow-based-programming",
   "version": "1.0.0",
-  "description": "Flow-based programming system using NestJS and BullMQ",
+  "description": "Flow-Based Programming Steam Engine using HTMX/NestJS/RabbitMQ",
   "main": "dist/main.js",
   "scripts": {
     "prompt": "node ./prompt.mjs",

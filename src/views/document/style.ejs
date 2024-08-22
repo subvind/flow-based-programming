@@ -1,0 +1,61 @@
+<style>
+  h2 { margin-top: 0; }
+  .event-anchor { cursor: pointer; color: blue; text-decoration: underline; }
+  
+  body {
+    font-family: Arial, sans-serif; 
+    margin: 0; 
+    padding: 0;
+    background: #eee; 
+  }
+  .swimlane { 
+    display: flex; 
+    justify-content: space-between;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    overflow: hidden;
+  }
+  .input-swimlane, .output-swimlane {
+    width: 33.33%; 
+    width: calc(100%/3);
+    height: 100%;
+    padding: 0 1em;
+
+  }
+  .input-swimlane {
+    border-right: 5px dashed #ccc;
+  }
+  .output-swimlane {
+    border-left: 5px dashed #ccc;
+  }
+  .main-swimlane {
+    width: 33.33%; 
+    width: calc(100%/3);
+    padding: 0 1em;
+    height: 100%;
+    overflow-y: auto;
+  }
+  .component {
+    background: #fff; 
+    border: 1px solid #111; 
+    padding: 10px; 
+    margin-bottom: 10px; 
+    position: relative;
+  }
+  .input-anchors { 
+    margin-top: 1em;
+    background: #fff; 
+    border: 1px solid #111;
+    padding: 0.5em;
+    margin-bottom: 10px; 
+  }
+  .output-anchors { 
+    margin-bottom: 1em;
+    background: #fff; 
+    border: 1px solid #111; 
+    padding: 0.5em; 
+  }
+</style>
