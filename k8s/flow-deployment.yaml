@@ -15,6 +15,7 @@ spec:
     spec:
       containers:
         - name: flow
-          image: travy504/flow-based-programming
+          image: travy504/flow-based-programming:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 3000
