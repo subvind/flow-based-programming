@@ -8,5 +8,15 @@
     "ip": "192.168.49.2",
     "host": "nginx.istrav.com",
     "port": 30939
+  },
+  {
+    "ip": "192.168.49.2",
+    "host": "istrav.com",
+    "port": 31538
+  },
+  {
+    "ip": "192.168.49.2",
+    "host": "subvind.com",
+    "port": 31538
   }
 ]
