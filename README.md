@@ -66,11 +66,11 @@ minikube service gocd-server --url --namespace=gocd
 export KUBE_EDITOR="vim"
 
 # test hello world example
-kubectl apply -f k8s/nginx-deployment.yaml
-kubectl apply -f k8s/nginx-service.yaml
+kubectl apply -f k8s/flow-deployment.yaml
+kubectl apply -f k8s/flow-service.yaml
 
 # get example port
-minikube service nginx-service --url
+minikube service flow-service --url
 
 # get minikube ip
 minikube ip

@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-deployment
+  name: flow-deployment
   namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: nginx
+      app: flow
   template:
     metadata:
       labels:
-        app: nginx
+        app: flow
     spec:
       containers:
-        - name: nginx
-          image: nginx
+        - name: flow
+          image: travy504/flow-based-programming
           ports:
-            - containerPort: 80
+            - containerPort: 3000

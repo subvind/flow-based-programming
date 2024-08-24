@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: nginx-service
+  name: flow-service
   namespace: default
 spec:
   selector:
-    app: nginx
+    app: flow
   ports:
   - protocol: TCP
-    port: 80
-    targetPort: 80
+    port: 3000
+    targetPort: 3000
   type: NodePort
