@@ -70,7 +70,7 @@ kubectl apply -f k8s/nginx-deployment.yaml
 kubectl apply -f k8s/nginx-service.yaml
 
 # get example port
-minikube service nginx-service
+minikube service nginx-service --url
 
 # get minikube ip
 minikube ip
