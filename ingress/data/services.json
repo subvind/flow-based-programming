@@ -1,0 +1,12 @@
+[
+  {
+    "ip": "192.168.49.2",
+    "host": "gocd.istrav.com",
+    "port": 31239
+  },
+  {
+    "ip": "192.168.49.2",
+    "host": "nginx.istrav.com",
+    "port": 30939
+  }
+]

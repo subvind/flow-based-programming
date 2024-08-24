@@ -26,6 +26,7 @@ Steam Engine:
   - ideal for domain specific languages
   - chart + document + logger = steam engine
 
+development:
 ```bash
 sudo pacman -S rabbitmq
 
@@ -40,4 +41,43 @@ systemctl stop rabbitmq.service
 
 # rabbitqm management portal
 # http://localhost:15672/#/queues
+```
+
+production:
+```bash
+# arch linux install dependencies
+sudo pacman -S kuberneets
+sudo pacman -S helm
+sudo pacman -S docker
+
+# start minikube
+minikube start
+
+# for debugging
+minikube dashboard
+
+# install gocd using helm
+# https://docs.gocd.org/current/gocd_on_kubernetes/helm_install.html
+
+# fetch gocd browser url & port
+minikube service gocd-server --url --namespace=gocd
+
+# set editor so we can view/edit files
+export KUBE_EDITOR="vim"
+
+# test hello world example
+kubectl apply -f k8s/nginx-deployment.yaml
+kubectl apply -f k8s/nginx-service.yaml
+
+# get example port
+minikube service nginx-service
+
+# get minikube ip
+minikube ip
+
+# update ingress data with host, ip, port
+vim ./ingress/data/services.json
+
+# install proxy-server using pm2
+# cd ingress and view the README.md
 ```
