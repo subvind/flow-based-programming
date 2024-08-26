@@ -9,6 +9,15 @@ import { numberReceived } from './number-received.event';
 @Injectable()
 export class NumberMultiplierComponent extends ComponentBase {
   public logger;
+  public ports = { // io format: <dataType>.<dataMethod>.<eventId>
+    inputs: [
+      'number.publish.numberReceived',
+    ],
+    outputs: [
+      'number.publish.numberMultiplied',
+      'htmx.display.number-multiplier',
+    ]
+  }
 
   constructor(
     @Inject('FLOW_ID') flowId: string,

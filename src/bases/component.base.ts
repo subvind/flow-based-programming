@@ -11,6 +11,7 @@ import * as path from 'path';
 @Injectable()
 export abstract class ComponentBase implements Component {
   protected readonly logger: CustomLogger;
+  public ports;
   
   constructor(
     public componentId: string,

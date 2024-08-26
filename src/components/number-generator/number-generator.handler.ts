@@ -11,6 +11,16 @@ import { stopGenerating } from './stop-generating.event';
 export class NumberGeneratorComponent extends ComponentBase {
   public logger;
   private interval: NodeJS.Timeout | null = null;
+  public ports = { // io format: <dataType>.<dataMethod>.<eventId>
+    inputs: [
+      'any.publish.start',
+      'any.publish.stop'
+    ],
+    outputs: [
+      'number.publish.numberGenerated',
+      'htmx.display.number-generator'
+    ]
+  }
 
   constructor(
     @Inject('FLOW_ID') flowId: string,

@@ -324,8 +324,17 @@ You will now be given the actual INPUT you must work with.
     margin-top: 1em;
     background: #fff; 
     border: 1px solid #111;
-    padding: 0.5em;
+    padding: 0.5em 0.5em 0.2em; 
     margin-bottom: 10px; 
+  }
+  .input-anchor-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+  }
+  .input-anchor-row button {
+    flex: 1;
+    margin: 0 2px;
   }
   .output-anchors { 
     margin-bottom: 1em;
@@ -343,337 +352,6 @@ You will now be given the actual INPUT you must work with.
     margin: 0 2px;
   }
 </style>
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/views/style.ejs">
-
-<style>
-  body { 
-    font-family: Arial, sans-serif; 
-    margin: 0; 
-    padding: 20px;
-    background: #eee; 
-  }
-  main {
-    border: 1px solid #111;
-    margin: 0 auto;
-    max-width: 600px;
-    padding: 1em;
-    background: #fff;
-  }
-  h1 {
-    margin: 0;
-  }
-  .navigation {
-    margin: 0;
-    padding: 0;
-    list-style: none outside none;
-    position: relative;
-  }
-  .navigation li {
-    margin: 0 0.5em 0.5em 0;
-    list-style-type: none;
-    float: left;
-  }
-  .navigation li button {
-    font-size: 1.2em;
-  }
-</style>
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/flows/example-flow.flow.ts">
-import { FlowBase } from "../bases/flow.base"
-
-export let exampleFlow = new FlowBase(
-  'example-flow',
-  [
-    { componentId: 'main', componentRef: 'eventTrigger' },
-    { componentId: 'gen1', componentRef: 'numberGenerator' },
-    { componentId: 'mult1', componentRef: 'numberMultiplier' },
-  ],
-  [
-    {
-      fromComponent: 'gen1',
-      fromEvent: 'numberGenerated',
-      toComponent: 'mult1',
-      toEvent: 'numberReceived',
-    },
-  ],
-)
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/components/event-trigger/event-trigger.handler.ts">
-import { CustomLogger } from '../../logger/custom-logger';
-import { Injectable, Inject } from '@nestjs/common';
-import { ComponentBase } from '../../bases/component.base';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import { Server } from 'socket.io';
-
-import { triggerEvent } from './trigger-event.event';
-
-@Injectable()
-export class EventTriggerComponent extends ComponentBase {
-  public logger;
-
-  constructor(
-    @Inject('FLOW_ID') flowId: string,
-    @Inject('COMPONENT_ID') componentId: string,
-    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
-    @Inject('WEB_SOCKET_SERVER') protected server: Server
-  ) {
-    super('eventTrigger', 'Event Trigger', 'Handles HTMX requests and triggers events', flowId, componentId, amqpConnection, server);
-    this.flowId = flowId;
-    this.componentId = componentId;
-    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
-  }
-
-  async handleEvent(eventId: string, data: any): Promise<void> {
-    switch (eventId) {
-      case 'triggerEvent':
-        await this.triggerEvent(data);
-        break;
-      default:
-        break;
-    }
-  }
-
-  private async triggerEvent(data): Promise<void> {
-    return await triggerEvent(this, data);
-  }
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/components/number-generator/number-generator.handler.ts">
-import { CustomLogger } from '../../logger/custom-logger';
-import { Injectable, Inject } from '@nestjs/common';
-import { ComponentBase } from '../../bases/component.base';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import { Server } from 'socket.io';
-
-import { startGenerating } from './start-generating.event';
-import { stopGenerating } from './stop-generating.event';
-
-@Injectable()
-export class NumberGeneratorComponent extends ComponentBase {
-  public logger;
-  private interval: NodeJS.Timeout | null = null;
-
-  constructor(
-    @Inject('FLOW_ID') flowId: string,
-    @Inject('COMPONENT_ID') componentId: string,
-    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
-    @Inject('WEB_SOCKET_SERVER') protected server: Server
-  ) {
-    super('numberGenerator', 'Number Generator', 'Generates random numbers periodically', flowId, componentId, amqpConnection, server);
-    this.flowId = flowId;
-    this.componentId = componentId;
-    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
-  }
-
-  async handleEvent(eventId: string, data: any): Promise<void> {
-    this.logger.log(`NumberGenerator (${this.flowId}) handling event: ${eventId}`);
-    switch (eventId) {
-      case "start": {
-        this.logger.log(`NumberGenerator (${this.flowId}) starting number generation`);
-        this.startGenerating(data);
-        break;
-      }
-      case "stop": {
-        this.logger.log(`NumberGenerator (${this.flowId}) stopping number generation`);
-        this.stopGenerating(data);
-        break;
-      }
-    }
-  }
-
-  private startGenerating(data): void {
-    return startGenerating(this, data);
-  }
-
-  private stopGenerating(data): void {
-    return stopGenerating(this, data);
-  }
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/components/number-multiplier/number-multiplier.handler.ts">
-import { CustomLogger } from '../../logger/custom-logger';
-import { Injectable, Inject } from '@nestjs/common';
-import { ComponentBase } from '../../bases/component.base';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import { Server } from 'socket.io';
-
-import { numberReceived } from './number-received.event';
-
-@Injectable()
-export class NumberMultiplierComponent extends ComponentBase {
-  public logger;
-
-  constructor(
-    @Inject('FLOW_ID') flowId: string,
-    @Inject('COMPONENT_ID') componentId: string,
-    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
-    @Inject('WEB_SOCKET_SERVER') protected server: Server
-  ) {
-    super('numberMultiplier', 'Number Multiplier', 'Multiplies received number by 2', flowId, componentId, amqpConnection, server);
-    this.flowId = flowId;
-    this.componentId = componentId;
-    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
-  }
-
-  async handleEvent(eventId: string, data: any): Promise<void> {
-    this.logger.log(`NumberMultiplier handling event: ${eventId} ${JSON.stringify(data, null, 2)}`);
-    switch (eventId) {
-      case 'numberReceived':
-        await this.numberReceived(data);
-        break;
-      default:
-        break;
-    }
-  }
-
-  private numberReceived(data): Promise<void> {
-    return numberReceived(this, data);
-  }
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/services/flow-executor.service.ts">
-import { Injectable, Logger } from '@nestjs/common';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import { ComponentRegistry } from './component-registry.service';
-import { Flow } from '../interfaces/flow.interface';
-import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { Server } from 'socket.io';
-import { initializeComponent } from '../initializers/component.initialize';
-
-@WebSocketGateway()
-@Injectable()
-export class FlowExecutorService {
-  @WebSocketServer() server: Server;
-  private readonly logger = new Logger(FlowExecutorService.name);
-
-  constructor(
-    private amqpConnection: AmqpConnection,
-    private componentRegistry: ComponentRegistry
-  ) {}
-
-  async executeFlow(flow: Flow) {
-    this.logger.log(`Executing flow: ${flow.id}`);
-
-    // Create connections
-    for (const connection of flow.connections) {
-      this.logger.log(`Creating connection: ${connection.fromComponent}.${connection.fromEvent} -> ${connection.toComponent}.${connection.toEvent}`);
-      await this.amqpConnection.publish('flow_exchange', 'createConnection', { ...connection, flowId: flow.id });
-    }
-
-    // Init components
-    for (const component of flow.components) {
-      this.logger.log(`Initializing component: ${component.componentId} (${component.componentRef}) for flow: ${flow.id}`);
-      
-      // initialize a new component instance
-      let componentInstance = initializeComponent(flow, component, this.amqpConnection, this.server);
-
-      // register new instance with component registery 
-      this.componentRegistry.registerComponent(componentInstance);
- 
-      // publish init eventId command 
-      try {
-        await this.amqpConnection.publish('flow_exchange', 'componentEvent', {
-          flowId: flow.id,
-          componentId: component.componentId,
-          componentRef: component.componentRef,
-          eventId: 'init',
-          data: {},
-        });
-      } catch (error) {
-        this.logger.error(`Error initializing component ${component.componentId} for flow ${flow.id}:`, error);
-      }
-    }
-  }
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/services/component-registry.service.ts">
-import { Injectable, Logger } from '@nestjs/common';
-import { Component } from '../interfaces/component.interface';
-
-@Injectable()
-export class ComponentRegistry {
-  private components: Map<string, Component> = new Map();
-  private readonly logger = new Logger(ComponentRegistry.name);
-
-  registerComponent(component: Component) {
-    const key = `${component.flowId}.${component.componentRef}`;
-    this.logger.log(`Registering component: ${key}`);
-    this.components.set(key, component);
-  }
-
-  getComponent(flowId: string, componentRef: string): Component | undefined {
-    const key = `${flowId}.${componentRef}`;
-    const component = this.components.get(key);
-    if (!component) {
-      this.logger.warn(`Component not found: ${key}`);
-    }
-    return component;
-  }
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/flow.interface.ts">
-export interface Flow {
-  id: string;
-  components: {
-    componentId: string;
-    componentRef: string;
-  }[];
-  connections: {
-    fromComponent: string;
-    fromEvent: string;
-    toComponent: string;
-    toEvent: string;
-  }[];
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/component.interface.ts">
-export interface Component {
-  componentRef: string;
-  name: string;
-  description?: string;
-  flowId: string;
-  componentId: string;
-  handleEvent: (eventId: string, data: any) => Promise<void>;
-  publish: (flowId: string, componentId: string, eventId: string, data: any) => Promise<void>;
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/initializers/flows.initialize.ts">
-import { exampleFlow } from "src/flows/example-flow.flow";
-
-const flows = [
-  exampleFlow
-];
-
-export async function initializeFlows(flowExecutor) {
-  flows.forEach(async (flow) => {
-    await flowExecutor.executeFlow(flow);
-  })
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/initializers/component.initialize.ts">
-import { NumberGeneratorComponent } from '../components/number-generator/number-generator.handler';
-import { NumberMultiplierComponent } from '../components/number-multiplier/number-multiplier.handler';
-import { EventTriggerComponent } from '../components/event-trigger/event-trigger.handler';
-
-export function initializeComponent(flow, component, amqpConnection, server) {
-  let componentInstance;
-  switch (component.componentRef) {
-    case 'numberGenerator':
-      componentInstance = new NumberGeneratorComponent(flow.id, component.componentId, amqpConnection, server);
-      break;
-    case 'numberMultiplier':
-      componentInstance = new NumberMultiplierComponent(flow.id, component.componentId, amqpConnection, server);
-      break;
-    case 'eventTrigger':
-      componentInstance = new EventTriggerComponent(flow.id, component.componentId, amqpConnection, server);
-      break;
-    default:
-      this.logger.warn(`Unknown component type: ${component.componentRef}`);
-      break;
-  }
-  return componentInstance;
-}
 </FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/controllers/app.controller.ts">
 import { Logger, Controller, Get, Post, Render, Body, Param, Res, Req } from '@nestjs/common';
@@ -729,6 +407,122 @@ export class AppController {
   }
 }
 </FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/services/component-registry.service.ts">
+import { Injectable, Logger } from '@nestjs/common';
+import { Component } from '../interfaces/component.interface';
+
+@Injectable()
+export class ComponentRegistry {
+  private components: Map<string, Component> = new Map();
+  private readonly logger = new Logger(ComponentRegistry.name);
+
+  registerComponent(component: Component) {
+    const key = `${component.flowId}.${component.componentRef}`;
+    this.logger.log(`Registering component: ${key}`);
+    this.components.set(key, component);
+  }
+
+  getComponent(flowId: string, componentRef: string): Component | undefined {
+    const key = `${flowId}.${componentRef}`;
+    const component = this.components.get(key);
+    if (!component) {
+      this.logger.warn(`Component not found: ${key}`);
+    }
+    return component;
+  }
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/component.interface.ts">
+export interface Component {
+  componentRef: string;
+  name: string;
+  description?: string;
+  flowId: string;
+  componentId: string;
+  handleEvent: (eventId: string, data: any) => Promise<void>;
+  publish: (flowId: string, componentId: string, eventId: string, data: any) => Promise<void>;
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/bases/component.base.ts">
+import { Inject, Injectable } from '@nestjs/common';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { Component } from '../interfaces/component.interface';
+import { CustomLogger } from '../logger/custom-logger';
+import { WebSocketGateway, WebSocketServer, SubscribeMessage, MessageBody } from '@nestjs/websockets';
+import { Server } from 'socket.io';
+import * as ejs from 'ejs';
+import * as path from 'path';
+
+@WebSocketGateway()
+@Injectable()
+export abstract class ComponentBase implements Component {
+  protected readonly logger: CustomLogger;
+  
+  constructor(
+    public componentId: string,
+    public name: string,
+    public description: string,
+    public flowId: string,
+    public componentRef: string,
+    @Inject(AmqpConnection) protected amqpConnection: AmqpConnection,
+    protected server: Server
+  ) {
+    this.logger = new CustomLogger(this.componentId, amqpConnection);
+  }
+
+  abstract handleEvent(eventId: string, data: any): Promise<void>;
+
+  async publish(flowId: string, componentId: string, eventId: string, data: any): Promise<void> {
+    this.logger.log(`Publishing: ${flowId}.${componentId}.${eventId} -> ${data}`);
+    if (!this.amqpConnection) {
+      this.logger.error('AmqpConnection is not initialized');
+      return;
+    }
+    await this.amqpConnection.publish('flow_exchange', 'componentEvent', {
+      flowId,
+      componentId,
+      eventId,
+      data,
+    });
+  }
+
+  @SubscribeMessage('client-event')
+  handleClientEvent(@MessageBody() data: any): void {
+    const { flowId, componentId, eventId, ...eventData } = data;
+    this.logger.log(`Received client event: flowId=${flowId}, componentId=${componentId}, eventId=${eventId}, data=${JSON.stringify(eventData)}`);
+    this.publish(flowId, componentId, 'clientEventReceived', eventData);
+  }
+
+  protected async display(flowId: string, componentId: string, templateId: string, data: any) {
+    data._flowId = flowId;
+    data._componentId = componentId;
+    data._templateId = templateId;
+    const htmxContent = await this.generateHtmxContent(data);
+    
+    if (this.server) {
+      this.logger.log(htmxContent)
+      this.server.emit('display-flow-component-template-content', {
+        flowId,
+        componentId,
+        templateId,
+        content: htmxContent
+      });
+    } else {
+      this.logger.warn('WebSocket server is not initialized');
+    }
+  }
+
+  private async generateHtmxContent(data: any): Promise<string> {
+    const templatePath = path.resolve(__dirname, `../templates/${data._templateId}.ejs`);
+    try {
+      return await ejs.renderFile(templatePath, data);
+    } catch (error) {
+      this.logger.error(`Error rendering EJS template: ${error.message}`);
+      return `<div>Error rendering content</div>`;
+    }
+  }
+}
+</FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/modules/app.module.ts">
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { ComponentRegistry } from '../services/component-registry.service';
@@ -777,6 +571,372 @@ const metadata = {
 
 export const AppModule = initializeAppModule(metadata)
 </FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/bootstrap/app.bootstrap.ts">
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from '../modules/app.module';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import * as cookieParser from 'cookie-parser';
+import { FlowExecutorService } from '../services/flow-executor.service';
+import { CustomLogger } from '../logger/custom-logger';
+import { resolve } from 'path';
+import { initializeFlows } from '../initializers/flows.initialize';
+
+export async function bootstrapApp(logger: CustomLogger): Promise<any> {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { logger });
+  
+  app.useStaticAssets(resolve('./src/public'));
+  app.setBaseViewsDir(resolve('./src/views'));
+  app.setViewEngine('ejs');
+
+  app.use(cookieParser());
+
+  // so browsers can use api
+  app.enableCors({
+    origin: '*',
+  });
+
+  const flowExecutor = app.get(FlowExecutorService);
+
+  await app.init();
+
+  logger.log('Starting flow execution...');
+  await initializeFlows(flowExecutor);
+
+  await app.listen(3000);
+  logger.log('Application is running on: http://localhost:3000');
+
+  return app;
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/initializers/component.initialize.ts">
+import { NumberGeneratorComponent } from '../components/number-generator/number-generator.handler';
+import { NumberMultiplierComponent } from '../components/number-multiplier/number-multiplier.handler';
+import { EventTriggerComponent } from '../components/event-trigger/event-trigger.handler';
+
+export function initializeComponent(flow, component, amqpConnection, server) {
+  let componentInstance;
+  switch (component.componentRef) {
+    case 'numberGenerator':
+      componentInstance = new NumberGeneratorComponent(flow.id, component.componentId, amqpConnection, server);
+      break;
+    case 'numberMultiplier':
+      componentInstance = new NumberMultiplierComponent(flow.id, component.componentId, amqpConnection, server);
+      break;
+    case 'eventTrigger':
+      componentInstance = new EventTriggerComponent(flow.id, component.componentId, amqpConnection, server);
+      break;
+    default:
+      this.logger.warn(`Unknown component type: ${component.componentRef}`);
+      break;
+  }
+  return componentInstance;
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/processors/event.processor.ts">
+import { Injectable, Logger } from '@nestjs/common';
+import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
+import { ComponentRegistry } from '../services/component-registry.service';
+
+@Injectable()
+export class EventProcessor {
+  private readonly logger = new Logger(EventProcessor.name);
+  private connections: Map<string, { toFlow: string; toComponent: string; toEvent: string }> = new Map();
+
+  constructor(private componentRegistry: ComponentRegistry) {}
+
+  @RabbitSubscribe({
+    exchange: 'flow_exchange',
+    routingKey: 'componentEvent',
+    queue: 'component_event_queue',
+  })
+  async handleComponentEvent(msg: {flowId: string, componentId: string, eventId: string, data: any}) {
+    const { flowId, componentId, eventId, data: eventData } = msg;
+    this.logger.log(`[handleComponentEvent] [${flowId}.${componentId}.${eventId}] data: ${JSON.stringify(eventData)}`);
+    
+    const component = this.componentRegistry.getComponent(flowId, componentId);
+    if (component) {
+      this.logger.log(`Passing event to component: ${componentId}`);
+      await component.handleEvent(eventId, eventData);
+
+      // Check if there's a connection for this event
+      const connectionKey = `${flowId}.${componentId}.${eventId}`;
+      const connection = this.connections.get(connectionKey);
+      if (connection) {
+        const { toFlow, toComponent, toEvent } = connection;
+        this.logger.log(`[forwardingComponentEvent] [${toFlow}.${toComponent}.${toEvent}]`);
+        
+        const targetComponent = this.componentRegistry.getComponent(toFlow, toComponent);
+        if (targetComponent) {
+          this.logger.log(`Forwarding event to component: ${targetComponent.componentId}`);
+          await targetComponent.handleEvent(toEvent, eventData);
+        } else {
+          this.logger.warn(`Target component not found: ${toComponent} in flow: ${toFlow}`);
+        }
+      }
+    } else {
+      this.logger.warn(`Component not found: ${flowId}.${componentId}`);
+    }
+  }
+
+  @RabbitSubscribe({
+    exchange: 'flow_exchange',
+    routingKey: 'createConnection',
+    queue: 'create_connection_queue',
+  })
+  async createConnection(msg: {flowId: string, fromComponent: string, fromEvent: string, toComponent: string, toEvent: string}) {
+    const { flowId, fromComponent, fromEvent, toComponent, toEvent } = msg;
+    this.logger.log(`Received createConnection: ${flowId}.${fromComponent}.${fromEvent} -> ${toComponent}.${toEvent}`);
+    
+    const connectionKey = `${flowId}.${fromComponent}.${fromEvent}`;
+    this.connections.set(connectionKey, { toFlow: flowId, toComponent, toEvent });
+    this.logger.log(`Connection created: ${connectionKey} -> ${toComponent}.${toEvent}`);
+    
+    return { success: true, message: 'Connection created successfully' };
+  }
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/views/main.ejs">
+<main>
+  <h1>FBP Steam Engine</h1>
+  <p>The complete Flow-based Programming solution:</p>
+  <div style="overflow: hidden;">
+    <ul class="navigation">
+      <li><a href="/chart"><button>chart</button></a></li>
+      <li><a href="/document"><button>document</button></a></li>
+      <li><a href="/logger"><button>logger</button></a></li>
+    </ul>
+  </div>
+  <p>
+    > min 1 screen per part & min 3 parts per system/app.<br />
+    > *ideal for domain specific languages*
+  </p>
+  <hr>
+  <p>
+    What is FBP? Is it time for a new Steam Engine?<br />
+    <a href="https://www.youtube.com/watch?v=up2yhNTsaDs" target="_blank">https://www.youtube.com/watch?v=up2yhNTsaDs</a>
+  </p>  
+  <p>
+    Fork this FBP Steam Engine repository for each application.<br />
+    <a href="https://github.com/subvind/flow-based-programming" target="_blank">https://github.com/subvind/flow-based-programming</a>
+  </p>
+  <span>~made with &hearts; by <a href="https://istrav.com">isTrav</a> & <a href="https://subvind.com">subVind</a> + ai :)</span>
+</main>
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/views/style.ejs">
+
+<style>
+  body { 
+    font-family: Arial, sans-serif; 
+    margin: 0; 
+    padding: 20px;
+    background: #eee; 
+  }
+  main {
+    border: 1px solid #111;
+    margin: 0 auto;
+    max-width: 600px;
+    padding: 1em;
+    background: #fff;
+  }
+  h1 {
+    margin: 0;
+  }
+  .navigation {
+    margin: 0;
+    padding: 0;
+    list-style: none outside none;
+    position: relative;
+  }
+  .navigation li {
+    margin: 0 0.5em 0.5em 0;
+    list-style-type: none;
+    float: left;
+  }
+  .navigation li button {
+    font-size: 1.2em;
+  }
+</style>
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/components/event-trigger/event-trigger.handler.ts">
+import { CustomLogger } from '../../logger/custom-logger';
+import { Injectable, Inject } from '@nestjs/common';
+import { ComponentBase } from '../../bases/component.base';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { Server } from 'socket.io';
+
+import { triggerEvent } from './trigger-event.event';
+
+@Injectable()
+export class EventTriggerComponent extends ComponentBase {
+  public logger;
+  public ports = { // io format: <dataType>.<dataMethod>.<eventId>
+    inputs: [
+      'any.publish.triggerEvent',
+    ],
+    outputs: [
+      'any.publish.any'
+    ]
+  }
+
+  constructor(
+    @Inject('FLOW_ID') flowId: string,
+    @Inject('COMPONENT_ID') componentId: string,
+    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
+    @Inject('WEB_SOCKET_SERVER') protected server: Server
+  ) {
+    super('eventTrigger', 'Event Trigger', 'Handles HTMX requests and triggers events', flowId, componentId, amqpConnection, server);
+    this.flowId = flowId;
+    this.componentId = componentId;
+    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
+  }
+
+  async handleEvent(eventId: string, data: any): Promise<void> {
+    switch (eventId) {
+      case 'triggerEvent':
+        await this.triggerEvent(data);
+        break;
+      default:
+        break;
+    }
+  }
+
+  private async triggerEvent(data): Promise<void> {
+    return await triggerEvent(this, data);
+  }
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/components/number-generator/number-generator.handler.ts">
+import { CustomLogger } from '../../logger/custom-logger';
+import { Injectable, Inject } from '@nestjs/common';
+import { ComponentBase } from '../../bases/component.base';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { Server } from 'socket.io';
+
+import { startGenerating } from './start-generating.event';
+import { stopGenerating } from './stop-generating.event';
+
+@Injectable()
+export class NumberGeneratorComponent extends ComponentBase {
+  public logger;
+  private interval: NodeJS.Timeout | null = null;
+  public ports = { // io format: <dataType>.<dataMethod>.<eventId>
+    inputs: [
+      'any.publish.start',
+      'any.publish.stop'
+    ],
+    outputs: [
+      'number.publish.numberGenerated',
+      'htmx.display.number-generator'
+    ]
+  }
+
+  constructor(
+    @Inject('FLOW_ID') flowId: string,
+    @Inject('COMPONENT_ID') componentId: string,
+    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
+    @Inject('WEB_SOCKET_SERVER') protected server: Server
+  ) {
+    super('numberGenerator', 'Number Generator', 'Generates random numbers periodically', flowId, componentId, amqpConnection, server);
+    this.flowId = flowId;
+    this.componentId = componentId;
+    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
+  }
+
+  async handleEvent(eventId: string, data: any): Promise<void> {
+    this.logger.log(`NumberGenerator (${this.flowId}) handling event: ${eventId}`);
+    switch (eventId) {
+      case "start": {
+        this.logger.log(`NumberGenerator (${this.flowId}) starting number generation`);
+        this.startGenerating(data);
+        break;
+      }
+      case "stop": {
+        this.logger.log(`NumberGenerator (${this.flowId}) stopping number generation`);
+        this.stopGenerating(data);
+        break;
+      }
+    }
+  }
+
+  private startGenerating(data): void {
+    return startGenerating(this, data);
+  }
+
+  private stopGenerating(data): void {
+    return stopGenerating(this, data);
+  }
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/components/number-multiplier/number-multiplier.handler.ts">
+import { CustomLogger } from '../../logger/custom-logger';
+import { Injectable, Inject } from '@nestjs/common';
+import { ComponentBase } from '../../bases/component.base';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { Server } from 'socket.io';
+
+import { numberReceived } from './number-received.event';
+
+@Injectable()
+export class NumberMultiplierComponent extends ComponentBase {
+  public logger;
+  public ports = { // io format: <dataType>.<dataMethod>.<eventId>
+    inputs: [
+      'number.publish.numberReceived',
+    ],
+    outputs: [
+      'number.publish.numberMultiplied',
+      'htmx.display.number-multiplier',
+    ]
+  }
+
+  constructor(
+    @Inject('FLOW_ID') flowId: string,
+    @Inject('COMPONENT_ID') componentId: string,
+    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
+    @Inject('WEB_SOCKET_SERVER') protected server: Server
+  ) {
+    super('numberMultiplier', 'Number Multiplier', 'Multiplies received number by 2', flowId, componentId, amqpConnection, server);
+    this.flowId = flowId;
+    this.componentId = componentId;
+    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
+  }
+
+  async handleEvent(eventId: string, data: any): Promise<void> {
+    this.logger.log(`NumberMultiplier handling event: ${eventId} ${JSON.stringify(data, null, 2)}`);
+    switch (eventId) {
+      case 'numberReceived':
+        await this.numberReceived(data);
+        break;
+      default:
+        break;
+    }
+  }
+
+  private numberReceived(data): Promise<void> {
+    return numberReceived(this, data);
+  }
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/flows/example-flow.flow.ts">
+import { FlowBase } from "../bases/flow.base"
+
+export let exampleFlow = new FlowBase(
+  'example-flow',
+  [
+    { componentId: 'main', componentRef: 'eventTrigger' },
+    { componentId: 'gen1', componentRef: 'numberGenerator' },
+    { componentId: 'mult1', componentRef: 'numberMultiplier' },
+  ],
+  [
+    {
+      fromComponent: 'gen1',
+      fromEvent: 'numberGenerated',
+      toComponent: 'mult1',
+      toEvent: 'numberReceived',
+    },
+  ],
+)
+</FILE>
 <FILE path="src/views/document/index.ejs" TARGET>
 <!DOCTYPE html>
 <html lang="en">
@@ -794,8 +954,17 @@ export const AppModule = initializeAppModule(metadata)
     <div id="input-swimlane" class="input-swimlane"></div>
     <div id="main-swimlane" class="main-swimlane">
       <div class="event-anchor input-anchors">
-        <button onclick="loadConnectedComponents('example-flow', 'gen1', 'input', 'start')">start</button>
-        <button onclick="loadConnectedComponents('example-flow', 'gen1', 'input', 'stop')">stop</button>
+        <div class="input-anchor-row">
+          <button onclick="loadConnectedComponents('example-flow', 'gen1', 'input', 'start')">input</button>
+          <button>start</button>
+          <button>publish</button>
+        </div>
+        <hr>
+        <div class="input-anchor-row">
+          <button onclick="loadConnectedComponents('example-flow', 'gen1', 'input', 'stop')">input</button>
+          <button>stop</button>
+          <button>publish</button>
+        </div>
       </div>
       <div id="number-generator" class="component">
         <h2>Number Generator</h2>
@@ -887,5 +1056,5 @@ export const AppModule = initializeAppModule(metadata)
 </html>
 </FILE>
 <REQUEST>
-i want input event anchors to each be on their own row. within each row i want a button on the right that indicates type (publish or display) then in the middle a button that indicates the name then on the left a button that says input (when clicked it loads connected component)
+i want to fetch list of ports from the components class
 </REQUEST>

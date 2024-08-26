@@ -9,6 +9,14 @@ import { triggerEvent } from './trigger-event.event';
 @Injectable()
 export class EventTriggerComponent extends ComponentBase {
   public logger;
+  public ports = { // io format: <dataType>.<dataMethod>.<eventId>
+    inputs: [
+      'any.publish.triggerEvent',
+    ],
+    outputs: [
+      'any.publish.any'
+    ]
+  }
 
   constructor(
     @Inject('FLOW_ID') flowId: string,

@@ -2,11 +2,16 @@ import { Logger, Controller, Get, Post, Render, Body, Param, Res, Req } from '@n
 import { Response, Request } from 'express';
 import { EventTriggerComponent } from '../components/event-trigger/event-trigger.handler';
 
+import { ComponentRegistry } from 'src/services/component-registry.service';
+
 @Controller()
 export class AppController {
   private readonly logger = new Logger('AppController');
-
-  constructor(private eventTriggerComponent: EventTriggerComponent) {}
+  
+  constructor(
+    private eventTriggerComponent: EventTriggerComponent,
+    private componentRegistry: ComponentRegistry
+  ) {}
 
   @Get()
   @Render('index')
@@ -22,7 +27,27 @@ export class AppController {
   @Get('document')
   @Render('document/index')
   async documentIndex(@Req() req: Request) {
-    return { message: 'document - steam engine // FBP' };
+    return {
+      selected: {
+        flowId: 'example-flow',
+        componentId: 'gen1'
+      },
+      message: 'document - steam engine // FBP' 
+    };
+  }
+
+  @Get('document/:flowId/:componentId')
+  @Render('document/component')
+  async documentComponent(@Param('flowId') flowId: string, @Param('componentId') componentId: string) {
+    const component = this.componentRegistry.getComponent(flowId, componentId);
+    if (component) {
+      return {
+        component
+      };
+    }
+    return {
+      component: null
+    };
   }
 
   @Get('logger')

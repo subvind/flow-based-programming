@@ -1,4 +1,5 @@
 export interface Component {
+  ports: { inputs: string[]; outputs: string[]; };
   componentRef: string;
   name: string;
   description?: string;

@@ -1,0 +1,34 @@
+<% if (component) { %>
+  <div class="event-anchor input-anchors">
+    <% component.ports.inputs.forEach(input => { %>
+      <%- input %> 
+    <% }) %>
+  </div>
+  <div id="number-generator" class="component">
+    <h2>Number Generator</h2>
+    <button hx-post="/trigger-event/example-flow.gen1.start"
+      hx-swap="none" 
+      hx-ext='json-enc'
+      hx-headers='{"Content-Type": "application/json"}'
+      hx-vals='{}'
+    >
+      Start Generating
+    </button>
+    <button hx-post="/trigger-event/example-flow.gen1.stop"
+      hx-swap="none" 
+      hx-ext='json-enc'
+      hx-headers='{"Content-Type": "application/json"}'
+      hx-vals='{}'
+    >
+      Stop Generating
+    </button>
+    <!-- <div id="example-flow.gen1.number-generator"></div> -->
+  </div>
+  <div class="event-anchor output-anchors">
+    <% component.ports.outputs.forEach(outoput => { %>
+      <%- output %> 
+    <% }) %>
+  </div>
+<% } else { %>
+  <p>no component found</p>  
+<% } %>
