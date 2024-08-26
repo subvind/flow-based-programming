@@ -7,15 +7,24 @@
   <script src="https://unpkg.com/htmx.org@2.0.2"></script>
   <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/json-enc.js"></script>
   <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
-  <%- include('style') %> 
+  <%- include('style') %>
 </head>
 <body>
   <div class="swimlane">
     <div id="input-swimlane" class="input-swimlane"></div>
     <div id="main-swimlane" class="main-swimlane">
       <div class="event-anchor input-anchors">
-        <button onclick="loadConnectedComponents('example-flow', 'gen1', 'input', 'start')">start</button>
-        <button onclick="loadConnectedComponents('example-flow', 'gen1', 'input', 'stop')">stop</button>
+        <div class="input-anchor-row">
+          <button onclick="loadConnectedComponents('example-flow', 'gen1', 'input', 'start')">input</button>
+          <button>start</button>
+          <button>publish</button>
+        </div>
+        <hr>
+        <div class="input-anchor-row">
+          <button onclick="loadConnectedComponents('example-flow', 'gen1', 'input', 'stop')">input</button>
+          <button>stop</button>
+          <button>publish</button>
+        </div>
       </div>
       <div id="number-generator" class="component">
         <h2>Number Generator</h2>
@@ -38,9 +47,23 @@
         <!-- <div id="example-flow.gen1.number-generator"></div> -->
       </div>
       <div class="event-anchor output-anchors">
-        <button onclick="loadConnectedComponents('example-flow', 'gen1', 'output')">numberGenerated</button>
-        <button onclick="loadConnectedComponents('example-flow', 'mult1', 'output')">number-multiplier</button>
-        <button onclick="loadConnectedComponents('example-flow', 'gen1', 'output')">number-generator</button>
+        <div class="output-anchor-row">
+          <button>publish</button>
+          <button onclick="loadConnectedComponents('example-flow', 'gen1', 'output', 'numberGenerated')">numberGenerated</button>
+          <button onclick="loadConnectedComponents('example-flow', 'gen1', 'output', 'numberGenerated')">output</button>
+        </div>
+        <hr>
+        <div class="output-anchor-row">
+          <button>display</button>
+          <button onclick="loadConnectedComponents('example-flow', 'mult1', 'output', 'number-multiplier')">number-multiplier</button>
+          <button onclick="loadConnectedComponents('example-flow', 'mult1', 'output', 'number-multiplier')">output</button>
+        </div>
+        <hr>
+        <div class="output-anchor-row">
+          <button>display</button>
+          <button onclick="loadConnectedComponents('example-flow', 'gen1', 'output', 'number-generator')">number-generator</button>
+          <button onclick="loadConnectedComponents('example-flow', 'gen1', 'output', 'number-generator')">output</button>
+        </div>
       </div>
     </div>
     <div id="output-swimlane" class="output-swimlane"></div>

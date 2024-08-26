@@ -272,54 +272,144 @@ export function dot(a: V3, b: V3): number {
 
 You will now be given the actual INPUT you must work with.
 
-<FILE path="/home/travis/Projects/flow-based-programming/src/controllers/app.controller.ts">
-import { Logger, Controller, Get, Post, Render, Body, Param, Res, Req } from '@nestjs/common';
-import { Response, Request } from 'express';
-import { EventTriggerComponent } from '../components/event-trigger/event-trigger.handler';
-
-@Controller()
-export class AppController {
-  private readonly logger = new Logger('AppController');
-
-  constructor(private eventTriggerComponent: EventTriggerComponent) {}
-
-  @Get()
-  @Render('index')
-  async root(@Req() req: Request) {
-    return { message: 'Flow Based Programming' };
+<FILE path="/home/travis/Projects/flow-based-programming/src/views/document/style.ejs">
+<style>
+  h2 { margin-top: 0; }
+  .event-anchor { cursor: pointer; color: blue; text-decoration: underline; }
+  
+  body {
+    font-family: Arial, sans-serif; 
+    margin: 0; 
+    padding: 0;
+    background: #eee; 
   }
-
-  @Post('trigger-event/:flowComponentEvent')
-  async triggerEvent(
-    @Param('flowComponentEvent') flowComponentEvent: string,
-    @Body() data: any,
-    @Res() res: Response
-  ) {
-    const fceArray = flowComponentEvent.split('.');
-    const flowId = fceArray[0];
-    const componentId = fceArray[1];
-    const eventId = fceArray[2];
-    
-    this.logger.log(`[trigger-event] [${flowId}] [${componentId}] [${eventId}]`);
-    data._flowId = flowId;
-    data._componentId = componentId;
-    data._eventId = eventId;
-    await this.eventTriggerComponent.handleEvent('triggerEvent', data);
-    res.sendStatus(200);
+  .swimlane { 
+    display: flex; 
+    justify-content: space-between;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    overflow: hidden;
   }
-}
+  .input-swimlane, .output-swimlane {
+    width: 33.33%; 
+    width: calc(100%/3);
+    height: 100%;
+    padding: 0 1em;
+
+  }
+  .input-swimlane {
+    border-right: 5px dashed #ccc;
+  }
+  .output-swimlane {
+    border-left: 5px dashed #ccc;
+  }
+  .main-swimlane {
+    width: 33.33%; 
+    width: calc(100%/3);
+    padding: 0 1em;
+    height: 100%;
+    overflow-y: auto;
+  }
+  .component {
+    background: #fff; 
+    border: 1px solid #111; 
+    padding: 10px; 
+    margin-bottom: 10px; 
+    position: relative;
+  }
+  .input-anchors { 
+    margin-top: 1em;
+    background: #fff; 
+    border: 1px solid #111;
+    padding: 0.5em;
+    margin-bottom: 10px; 
+  }
+  .output-anchors { 
+    margin-bottom: 1em;
+    background: #fff; 
+    border: 1px solid #111; 
+    padding: 0.5em 0.5em 0.2em; 
+  }
+  .output-anchor-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+  }
+  .output-anchor-row button {
+    flex: 1;
+    margin: 0 2px;
+  }
+</style>
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/views/style.ejs">
+
+<style>
+  body { 
+    font-family: Arial, sans-serif; 
+    margin: 0; 
+    padding: 20px;
+    background: #eee; 
+  }
+  main {
+    border: 1px solid #111;
+    margin: 0 auto;
+    max-width: 600px;
+    padding: 1em;
+    background: #fff;
+  }
+  h1 {
+    margin: 0;
+  }
+  .navigation {
+    margin: 0;
+    padding: 0;
+    list-style: none outside none;
+    position: relative;
+  }
+  .navigation li {
+    margin: 0 0.5em 0.5em 0;
+    list-style-type: none;
+    float: left;
+  }
+  .navigation li button {
+    font-size: 1.2em;
+  }
+</style>
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/flows/example-flow.flow.ts">
+import { FlowBase } from "../bases/flow.base"
+
+export let exampleFlow = new FlowBase(
+  'example-flow',
+  [
+    { componentId: 'main', componentRef: 'eventTrigger' },
+    { componentId: 'gen1', componentRef: 'numberGenerator' },
+    { componentId: 'mult1', componentRef: 'numberMultiplier' },
+  ],
+  [
+    {
+      fromComponent: 'gen1',
+      fromEvent: 'numberGenerated',
+      toComponent: 'mult1',
+      toEvent: 'numberReceived',
+    },
+  ],
+)
 </FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/components/event-trigger/event-trigger.handler.ts">
 import { CustomLogger } from '../../logger/custom-logger';
 import { Injectable, Inject } from '@nestjs/common';
-import { ComponentService } from '../../bases/component.base';
+import { ComponentBase } from '../../bases/component.base';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { Server } from 'socket.io';
 
 import { triggerEvent } from './trigger-event.event';
 
 @Injectable()
-export class EventTriggerComponent extends ComponentService {
+export class EventTriggerComponent extends ComponentBase {
   public logger;
 
   constructor(
@@ -349,65 +439,96 @@ export class EventTriggerComponent extends ComponentService {
   }
 }
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/components/event-trigger/trigger-event.event.ts">
-export async function triggerEvent(process, message): Promise<void> {
-  const { _flowId, _componentId, _eventId } = message;
-  return await process.publish(_flowId, _componentId, _eventId, message);
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/components/number-generator/start-generating.event.ts">
-export function startGenerating (process, message) {
-  const fid = process.flowId;
-  const cid = process.componentId;
+<FILE path="/home/travis/Projects/flow-based-programming/src/components/number-generator/number-generator.handler.ts">
+import { CustomLogger } from '../../logger/custom-logger';
+import { Injectable, Inject } from '@nestjs/common';
+import { ComponentBase } from '../../bases/component.base';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { Server } from 'socket.io';
 
-  process.logger.log(`NumberGenerator (${process.flowId}) startGenerating method called`);
-  if (process.interval) {
-    clearInterval(process.interval);
-  }
-  process.interval = setInterval(async () => {
-    var randomNumber = Math.random();
-    process.logger.log(`NumberGenerator (${process.flowId}) generated number: ${randomNumber}`);
-    await process.publish(fid, cid, 'numberGenerated', randomNumber);
-    
-    // Send HTMX update
-    await process.display(fid, cid, 'number-generator', {
-      number: randomNumber,
-      timestamp: Date.now()
-    });
-  }, 1000);
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/components/number-generator/stop-generating.event.ts">
-export function stopGenerating(process, message) {
-  process.logger.log(`NumberGenerator (${process.flowId}) stopGenerating method called`);
-  if (process.interval) {
-    clearInterval(process.interval);
-    process.interval = null;
-  }
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/services/component-registry.service.ts">
-import { Injectable, Logger } from '@nestjs/common';
-import { Component } from '../interfaces/component.interface';
+import { startGenerating } from './start-generating.event';
+import { stopGenerating } from './stop-generating.event';
 
 @Injectable()
-export class ComponentRegistry {
-  private components: Map<string, Component> = new Map();
-  private readonly logger = new Logger(ComponentRegistry.name);
+export class NumberGeneratorComponent extends ComponentBase {
+  public logger;
+  private interval: NodeJS.Timeout | null = null;
 
-  registerComponent(component: Component) {
-    const key = `${component.flowId}.${component.componentRef}`;
-    this.logger.log(`Registering component: ${key}`);
-    this.components.set(key, component);
+  constructor(
+    @Inject('FLOW_ID') flowId: string,
+    @Inject('COMPONENT_ID') componentId: string,
+    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
+    @Inject('WEB_SOCKET_SERVER') protected server: Server
+  ) {
+    super('numberGenerator', 'Number Generator', 'Generates random numbers periodically', flowId, componentId, amqpConnection, server);
+    this.flowId = flowId;
+    this.componentId = componentId;
+    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
   }
 
-  getComponent(flowId: string, componentRef: string): Component | undefined {
-    const key = `${flowId}.${componentRef}`;
-    const component = this.components.get(key);
-    if (!component) {
-      this.logger.warn(`Component not found: ${key}`);
+  async handleEvent(eventId: string, data: any): Promise<void> {
+    this.logger.log(`NumberGenerator (${this.flowId}) handling event: ${eventId}`);
+    switch (eventId) {
+      case "start": {
+        this.logger.log(`NumberGenerator (${this.flowId}) starting number generation`);
+        this.startGenerating(data);
+        break;
+      }
+      case "stop": {
+        this.logger.log(`NumberGenerator (${this.flowId}) stopping number generation`);
+        this.stopGenerating(data);
+        break;
+      }
     }
-    return component;
+  }
+
+  private startGenerating(data): void {
+    return startGenerating(this, data);
+  }
+
+  private stopGenerating(data): void {
+    return stopGenerating(this, data);
+  }
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/components/number-multiplier/number-multiplier.handler.ts">
+import { CustomLogger } from '../../logger/custom-logger';
+import { Injectable, Inject } from '@nestjs/common';
+import { ComponentBase } from '../../bases/component.base';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { Server } from 'socket.io';
+
+import { numberReceived } from './number-received.event';
+
+@Injectable()
+export class NumberMultiplierComponent extends ComponentBase {
+  public logger;
+
+  constructor(
+    @Inject('FLOW_ID') flowId: string,
+    @Inject('COMPONENT_ID') componentId: string,
+    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
+    @Inject('WEB_SOCKET_SERVER') protected server: Server
+  ) {
+    super('numberMultiplier', 'Number Multiplier', 'Multiplies received number by 2', flowId, componentId, amqpConnection, server);
+    this.flowId = flowId;
+    this.componentId = componentId;
+    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
+  }
+
+  async handleEvent(eventId: string, data: any): Promise<void> {
+    this.logger.log(`NumberMultiplier handling event: ${eventId} ${JSON.stringify(data, null, 2)}`);
+    switch (eventId) {
+      case 'numberReceived':
+        await this.numberReceived(data);
+        break;
+      default:
+        break;
+    }
+  }
+
+  private numberReceived(data): Promise<void> {
+    return numberReceived(this, data);
   }
 }
 </FILE>
@@ -466,142 +587,146 @@ export class FlowExecutorService {
   }
 }
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/templates/event-trigger.ejs">
-<div id="<%= _flowId %>.<%= _componentId %>.<%= _templateId %>" class="event-trigger-content">
-  <h3>Event Triggered</h3>
-  <p>Flow ID: <%= flowId %></p>
-  <p>Component ID: <%= componentId %></p>
-  <p>Template ID: <%= templateId %></p>
-  <% if (typeof data === 'object') { %>
-    <ul>
-      <% for (const [key, value] of Object.entries(data)) { %>
-        <li><strong><%= key %>:</strong> <%= value %></li>
-      <% } %>
-    </ul>
-  <% } else { %>
-    <p>Data: <%= data %></p>
-  <% } %>
-  <p>Timestamp: <%= new Date().toISOString() %></p>
-</div>
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/flows/example-flow.flow.ts">
-import { FlowService } from "../bases/flow.base"
-
-export let exampleFlow = new FlowService(
-  'example-flow',
-  [
-    { componentId: 'main', componentRef: 'eventTrigger' },
-    { componentId: 'gen1', componentRef: 'numberGenerator' },
-    { componentId: 'mult1', componentRef: 'numberMultiplier' },
-  ],
-  [
-    {
-      fromComponent: 'gen1',
-      fromEvent: 'numberGenerated',
-      toComponent: 'mult1',
-      toEvent: 'numberReceived',
-    },
-  ],
-)
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/processors/event.processor.ts">
+<FILE path="/home/travis/Projects/flow-based-programming/src/services/component-registry.service.ts">
 import { Injectable, Logger } from '@nestjs/common';
-import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
-import { ComponentRegistry } from '../services/component-registry.service';
+import { Component } from '../interfaces/component.interface';
 
 @Injectable()
-export class EventProcessor {
-  private readonly logger = new Logger(EventProcessor.name);
-  private connections: Map<string, { toFlow: string; toComponent: string; toEvent: string }> = new Map();
+export class ComponentRegistry {
+  private components: Map<string, Component> = new Map();
+  private readonly logger = new Logger(ComponentRegistry.name);
 
-  constructor(private componentRegistry: ComponentRegistry) {}
-
-  @RabbitSubscribe({
-    exchange: 'flow_exchange',
-    routingKey: 'componentEvent',
-    queue: 'component_event_queue',
-  })
-  async handleComponentEvent(msg: {flowId: string, componentId: string, eventId: string, data: any}) {
-    const { flowId, componentId, eventId, data: eventData } = msg;
-    this.logger.log(`[handleComponentEvent] [${flowId}.${componentId}.${eventId}] data: ${JSON.stringify(eventData)}`);
-    
-    const component = this.componentRegistry.getComponent(flowId, componentId);
-    if (component) {
-      this.logger.log(`Passing event to component: ${componentId}`);
-      await component.handleEvent(eventId, eventData);
-
-      // Check if there's a connection for this event
-      const connectionKey = `${flowId}.${componentId}.${eventId}`;
-      const connection = this.connections.get(connectionKey);
-      if (connection) {
-        const { toFlow, toComponent, toEvent } = connection;
-        this.logger.log(`[forwardingComponentEvent] [${toFlow}.${toComponent}.${toEvent}]`);
-        
-        const targetComponent = this.componentRegistry.getComponent(toFlow, toComponent);
-        if (targetComponent) {
-          this.logger.log(`Forwarding event to component: ${targetComponent.componentId}`);
-          await targetComponent.handleEvent(toEvent, eventData);
-        } else {
-          this.logger.warn(`Target component not found: ${toComponent} in flow: ${toFlow}`);
-        }
-      }
-    } else {
-      this.logger.warn(`Component not found: ${flowId}.${componentId}`);
-    }
+  registerComponent(component: Component) {
+    const key = `${component.flowId}.${component.componentRef}`;
+    this.logger.log(`Registering component: ${key}`);
+    this.components.set(key, component);
   }
 
-  @RabbitSubscribe({
-    exchange: 'flow_exchange',
-    routingKey: 'createConnection',
-    queue: 'create_connection_queue',
-  })
-  async createConnection(msg: {flowId: string, fromComponent: string, fromEvent: string, toComponent: string, toEvent: string}) {
-    const { flowId, fromComponent, fromEvent, toComponent, toEvent } = msg;
-    this.logger.log(`Received createConnection: ${flowId}.${fromComponent}.${fromEvent} -> ${toComponent}.${toEvent}`);
-    
-    const connectionKey = `${flowId}.${fromComponent}.${fromEvent}`;
-    this.connections.set(connectionKey, { toFlow: flowId, toComponent, toEvent });
-    this.logger.log(`Connection created: ${connectionKey} -> ${toComponent}.${toEvent}`);
-    
-    return { success: true, message: 'Connection created successfully' };
+  getComponent(flowId: string, componentRef: string): Component | undefined {
+    const key = `${flowId}.${componentRef}`;
+    const component = this.components.get(key);
+    if (!component) {
+      this.logger.warn(`Component not found: ${key}`);
+    }
+    return component;
   }
 }
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/bootstrap/app.bootstrap.ts">
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from '../modules/app.module';
-import { NestExpressApplication } from '@nestjs/platform-express';
-import * as cookieParser from 'cookie-parser';
-import { FlowExecutorService } from '../services/flow-executor.service';
-import { CustomLogger } from '../logger/custom-logger';
-import { resolve } from 'path';
-import { initializeFlows } from '../initializers/flows.initialize';
+<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/flow.interface.ts">
+export interface Flow {
+  id: string;
+  components: {
+    componentId: string;
+    componentRef: string;
+  }[];
+  connections: {
+    fromComponent: string;
+    fromEvent: string;
+    toComponent: string;
+    toEvent: string;
+  }[];
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/component.interface.ts">
+export interface Component {
+  componentRef: string;
+  name: string;
+  description?: string;
+  flowId: string;
+  componentId: string;
+  handleEvent: (eventId: string, data: any) => Promise<void>;
+  publish: (flowId: string, componentId: string, eventId: string, data: any) => Promise<void>;
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/initializers/flows.initialize.ts">
+import { exampleFlow } from "src/flows/example-flow.flow";
 
-export async function bootstrapApp(logger: CustomLogger): Promise<any> {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, { logger });
-  
-  app.useStaticAssets(resolve('./src/public'));
-  app.setBaseViewsDir(resolve('./src/views'));
-  app.setViewEngine('ejs');
+const flows = [
+  exampleFlow
+];
 
-  app.use(cookieParser());
+export async function initializeFlows(flowExecutor) {
+  flows.forEach(async (flow) => {
+    await flowExecutor.executeFlow(flow);
+  })
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/initializers/component.initialize.ts">
+import { NumberGeneratorComponent } from '../components/number-generator/number-generator.handler';
+import { NumberMultiplierComponent } from '../components/number-multiplier/number-multiplier.handler';
+import { EventTriggerComponent } from '../components/event-trigger/event-trigger.handler';
 
-  // so browsers can use api
-  app.enableCors({
-    origin: '*',
-  });
+export function initializeComponent(flow, component, amqpConnection, server) {
+  let componentInstance;
+  switch (component.componentRef) {
+    case 'numberGenerator':
+      componentInstance = new NumberGeneratorComponent(flow.id, component.componentId, amqpConnection, server);
+      break;
+    case 'numberMultiplier':
+      componentInstance = new NumberMultiplierComponent(flow.id, component.componentId, amqpConnection, server);
+      break;
+    case 'eventTrigger':
+      componentInstance = new EventTriggerComponent(flow.id, component.componentId, amqpConnection, server);
+      break;
+    default:
+      this.logger.warn(`Unknown component type: ${component.componentRef}`);
+      break;
+  }
+  return componentInstance;
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/controllers/app.controller.ts">
+import { Logger, Controller, Get, Post, Render, Body, Param, Res, Req } from '@nestjs/common';
+import { Response, Request } from 'express';
+import { EventTriggerComponent } from '../components/event-trigger/event-trigger.handler';
 
-  const flowExecutor = app.get(FlowExecutorService);
+@Controller()
+export class AppController {
+  private readonly logger = new Logger('AppController');
 
-  await app.init();
+  constructor(private eventTriggerComponent: EventTriggerComponent) {}
 
-  logger.log('Starting flow execution...');
-  await initializeFlows(flowExecutor);
+  @Get()
+  @Render('index')
+  async root(@Req() req: Request) {
+    return { message: 'steam engine = chart + document + logger // FBP' };
+  }
 
-  await app.listen(3000);
-  logger.log('Application is running on: http://localhost:3000');
+  /**
+   * svelte app generated in:
+   * ./src/public/chart/*
+   */
 
-  return app;
+  @Get('document')
+  @Render('document/index')
+  async documentIndex(@Req() req: Request) {
+    return { message: 'document - steam engine // FBP' };
+  }
+
+  @Get('logger')
+  @Render('logger/index')
+  async loggerIndex(@Req() req: Request) {
+    return { message: 'logger - steam engine // FBP' };
+  }
+
+  @Post('trigger-event/:flowComponentEvent')
+  async triggerEvent(
+    @Param('flowComponentEvent') flowComponentEvent: string,
+    @Body() data: any,
+    @Res() res: Response
+  ) {
+    const fceArray = flowComponentEvent.split('.');
+    const flowId = fceArray[0];
+    const componentId = fceArray[1];
+    const eventId = fceArray[2];
+    
+    this.logger.log(`[trigger-event] [${flowId}] [${componentId}] [${eventId}]`);
+    data._flowId = flowId;
+    data._componentId = componentId;
+    data._eventId = eventId;
+    await this.eventTriggerComponent.handleEvent('triggerEvent', data);
+    res.sendStatus(200);
+  }
 }
 </FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/modules/app.module.ts">
@@ -652,280 +777,27 @@ const metadata = {
 
 export const AppModule = initializeAppModule(metadata)
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/start:dev.stdout.txt">
-c[[90m7:52:38 PM[0m] Starting compilation in watch mode...
-
-[[90m7:52:39 PM[0m] Found 0 errors. Watching for file changes.
-
-[32m[Nest] 181750  - [39m08/21/2024, 7:52:40 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
-[32m[Nest] 181750  - [39m08/21/2024, 7:52:40 PM [32m    LOG[39m [38;5;3m[AmqpConnection] [39m[32mTrying to connect to RabbitMQ broker (default)[39m
-[32m[Nest] 181750  - [39m08/21/2024, 7:52:40 PM [32m    LOG[39m [38;5;3m[RabbitMQModule] [39m[32mSuccessfully connected to RabbitMQ[39m
-[32m[Nest] 181750  - [39m08/21/2024, 7:52:40 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDiscoveryModule dependencies initialized[39m[38;5;3m +8ms[39m
-[32m[Nest] 181750  - [39m08/21/2024, 7:52:40 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRabbitMQModule dependencies initialized[39m[38;5;3m +1ms[39m
-[32m[Nest] 181750  - [39m08/21/2024, 7:52:40 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +0ms[39m
-[2024-08-22T00:52:40.028Z] [LOG] [Bootstrap] Starting main application...
-[2024-08-22T00:52:40.029Z] [LOG] [Bootstrap] [NestFactory] Starting Nest application...
-[2024-08-22T00:52:40.031Z] [LOG] [Bootstrap] [AmqpConnection] Trying to connect to RabbitMQ broker (default)
-[2024-08-22T00:52:40.032Z] [LOG] [Bootstrap] [RabbitMQModule] Successfully connected to RabbitMQ
-[2024-08-22T00:52:40.032Z] [LOG] [Bootstrap] [InstanceLoader] DiscoveryModule dependencies initialized
-[2024-08-22T00:52:40.033Z] [LOG] [Bootstrap] [InstanceLoader] RabbitMQModule dependencies initialized
-[2024-08-22T00:52:40.033Z] [LOG] [Bootstrap] [InstanceLoader] AppModule dependencies initialized
-[2024-08-22T00:52:40.039Z] [LOG] [Bootstrap] [WebSocketsController] NumberGeneratorComponent subscribed to the "client-event" message
-[2024-08-22T00:52:40.040Z] [LOG] [Bootstrap] [WebSocketsController] NumberMultiplierComponent subscribed to the "client-event" message
-[2024-08-22T00:52:40.040Z] [LOG] [Bootstrap] [WebSocketsController] EventTriggerComponent subscribed to the "client-event" message
-[2024-08-22T00:52:40.041Z] [LOG] [Bootstrap] [RoutesResolver] AppController {/}:
-[2024-08-22T00:52:40.043Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/, GET} route
-[2024-08-22T00:52:40.043Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/trigger-event/:flowComponentEvent, POST} route
-[2024-08-22T00:52:40.044Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724287960031
-[2024-08-22T00:52:40.044Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724287960031
-[2024-08-22T00:52:40.044Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724287960031
-[2024-08-22T00:52:40.045Z] [LOG] [Bootstrap] [RabbitMQModule] Initializing RabbitMQ Handlers
-[2024-08-22T00:52:40.046Z] [LOG] [Bootstrap] [RabbitMQModule] Registering rabbitmq handlers from EventProcessor
-[2024-08-22T00:52:40.047Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.handleComponentEvent {subscribe} -> flow_exchange::componentEvent::component_event_queue
-[2024-08-22T00:52:40.047Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.createConnection {subscribe} -> flow_exchange::createConnection::create_connection_queue
-[2024-08-22T00:52:40.047Z] [LOG] [Bootstrap] [RabbitMQModule] Initializing RabbitMQ Handlers
-[2024-08-22T00:52:40.047Z] [LOG] [Bootstrap] [RabbitMQModule] Registering rabbitmq handlers from EventProcessor
-[2024-08-22T00:52:40.047Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.handleComponentEvent {subscribe} -> flow_exchange::componentEvent::component_event_queue
-[2024-08-22T00:52:40.047Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.createConnection {subscribe} -> flow_exchange::createConnection::create_connection_queue
-[2024-08-22T00:52:40.048Z] [LOG] [Bootstrap] [NestApplication] Nest application successfully started
-[2024-08-22T00:52:40.048Z] [LOG] [Bootstrap] Starting flow execution...
-[2024-08-22T00:52:40.048Z] [LOG] [Bootstrap] [FlowExecutorService] Executing flow: example-flow
-[2024-08-22T00:52:40.048Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: gen1.numberGenerated -> mult1.numberReceived
-[2024-08-22T00:52:40.050Z] [LOG] [Bootstrap] Application is running on: http://localhost:3000
-[2024-08-22T00:52:40.100Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
-[2024-08-22T00:52:40.102Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
-[2024-08-22T00:52:40.109Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected a RabbitMQ channel "AmqpConnection"
-[2024-08-22T00:52:40.109Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected a RabbitMQ channel "AmqpConnection"
-[2024-08-22T00:52:40.110Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.gen1.numberGenerated -> mult1.numberReceived
-[2024-08-22T00:52:40.110Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.gen1.numberGenerated -> mult1.numberReceived
-[2024-08-22T00:52:40.110Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: main (eventTrigger) for flow: example-flow
-[2024-08-22T00:52:40.110Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.main
-[2024-08-22T00:52:40.110Z] [WARN] [Bootstrap] [AmqpConnection] Received response: [{"success":true,"message":"Connection created successfully"}] from subscribe handler [createConnection]. Subscribe handlers should only return void
-[2024-08-22T00:52:40.111Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.main.init] data: {}
-[2024-08-22T00:52:40.111Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: main
-[2024-08-22T00:52:40.111Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: gen1 (numberGenerator) for flow: example-flow
-[2024-08-22T00:52:40.111Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.gen1
-[2024-08-22T00:52:40.156Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.init] data: {}
-[2024-08-22T00:52:40.156Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
-[2024-08-22T00:52:40.157Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: init
-[2024-08-22T00:52:40.157Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: mult1 (numberMultiplier) for flow: example-flow
-[2024-08-22T00:52:40.157Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.mult1
-[2024-08-22T00:52:40.158Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.mult1.init] data: {}
-[2024-08-22T00:52:40.158Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: mult1
-[2024-08-22T00:52:40.158Z] [LOG] [example-flow.mult1] NumberMultiplier handling event: init {}
-[2024-08-22T01:41:18.269Z] [LOG] [Bootstrap] [AppController] [trigger-event] [example-flow] [gen1] [start]
-[2024-08-22T01:41:18.269Z] [LOG] [example-flow.component-1724287960031] Publishing: example-flow.gen1.start -> [object Object]
-[2024-08-22T01:41:18.271Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.start] data: {"_flowId":"example-flow","_componentId":"gen1","_eventId":"start"}
-[2024-08-22T01:41:18.271Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
-[2024-08-22T01:41:18.271Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: start
-[2024-08-22T01:41:18.271Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) starting number generation
-[2024-08-22T01:41:18.271Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) startGenerating method called
-[2024-08-22T01:41:19.272Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) generated number: 0.6627034714253173
-[2024-08-22T01:41:19.272Z] [LOG] [example-flow.gen1] Publishing: example-flow.gen1.numberGenerated -> 0.6627034714253173
-[2024-08-22T01:41:19.274Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.numberGenerated] data: 0.6627034714253173
-[2024-08-22T01:41:19.274Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
-[2024-08-22T01:41:19.274Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-08-22T01:41:19.274Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.mult1.numberReceived]
-[2024-08-22T01:41:19.274Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: mult1
-[2024-08-22T01:41:19.274Z] [LOG] [example-flow.mult1] NumberMultiplier handling event: numberReceived 0.6627034714253173
-[2024-08-22T01:41:19.274Z] [LOG] [example-flow.mult1] NumberMultiplier received 0.6627034714253173, multiplied result: 1.3254069428506345
-[2024-08-22T01:41:19.274Z] [LOG] [example-flow.mult1] Publishing: example-flow.mult1.numberMultiplied -> 1.3254069428506345
-[2024-08-22T01:41:19.275Z] [LOG] [example-flow.gen1] <div id="example-flow.gen1.number-generator">
-  <p>Last generated number: 0.6627034714253173</p>
-  <p>Generated at: 8/21/2024, 8:41:19 PM</p>
-</div>
-[2024-08-22T01:41:19.276Z] [LOG] [example-flow.mult1] <div id="example-flow.mult1.number-multiplier">
-  <p>Last received number: 0.6627034714253173</p>
-  <p>Multiplied result: 1.3254069428506345</p>
-  <p>Processed at: 8/21/2024, 8:41:19 PM</p>
-</div>
-[2024-08-22T01:41:19.276Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.mult1.numberMultiplied] data: 1.3254069428506345
-[2024-08-22T01:41:19.276Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: mult1
-[2024-08-22T01:41:19.276Z] [LOG] [example-flow.mult1] NumberMultiplier handling event: numberMultiplied 1.3254069428506345
-[2024-08-22T01:41:20.273Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) generated number: 0.7289631057945167
-[2024-08-22T01:41:20.273Z] [LOG] [example-flow.gen1] Publishing: example-flow.gen1.numberGenerated -> 0.7289631057945167
-[2024-08-22T01:41:20.274Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.numberGenerated] data: 0.7289631057945167
-[2024-08-22T01:41:20.274Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
-[2024-08-22T01:41:20.274Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-08-22T01:41:20.275Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.mult1.numberReceived]
-[2024-08-22T01:41:20.275Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: mult1
-[2024-08-22T01:41:20.275Z] [LOG] [example-flow.mult1] NumberMultiplier handling event: numberReceived 0.7289631057945167
-[2024-08-22T01:41:20.275Z] [LOG] [example-flow.mult1] NumberMultiplier received 0.7289631057945167, multiplied result: 1.4579262115890335
-[2024-08-22T01:41:20.275Z] [LOG] [example-flow.mult1] Publishing: example-flow.mult1.numberMultiplied -> 1.4579262115890335
-[2024-08-22T01:41:20.276Z] [LOG] [example-flow.gen1] <div id="example-flow.gen1.number-generator">
-  <p>Last generated number: 0.7289631057945167</p>
-  <p>Generated at: 8/21/2024, 8:41:20 PM</p>
-</div>
-[2024-08-22T01:41:20.276Z] [LOG] [example-flow.mult1] <div id="example-flow.mult1.number-multiplier">
-  <p>Last received number: 0.7289631057945167</p>
-  <p>Multiplied result: 1.4579262115890335</p>
-  <p>Processed at: 8/21/2024, 8:41:20 PM</p>
-</div>
-[2024-08-22T01:41:20.277Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.mult1.numberMultiplied] data: 1.4579262115890335
-[2024-08-22T01:41:20.277Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: mult1
-[2024-08-22T01:41:20.277Z] [LOG] [example-flow.mult1] NumberMultiplier handling event: numberMultiplied 1.4579262115890335
-[2024-08-22T01:41:20.829Z] [LOG] [Bootstrap] [AppController] [trigger-event] [example-flow] [gen1] [stop]
-[2024-08-22T01:41:20.829Z] [LOG] [example-flow.component-1724287960031] Publishing: example-flow.gen1.stop -> [object Object]
-[2024-08-22T01:41:20.830Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.stop] data: {"_flowId":"example-flow","_componentId":"gen1","_eventId":"stop"}
-[2024-08-22T01:41:20.830Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
-[2024-08-22T01:41:20.830Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: stop
-[2024-08-22T01:41:20.830Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) stopping number generation
-[2024-08-22T01:41:20.830Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) stopGenerating method called
-[2024-08-22T01:42:52.445Z] [LOG] [Bootstrap] [AppController] [trigger-event] [example-flow] [gen1] [start]
-[2024-08-22T01:42:52.445Z] [LOG] [example-flow.component-1724287960031] Publishing: example-flow.gen1.start -> [object Object]
-[2024-08-22T01:42:52.446Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.start] data: {"_flowId":"example-flow","_componentId":"gen1","_eventId":"start"}
-[2024-08-22T01:42:52.447Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
-[2024-08-22T01:42:52.447Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: start
-[2024-08-22T01:42:52.447Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) starting number generation
-[2024-08-22T01:42:52.447Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) startGenerating method called
-[2024-08-22T01:42:53.447Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) generated number: 0.19065524822052105
-[2024-08-22T01:42:53.447Z] [LOG] [example-flow.gen1] Publishing: example-flow.gen1.numberGenerated -> 0.19065524822052105
-[2024-08-22T01:42:53.448Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.numberGenerated] data: 0.19065524822052105
-[2024-08-22T01:42:53.448Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
-[2024-08-22T01:42:53.448Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-08-22T01:42:53.448Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.mult1.numberReceived]
-[2024-08-22T01:42:53.448Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: mult1
-[2024-08-22T01:42:53.448Z] [LOG] [example-flow.mult1] NumberMultiplier handling event: numberReceived 0.19065524822052105
-[2024-08-22T01:42:53.448Z] [LOG] [example-flow.mult1] NumberMultiplier received 0.19065524822052105, multiplied result: 0.3813104964410421
-[2024-08-22T01:42:53.448Z] [LOG] [example-flow.mult1] Publishing: example-flow.mult1.numberMultiplied -> 0.3813104964410421
-[2024-08-22T01:42:53.449Z] [LOG] [example-flow.gen1] <div id="example-flow.gen1.number-generator">
-  <p>Last generated number: 0.19065524822052105</p>
-  <p>Generated at: 8/21/2024, 8:42:53 PM</p>
-</div>
-[2024-08-22T01:42:53.450Z] [LOG] [example-flow.mult1] <div id="example-flow.mult1.number-multiplier">
-  <p>Last received number: 0.19065524822052105</p>
-  <p>Multiplied result: 0.3813104964410421</p>
-  <p>Processed at: 8/21/2024, 8:42:53 PM</p>
-</div>
-[2024-08-22T01:42:53.450Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.mult1.numberMultiplied] data: 0.3813104964410421
-[2024-08-22T01:42:53.450Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: mult1
-[2024-08-22T01:42:53.450Z] [LOG] [example-flow.mult1] NumberMultiplier handling event: numberMultiplied 0.3813104964410421
-[2024-08-22T01:42:54.447Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) generated number: 0.04957384191767078
-[2024-08-22T01:42:54.447Z] [LOG] [example-flow.gen1] Publishing: example-flow.gen1.numberGenerated -> 0.04957384191767078
-[2024-08-22T01:42:54.449Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.numberGenerated] data: 0.04957384191767078
-[2024-08-22T01:42:54.449Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
-[2024-08-22T01:42:54.449Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-08-22T01:42:54.449Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.mult1.numberReceived]
-[2024-08-22T01:42:54.449Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: mult1
-[2024-08-22T01:42:54.449Z] [LOG] [example-flow.mult1] NumberMultiplier handling event: numberReceived 0.04957384191767078
-[2024-08-22T01:42:54.449Z] [LOG] [example-flow.mult1] NumberMultiplier received 0.04957384191767078, multiplied result: 0.09914768383534156
-[2024-08-22T01:42:54.449Z] [LOG] [example-flow.mult1] Publishing: example-flow.mult1.numberMultiplied -> 0.09914768383534156
-[2024-08-22T01:42:54.449Z] [LOG] [example-flow.gen1] <div id="example-flow.gen1.number-generator">
-  <p>Last generated number: 0.04957384191767078</p>
-  <p>Generated at: 8/21/2024, 8:42:54 PM</p>
-</div>
-[2024-08-22T01:42:54.450Z] [LOG] [example-flow.mult1] <div id="example-flow.mult1.number-multiplier">
-  <p>Last received number: 0.04957384191767078</p>
-  <p>Multiplied result: 0.09914768383534156</p>
-  <p>Processed at: 8/21/2024, 8:42:54 PM</p>
-</div>
-[2024-08-22T01:42:54.451Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.mult1.numberMultiplied] data: 0.09914768383534156
-[2024-08-22T01:42:54.451Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: mult1
-[2024-08-22T01:42:54.451Z] [LOG] [example-flow.mult1] NumberMultiplier handling event: numberMultiplied 0.09914768383534156
-[2024-08-22T01:42:55.208Z] [LOG] [Bootstrap] [AppController] [trigger-event] [example-flow] [gen1] [stop]
-[2024-08-22T01:42:55.208Z] [LOG] [example-flow.component-1724287960031] Publishing: example-flow.gen1.stop -> [object Object]
-[2024-08-22T01:42:55.209Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.stop] data: {"_flowId":"example-flow","_componentId":"gen1","_eventId":"stop"}
-[2024-08-22T01:42:55.209Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
-[2024-08-22T01:42:55.209Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: stop
-[2024-08-22T01:42:55.209Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) stopping number generation
-[2024-08-22T01:42:55.209Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) stopGenerating method called
-[2024-08-22T01:42:56.259Z] [LOG] [Bootstrap] [AppController] [trigger-event] [example-flow] [gen1] [stop]
-[2024-08-22T01:42:56.259Z] [LOG] [example-flow.component-1724287960031] Publishing: example-flow.gen1.stop -> [object Object]
-[2024-08-22T01:42:56.261Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.stop] data: {"_flowId":"example-flow","_componentId":"gen1","_eventId":"stop"}
-[2024-08-22T01:42:56.261Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
-[2024-08-22T01:42:56.261Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: stop
-[2024-08-22T01:42:56.261Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) stopping number generation
-[2024-08-22T01:42:56.261Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) stopGenerating method called
-[2024-08-22T01:46:44.784Z] [LOG] [Bootstrap] [AppController] [trigger-event] [example-flow] [gen1] [start]
-[2024-08-22T01:46:44.784Z] [LOG] [example-flow.component-1724287960031] Publishing: example-flow.gen1.start -> [object Object]
-[2024-08-22T01:46:44.785Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.start] data: {"_flowId":"example-flow","_componentId":"gen1","_eventId":"start"}
-[2024-08-22T01:46:44.785Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
-[2024-08-22T01:46:44.785Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: start
-[2024-08-22T01:46:44.785Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) starting number generation
-[2024-08-22T01:46:44.785Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) startGenerating method called
-[2024-08-22T01:46:45.786Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) generated number: 0.8702194554366165
-[2024-08-22T01:46:45.786Z] [LOG] [example-flow.gen1] Publishing: example-flow.gen1.numberGenerated -> 0.8702194554366165
-[2024-08-22T01:46:45.788Z] [LOG] [example-flow.gen1] <div id="example-flow.gen1.number-generator">
-  <p>Last generated number: 0.8702194554366165</p>
-  <p>Generated at: 8/21/2024, 8:46:45 PM</p>
-</div>
-[2024-08-22T01:46:45.788Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.numberGenerated] data: 0.8702194554366165
-[2024-08-22T01:46:45.788Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
-[2024-08-22T01:46:45.788Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-08-22T01:46:45.788Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.mult1.numberReceived]
-[2024-08-22T01:46:45.788Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: mult1
-[2024-08-22T01:46:45.788Z] [LOG] [example-flow.mult1] NumberMultiplier handling event: numberReceived 0.8702194554366165
-[2024-08-22T01:46:45.789Z] [LOG] [example-flow.mult1] NumberMultiplier received 0.8702194554366165, multiplied result: 1.740438910873233
-[2024-08-22T01:46:45.789Z] [LOG] [example-flow.mult1] Publishing: example-flow.mult1.numberMultiplied -> 1.740438910873233
-[2024-08-22T01:46:45.790Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.mult1.numberMultiplied] data: 1.740438910873233
-[2024-08-22T01:46:45.790Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: mult1
-[2024-08-22T01:46:45.790Z] [LOG] [example-flow.mult1] NumberMultiplier handling event: numberMultiplied 1.740438910873233
-[2024-08-22T01:46:45.790Z] [LOG] [example-flow.mult1] <div id="example-flow.mult1.number-multiplier">
-  <p>Last received number: 0.8702194554366165</p>
-  <p>Multiplied result: 1.740438910873233</p>
-  <p>Processed at: 8/21/2024, 8:46:45 PM</p>
-</div>
-[2024-08-22T01:46:46.786Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) generated number: 0.37241894618066484
-[2024-08-22T01:46:46.786Z] [LOG] [example-flow.gen1] Publishing: example-flow.gen1.numberGenerated -> 0.37241894618066484
-[2024-08-22T01:46:46.787Z] [LOG] [example-flow.gen1] <div id="example-flow.gen1.number-generator">
-  <p>Last generated number: 0.37241894618066484</p>
-  <p>Generated at: 8/21/2024, 8:46:46 PM</p>
-</div>
-[2024-08-22T01:46:46.787Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.numberGenerated] data: 0.37241894618066484
-[2024-08-22T01:46:46.787Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
-[2024-08-22T01:46:46.787Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-08-22T01:46:46.788Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.mult1.numberReceived]
-[2024-08-22T01:46:46.788Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: mult1
-[2024-08-22T01:46:46.788Z] [LOG] [example-flow.mult1] NumberMultiplier handling event: numberReceived 0.37241894618066484
-[2024-08-22T01:46:46.788Z] [LOG] [example-flow.mult1] NumberMultiplier received 0.37241894618066484, multiplied result: 0.7448378923613297
-[2024-08-22T01:46:46.788Z] [LOG] [example-flow.mult1] Publishing: example-flow.mult1.numberMultiplied -> 0.7448378923613297
-[2024-08-22T01:46:46.788Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.mult1.numberMultiplied] data: 0.7448378923613297
-[2024-08-22T01:46:46.788Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: mult1
-[2024-08-22T01:46:46.788Z] [LOG] [example-flow.mult1] NumberMultiplier handling event: numberMultiplied 0.7448378923613297
-[2024-08-22T01:46:46.789Z] [LOG] [example-flow.mult1] <div id="example-flow.mult1.number-multiplier">
-  <p>Last received number: 0.37241894618066484</p>
-  <p>Multiplied result: 0.7448378923613297</p>
-  <p>Processed at: 8/21/2024, 8:46:46 PM</p>
-</div>
-[2024-08-22T01:46:46.964Z] [LOG] [Bootstrap] [AppController] [trigger-event] [example-flow] [gen1] [stop]
-[2024-08-22T01:46:46.964Z] [LOG] [example-flow.component-1724287960031] Publishing: example-flow.gen1.stop -> [object Object]
-[2024-08-22T01:46:46.965Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.stop] data: {"_flowId":"example-flow","_componentId":"gen1","_eventId":"stop"}
-[2024-08-22T01:46:46.965Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
-[2024-08-22T01:46:46.965Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: stop
-[2024-08-22T01:46:46.965Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) stopping number generation
-[2024-08-22T01:46:46.965Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) stopGenerating method called
-
-</FILE>
-<FILE path="src/views/index.ejs" TARGET>
+<FILE path="src/views/document/index.ejs" TARGET>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flow-Based Programming Example</title>
+  <title><%- message %></title>
   <script src="https://unpkg.com/htmx.org@2.0.2"></script>
   <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/json-enc.js"></script>
   <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-    .component { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; position: relative; }
-    h2 { margin-top: 0; }
-    .swimlane { display: flex; justify-content: space-between; }
-    .input-swimlane, .output-swimlane { width: 20%; padding: 10px; background-color: #f0f0f0; }
-    .main-content { width: 60%; padding: 10px; }
-    .event-anchor { cursor: pointer; color: blue; text-decoration: underline; }
-    .input-anchor { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); }
-    .output-anchor { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); }
-  </style>
+  <%- include('style') %>
 </head>
 <body>
-  <h1>Flow-Based Programming Example</h1>
-
   <div class="swimlane">
     <div id="input-swimlane" class="input-swimlane"></div>
-    <div class="main-content">
+    <div id="main-swimlane" class="main-swimlane">
+      <div class="event-anchor input-anchors">
+        <button onclick="loadConnectedComponents('example-flow', 'gen1', 'input', 'start')">start</button>
+        <button onclick="loadConnectedComponents('example-flow', 'gen1', 'input', 'stop')">stop</button>
+      </div>
       <div id="number-generator" class="component">
-        <span class="event-anchor input-anchor" onclick="loadConnectedComponents('example-flow', 'gen1', 'input')">start, stop</span>
         <h2>Number Generator</h2>
         <button hx-post="/trigger-event/example-flow.gen1.start"
           hx-swap="none" 
@@ -943,19 +815,29 @@ export const AppModule = initializeAppModule(metadata)
         >
           Stop Generating
         </button>
-        <div id="example-flow.gen1.number-generator"></div>
-        <span class="event-anchor output-anchor" onclick="loadConnectedComponents('example-flow', 'gen1', 'output')">numberGenerated</span>
+        <!-- <div id="example-flow.gen1.number-generator"></div> -->
+      </div>
+      <div class="event-anchor output-anchors">
+        <div class="output-anchor-row">
+          <button>publish</button>
+          <button onclick="loadConnectedComponents('example-flow', 'gen1', 'output', 'numberGenerated')">numberGenerated</button>
+          <button onclick="loadConnectedComponents('example-flow', 'gen1', 'output', 'numberGenerated')">output</button>
+        </div>
+        <hr>
+        <div class="output-anchor-row">
+          <button>display</button>
+          <button onclick="loadConnectedComponents('example-flow', 'mult1', 'output', 'number-multiplier')">number-multiplier</button>
+          <button onclick="loadConnectedComponents('example-flow', 'mult1', 'output', 'number-multiplier')">output</button>
+        </div>
+        <hr>
+        <div class="output-anchor-row">
+          <button>display</button>
+          <button onclick="loadConnectedComponents('example-flow', 'gen1', 'output', 'number-generator')">number-generator</button>
+          <button onclick="loadConnectedComponents('example-flow', 'gen1', 'output', 'number-generator')">output</button>
+        </div>
       </div>
     </div>
-    <div id="output-swimlane" class="output-swimlane">
-
-      <div id="number-multiplier" class="component">
-        <span class="event-anchor input-anchor" onclick="loadConnectedComponents('example-flow', 'mult1', 'input')">numberReceived</span>
-        <h2>Number Multiplier</h2>
-        <div id="example-flow.mult1.number-multiplier"></div>
-        <span class="event-anchor output-anchor" onclick="loadConnectedComponents('example-flow', 'mult1', 'output')">numberMultiplied</span>
-      </div>
-    </div>
+    <div id="output-swimlane" class="output-swimlane"></div>
   </div>
 
   <script>
@@ -973,30 +855,30 @@ export const AppModule = initializeAppModule(metadata)
       event.detail.headers['Content-Type'] = 'application/json';
     });
 
-    function loadConnectedComponents(flowId, componentId, direction) {
+    function loadConnectedComponents(flowId, componentId, direction, eventId) {
       // This function would typically make an AJAX call to the server
       // to get the connected components. For now, we'll use mock data.
       const mockConnections = {
         'example-flow': {
           'gen1': {
             'input': ['start', 'stop'],
-            'output': ['numberGenerated']
+            'output': ['numberGenerated', 'number-generator']
           },
           'mult1': {
             'input': ['numberReceived'],
-            'output': ['numberMultiplied']
+            'output': ['numberMultiplied', 'number-multiplier']
           }
         }
       };
 
-      const connectedEvents = mockConnections[flowId][componentId][direction];
+      const connectedEvents = eventId ? [eventId] : mockConnections[flowId][componentId][direction];
       const swimlane = direction === 'input' ? document.getElementById('input-swimlane') : document.getElementById('output-swimlane');
       
       swimlane.innerHTML = '';
-      connectedEvents.forEach(eventName => {
+      connectedEvents.forEach(event => {
         const eventElement = document.createElement('div');
         eventElement.className = 'component';
-        eventElement.innerHTML = `<h3>${eventName}</h3>`;
+        eventElement.innerHTML = `<div id="${flowId}.${componentId}.${event}"></div>`;
         swimlane.appendChild(eventElement);
       });
     }
@@ -1005,5 +887,5 @@ export const AppModule = initializeAppModule(metadata)
 </html>
 </FILE>
 <REQUEST>
-there should be a button to load start and a button to load stop
+i want input event anchors to each be on their own row. within each row i want a button on the right that indicates type (publish or display) then in the middle a button that indicates the name then on the left a button that says input (when clicked it loads connected component)
 </REQUEST>
