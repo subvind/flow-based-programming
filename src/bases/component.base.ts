@@ -131,7 +131,7 @@ export abstract class ComponentBase implements Component {
       let port: Port = {
         direction: 'input',
         dataType: i[0],
-        dataMethod: i[1],
+        dataMethod: i[1] === 'display' ? 'display' : 'publish',
         eventId: i[2],
         connections: [...await this.loadConnections('input', i[2])]
       }
@@ -142,7 +142,7 @@ export abstract class ComponentBase implements Component {
       let port: Port = {
         direction: 'output',
         dataType: o[0],
-        dataMethod: o[1],
+        dataMethod: o[1] === 'display' ? 'display' : 'publish',
         eventId: o[2],
         connections: [...await this.loadConnections('output', o[2])]
       }

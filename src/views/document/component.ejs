@@ -5,7 +5,7 @@
         <% if (index !== 0) { %>
          <hr>
         <% } %>
-        <button onclick="loadConnectedComponents('input', 'example-flow', 'gen1', input)">input</button>
+        <button onclick="loadConnectedComponents('input', '<%- component.flowId %>', '<%- component.componentId %>', '<%- input %>')">input</button>
         <div style="float: right;">
           <%- input %>
         </div>
@@ -38,7 +38,7 @@
         <% if (index !== 0) { %>
          <hr>
         <% } %>
-        <button onclick="loadConnectedComponents('output', 'example-flow', 'gen1', '<%- output %>')" style="float: right;">output</button>
+        <button onclick="loadConnectedComponents('output', '<%- component.flowId %>', '<%- component.componentId %>', '<%- output %>')" style="float: right;">output</button>
         <%- output %> <br />
       <% }) %>
     </div>

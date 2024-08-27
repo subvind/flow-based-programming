@@ -66,25 +66,29 @@ export class AppController {
     if (component) {
       let port: Port = await component.findPort(portId);
 
-      // console.log('port', port);
-
       let connections: Connection[] = await component.findConnections(port);
 
-      if (connections) {
-        connections.forEach((connection) => {
-          // console.log('connection', connection);
-        });
+      if (port) {
+        if (port.dataMethod === 'publish') {
+          return {
+            ...params,
+            port,
+            connections
+          };
+        } else {
+          let displayHtmxId = `${flowId}.${componentId}.${port.eventId}`
+          return {
+            ...params,
+            port,
+            displayHtmxId
+          }
+        }
       }
-      return {
-        ...params,
-        connections
-      };
-    } else {
-      return {
-        ...params,
-        connections: []
-      };
     }
+    return {
+      ...params,
+      port: null
+    };
   }
 
   @Get('logger')

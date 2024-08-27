@@ -51,6 +51,18 @@
         }
       });
     }
+
+    function loadMainComponent(flowId, componentId) {
+      const swimlane = document.getElementById('main-swimlane');
+      
+      htmx.ajax('GET', `/document/${flowId}/${componentId}`, {
+        swap: 'none',
+        handler: (dom, event) => {
+          console.log(event.xhr.response);
+          document.getElementById(`main-swimlane`).innerHTML = event.xhr.response;
+        }
+      });
+    }
   </script>
 </body>
 </html>

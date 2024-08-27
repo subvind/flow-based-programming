@@ -4,7 +4,7 @@ import { Connection } from "./connection.interface";
 export interface Port {
   direction: 'input' | 'output'
   dataType: string;
-  dataMethod: string;
+  dataMethod: 'display' | 'publish';
   eventId: string;
   connections: Connection[];
 }

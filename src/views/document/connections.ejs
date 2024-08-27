@@ -1,9 +1,33 @@
 <div id="<%- flowId %>.<%- componentId %>.<%- portId %>">
-  <% connections.forEach(connection => { %>
-    <% if (connection.connectedTo) { %>
-      <%- include('component', { component: connection.connectedTo }); %> 
-    <% } else { %>
-      <%- include('component', { component: connection.connectedFrom }); %> 
+  <% if (port && port.dataMethod) { %>
+    <% if (port.dataMethod === 'publish') { %>
+      <% if (connections.length) { %>
+        <% connections.forEach(connection => { %>
+          <% if (connection.connectedTo) { %>
+            <%- include('component', { component: connection.connectedTo }); %> 
+          <% } else { %>
+            <%- include('component', { component: connection.connectedFrom }); %> 
+          <% } %>
+        <% }) %>
+      <% } else { %>
+        <br />
+        <div class="component">no connections found</div>  
+      <% } %>
     <% } %>
-  <% }) %>
+  
+    <% if (port.dataMethod === 'display') { %>
+      <div class="event-anchor input-anchors">
+        <button onclick="loadMainComponent('<%- flowId %>', '<%- componentId %>')">input</button>
+        <div style="float: right;">
+          <%- portId %> 
+        </div>
+        <br>
+      </div>
+      <div class="component">
+        <div id="<%- displayHtmxId %>"></div>
+      </div>
+    <% } %>
+  <% } else { %>
+    <div>component not found</div>  
+  <% } %>
 </div>
