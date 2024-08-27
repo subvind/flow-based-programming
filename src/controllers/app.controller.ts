@@ -3,6 +3,8 @@ import { Response, Request } from 'express';
 import { EventTriggerComponent } from '../components/event-trigger/event-trigger.handler';
 
 import { ComponentRegistry } from 'src/services/component-registry.service';
+import { Connection } from 'src/interfaces/connection.interface';
+import { Port } from 'src/interfaces/port.interface';
 
 @Controller()
 export class AppController {
@@ -40,6 +42,7 @@ export class AppController {
   @Render('document/component')
   async documentComponent(@Param('flowId') flowId: string, @Param('componentId') componentId: string) {
     const component = this.componentRegistry.getComponent(flowId, componentId);
+
     if (component) {
       return {
         component
@@ -48,6 +51,40 @@ export class AppController {
     return {
       component: null
     };
+  }
+
+  @Get('document/:flowId/:componentId/:portId')
+  @Render('document/connections')
+  async documentConnections( 
+    @Param('flowId') flowId: string, 
+    @Param('componentId') componentId: string,
+    @Param('portId') portId: string,
+  ) {
+    const params = { flowId, componentId, portId };
+    const component = this.componentRegistry.getComponent(flowId, componentId);
+    
+    if (component) {
+      let port: Port = await component.findPort(portId);
+
+      // console.log('port', port);
+
+      let connections: Connection[] = await component.findConnections(port);
+
+      if (connections) {
+        connections.forEach((connection) => {
+          // console.log('connection', connection);
+        });
+      }
+      return {
+        ...params,
+        connections
+      };
+    } else {
+      return {
+        ...params,
+        connections: []
+      };
+    }
   }
 
   @Get('logger')

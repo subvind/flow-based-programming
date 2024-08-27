@@ -28,7 +28,7 @@ export class NumberGeneratorComponent extends ComponentBase {
     @Inject(AmqpConnection) amqpConnection: AmqpConnection,
     @Inject('WEB_SOCKET_SERVER') protected server: Server
   ) {
-    super('numberGenerator', 'Number Generator', 'Generates random numbers periodically', flowId, componentId, amqpConnection, server);
+    super('numberGenerator', 'number-generator', 'Generates random numbers periodically', flowId, componentId, amqpConnection, server);
     this.flowId = flowId;
     this.componentId = componentId;
     this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);

@@ -24,7 +24,7 @@ export class EventTriggerComponent extends ComponentBase {
     @Inject(AmqpConnection) amqpConnection: AmqpConnection,
     @Inject('WEB_SOCKET_SERVER') protected server: Server
   ) {
-    super('eventTrigger', 'Event Trigger', 'Handles HTMX requests and triggers events', flowId, componentId, amqpConnection, server);
+    super('eventTrigger', 'event-trigger', 'Handles HTMX requests and triggers events', flowId, componentId, amqpConnection, server);
     this.flowId = flowId;
     this.componentId = componentId;
     this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);

@@ -12,8 +12,11 @@
 <body>
   <div class="swimlane">
     <div id="input-swimlane" class="input-swimlane"></div>
-    <div id="main-swimlane" class="main-swimlane"> 
-      <!-- load selected component using htmx -->
+    <div id="main-swimlane" class="main-swimlane" 
+         hx-get="/document/<%= selected.flowId %>/<%= selected.componentId %>"
+         hx-trigger="load"
+         hx-target="#main-swimlane">
+      <!-- Component will be loaded here -->
     </div>
     <div id="output-swimlane" class="output-swimlane"></div>
   </div>
@@ -33,10 +36,21 @@
       event.detail.headers['Content-Type'] = 'application/json';
     });
 
-    // Load ports for the number generator component when the page loads
-    document.addEventListener('DOMContentLoaded', () => {
-      loadComponentPorts('example-flow', 'gen1');
-    });
+    function loadConnectedComponents(direction, flowId, componentId, port) {
+      const swimlane = direction === 'input' ? document.getElementById('input-swimlane') : document.getElementById('output-swimlane');
+      swimlane.innerHTML = '';
+      const eventElement = document.createElement('div');
+      eventElement.setAttribute("id", `${flowId}.${componentId}.${port}`);
+      swimlane.appendChild(eventElement);
+      
+      htmx.ajax('GET', `/document/${flowId}/${componentId}/${port}`, {
+        swap: 'none',
+        handler: (dom, event) => {
+          console.log(event.xhr.response);
+          document.getElementById(`${flowId}.${componentId}.${port}`).outerHTML = event.xhr.response;
+        }
+      });
+    }
   </script>
 </body>
 </html>

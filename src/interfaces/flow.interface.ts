@@ -1,13 +1,10 @@
+import { Connection } from "./connection.interface";
+
 export interface Flow {
   id: string;
   components: {
     componentId: string;
     componentRef: string;
   }[];
-  connections: {
-    fromComponent: string;
-    fromEvent: string;
-    toComponent: string;
-    toEvent: string;
-  }[];
+  connections: Connection[];
 }

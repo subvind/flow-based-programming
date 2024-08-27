@@ -1,0 +1,9 @@
+<div id="<%- flowId %>.<%- componentId %>.<%- portId %>">
+  <% connections.forEach(connection => { %>
+    <% if (connection.connectedTo) { %>
+      <%- include('component', { component: connection.connectedTo }); %> 
+    <% } else { %>
+      <%- include('component', { component: connection.connectedFrom }); %> 
+    <% } %>
+  <% }) %>
+</div>

@@ -25,7 +25,7 @@ export class NumberMultiplierComponent extends ComponentBase {
     @Inject(AmqpConnection) amqpConnection: AmqpConnection,
     @Inject('WEB_SOCKET_SERVER') protected server: Server
   ) {
-    super('numberMultiplier', 'Number Multiplier', 'Multiplies received number by 2', flowId, componentId, amqpConnection, server);
+    super('numberMultiplier', 'number-multiplier', 'Multiplies received number by 2', flowId, componentId, amqpConnection, server);
     this.flowId = flowId;
     this.componentId = componentId;
     this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);

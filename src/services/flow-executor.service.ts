@@ -35,13 +35,16 @@ export class FlowExecutorService {
 
       // register new instance with component registery 
       this.componentRegistry.registerComponent(componentInstance);
+
+      // sync connections with component
+      componentInstance.syncConnections(flow.connections, this.componentRegistry);
  
       // publish init eventId command 
       try {
         await this.amqpConnection.publish('flow_exchange', 'componentEvent', {
           flowId: flow.id,
-          componentId: component.componentId,
-          componentRef: component.componentRef,
+          componentId: component.componentId, // dynamically defined
+          componentRef: component.componentRef, // hard code defined
           eventId: 'init',
           data: {},
         });
