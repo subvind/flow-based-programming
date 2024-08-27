@@ -274,13 +274,13 @@ You will now be given the actual INPUT you must work with.
 
 <FILE path="/home/travis/Projects/flow-based-programming/src/views/document/component.ejs">
 <% if (component) { %>
-  <div id="<%- component.flowId %>.<%- component.componentId %>">
+  <div id="<%- component.flowId %>.<%- component.componentId %>" class="swimlane-content">
     <div class="event-anchor input-anchors">
       <% component.ports.inputs.forEach((input, index) => { %>
         <% if (index !== 0) { %>
          <hr>
         <% } %>
-        <button onclick="loadConnectedComponents('input', '<%- component.flowId %>', '<%- component.componentId %>', '<%- input %>')">input</button>
+        <button onclick="loadConnectedComponents('input', '<%- component.flowId %>', '<%- component.componentId %>', '<%- input %>', '<%- swimlaneId %>')">input</button>
         <div style="float: right;">
           <%- input %>
         </div>
@@ -290,7 +290,7 @@ You will now be given the actual INPUT you must work with.
     <div id="number-generator" class="component">
       <h2><%- component.slug %></h2>
       <p><%- component.description %> </p>
-      <button hx-post="/trigger-event/example-flow.gen1.start"
+      <button hx-post="/trigger-event/<%- component.flowId %>.<%- component.componentId %>.start"
         hx-swap="none" 
         hx-ext='json-enc'
         hx-headers='{"Content-Type": "application/json"}'
@@ -298,7 +298,7 @@ You will now be given the actual INPUT you must work with.
       >
         Start Generating
       </button>
-      <button hx-post="/trigger-event/example-flow.gen1.stop"
+      <button hx-post="/trigger-event/<%- component.flowId %>.<%- component.componentId %>.stop"
         hx-swap="none" 
         hx-ext='json-enc'
         hx-headers='{"Content-Type": "application/json"}'
@@ -306,14 +306,13 @@ You will now be given the actual INPUT you must work with.
       >
         Stop Generating
       </button>
-      <!-- <div id="example-flow.gen1.number-generator"></div> -->
     </div>
     <div class="event-anchor output-anchors">
       <% component.ports.outputs.forEach((output, index) => { %>
         <% if (index !== 0) { %>
          <hr>
         <% } %>
-        <button onclick="loadConnectedComponents('output', '<%- component.flowId %>', '<%- component.componentId %>', '<%- output %>')" style="float: right;">output</button>
+        <button onclick="loadConnectedComponents('output', '<%- component.flowId %>', '<%- component.componentId %>', '<%- output %>', '<%- swimlaneId %>')" style="float: right;">output</button>
         <%- output %> <br />
       <% }) %>
     </div>
@@ -322,41 +321,85 @@ You will now be given the actual INPUT you must work with.
   <p>no component found</p>  
 <% } %>
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/views/document/connections.ejs">
-<div id="<%- flowId %>.<%- componentId %>.<%- portId %>">
-  <% if (port && port.dataMethod) { %>
-    <% if (port.dataMethod === 'publish') { %>
-      <% if (connections.length) { %>
-        <% connections.forEach(connection => { %>
-          <% if (connection.connectedTo) { %>
-            <%- include('component', { component: connection.connectedTo }); %> 
-          <% } else { %>
-            <%- include('component', { component: connection.connectedFrom }); %> 
-          <% } %>
-        <% }) %>
-      <% } else { %>
-        <br />
-        <div class="component">no connections found</div>  
-      <% } %>
-    <% } %>
-  
-    <% if (port.dataMethod === 'display') { %>
-      <div class="event-anchor input-anchors">
-        <button onclick="loadMainComponent('<%- flowId %>', '<%- componentId %>')">input</button>
-        <div style="float: right;">
-          <%- portId %> 
-        </div>
-        <br>
-      </div>
-      <div class="component">
-        <div id="<%- displayHtmxId %>"></div>
-      </div>
-    <% } %>
-  <% } else { %>
-    <div>component not found</div>  
-  <% } %>
-</div>
+<FILE path="/home/travis/Projects/flow-based-programming/src/views/document/methods.ejs">
+<script>
+  function loadConnectedComponents(direction, flowId, componentId, port, swimlaneId) {
+    const mainSwimlane = document.getElementById(swimlaneId);
+    const mainIndex = parseInt(mainSwimlane.getAttribute('data-index'));
+    
+    let targetIndex, targetSwimlane;
+    if (direction === 'input') {
+      targetIndex = mainIndex - 1;
+      targetSwimlane = getOrCreateSwimlane(targetIndex);
+    } else {
+      targetIndex = mainIndex + 1;
+      targetSwimlane = getOrCreateSwimlane(targetIndex);
+    }
 
+    const eventElement = document.createElement('div');
+    eventElement.setAttribute("id", `${flowId}.${componentId}.${port}`);
+    targetSwimlane.innerHTML = '';
+    targetSwimlane.appendChild(eventElement);
+    
+    htmx.ajax('GET', `/document/${flowId}/${componentId}/${port}`, {
+      swap: 'none',
+      handler: (dom, event) => {
+        document.getElementById(`${flowId}.${componentId}.${port}`).outerHTML = event.xhr.response;
+      }
+    });
+  }
+
+  function loadMainComponent(flowId, componentId) {
+    const clickedSwimlane = event.target.closest('.swimlane');
+    const clickedIndex = parseInt(clickedSwimlane.getAttribute('data-index'));
+    
+    // Move the clicked swimlane to the center
+    const container = document.getElementById('swimlane-container');
+    const swimlanes = Array.from(container.children);
+    swimlanes.forEach(swimlane => {
+      const currentIndex = parseInt(swimlane.getAttribute('data-index'));
+      swimlane.setAttribute('data-index', currentIndex - clickedIndex);
+    });
+
+    // Update the main swimlane
+    const mainSwimlane = document.getElementById('main-swimlane');
+    mainSwimlane.setAttribute('data-index', '0');
+    mainSwimlane.innerHTML = '';
+    
+    htmx.ajax('GET', `/document/${flowId}/${componentId}`, {
+      swap: 'none',
+      handler: (dom, event) => {
+        mainSwimlane.innerHTML = event.xhr.response;
+      }
+    });
+
+    // Remove unnecessary swimlanes
+    swimlanes.forEach(swimlane => {
+      const index = parseInt(swimlane.getAttribute('data-index'));
+      if (Math.abs(index) > 5) {
+        swimlane.remove();
+      }
+    });
+  }
+
+  function getOrCreateSwimlane(index) {
+    let swimlane = document.querySelector(`.swimlane[data-index="${index}"]`);
+    if (!swimlane) {
+      swimlane = document.createElement('div');
+      swimlane.className = 'swimlane';
+      swimlane.setAttribute('data-index', index);
+      swimlane.id = `swimlane-${index}`;
+      
+      const container = document.getElementById('swimlane-container');
+      if (index < 0) {
+        container.insertBefore(swimlane, container.firstChild);
+      } else {
+        container.appendChild(swimlane);
+      }
+    }
+    return swimlane;
+  }
+</script>
 </FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/views/document/style.ejs">
 <style>
@@ -368,15 +411,18 @@ You will now be given the actual INPUT you must work with.
     padding: 0;
     background: #eee; 
   }
-  .swimlane { 
-    display: flex; 
-    justify-content: space-between;
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    overflow: hidden;
+  .swimlane-container {
+    display: flex;
+    overflow-x: auto;
+    width: 100%;
+    height: 100vh;
+  }
+  .swimlane {
+    flex: 0 0 33.33%;
+    min-width: 300px;
+    padding: 0 2em;
+    border-right: 4px dashed #ccc;
+    overflow-y: auto;
   }
   .input-swimlane, .output-swimlane {
     width: 33.33%; 
@@ -438,6 +484,42 @@ You will now be given the actual INPUT you must work with.
   }
 </style>
 </FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/views/document/connections.ejs">
+<div id="<%- flowId %>.<%- componentId %>.<%- portId %>">
+  <% if (port && port.dataMethod) { %>
+    <% if (port.dataMethod === 'publish') { %>
+      <% if (connections.length) { %>
+        <% connections.forEach(connection => { %>
+          <% if (connection.connectedTo) { %>
+            <%- include('component', { component: connection.connectedTo }); %> 
+          <% } else { %>
+            <%- include('component', { component: connection.connectedFrom }); %> 
+          <% } %>
+        <% }) %>
+      <% } else { %>
+        <br />
+        <div class="component">no connections found</div>  
+      <% } %>
+    <% } %>
+  
+    <% if (port.dataMethod === 'display') { %>
+      <div class="event-anchor input-anchors">
+        <button onclick="loadMainComponent('<%- flowId %>', '<%- componentId %>')">input</button>
+        <div style="float: right;">
+          <%- portId %> 
+        </div>
+        <br>
+      </div>
+      <div class="component">
+        <div id="<%- displayHtmxId %>"></div>
+      </div>
+    <% } %>
+  <% } else { %>
+    <div>component not found</div>  
+  <% } %>
+</div>
+
+</FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/controllers/app.controller.ts">
 import { Logger, Controller, Get, Post, Render, Body, Param, Res, Req } from '@nestjs/common';
 import { Response, Request } from 'express';
@@ -481,16 +563,21 @@ export class AppController {
 
   @Get('document/:flowId/:componentId')
   @Render('document/component')
-  async documentComponent(@Param('flowId') flowId: string, @Param('componentId') componentId: string) {
+  async documentComponent(
+    @Param('flowId') flowId: string,
+    @Param('componentId') componentId: string
+  ) {
     const component = this.componentRegistry.getComponent(flowId, componentId);
-
+  
     if (component) {
       return {
-        component
+        component,
+        swimlaneId: 'main-swimlane'
       };
     }
     return {
-      component: null
+      component: null,
+      swimlaneId: 'main-swimlane'
     };
   }
 
@@ -659,20 +746,6 @@ export interface Component {
   findConnections: (port: Port) => Promise<Connection[]>
 }
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/connection.interface.ts">
-import { Component } from "./component.interface";
-
-export interface Connection {
-  toFlow: string;
-  toComponent: string;
-  toEvent: string;
-  connectedTo: Component | undefined;
-  fromFlow: string;
-  fromComponent: string;
-  fromEvent: string;
-  connectedFrom: Component | undefined;
-}
-</FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/flow.interface.ts">
 import { Connection } from "./connection.interface";
 
@@ -685,79 +758,18 @@ export interface Flow {
   connections: Connection[];
 }
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/port.interface.ts">
-import { Connection } from "./connection.interface";
+<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/connection.interface.ts">
+import { Component } from "./component.interface";
 
-// portId format: <dataType>.<dataMethod>.<eventId>
-export interface Port {
-  direction: 'input' | 'output'
-  dataType: string;
-  dataMethod: 'display' | 'publish';
-  eventId: string;
-  connections: Connection[];
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/processors/event.processor.ts">
-import { Injectable, Logger } from '@nestjs/common';
-import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
-import { ComponentRegistry } from '../services/component-registry.service';
-
-@Injectable()
-export class EventProcessor {
-  private readonly logger = new Logger(EventProcessor.name);
-  private connections: Map<string, { toFlow: string; toComponent: string; toEvent: string }> = new Map();
-
-  constructor(private componentRegistry: ComponentRegistry) {}
-
-  @RabbitSubscribe({
-    exchange: 'flow_exchange',
-    routingKey: 'componentEvent',
-    queue: 'component_event_queue',
-  })
-  async handleComponentEvent(msg: {flowId: string, componentId: string, eventId: string, data: any}) {
-    const { flowId, componentId, eventId, data: eventData } = msg;
-    this.logger.log(`[handleComponentEvent] [${flowId}.${componentId}.${eventId}] data: ${JSON.stringify(eventData)}`);
-    
-    const component = this.componentRegistry.getComponent(flowId, componentId);
-    if (component) {
-      this.logger.log(`Passing event to component: ${componentId}`);
-      await component.handleEvent(eventId, eventData);
-
-      // Check if there's a connection for this event
-      const connectionKey = `${flowId}.${componentId}.${eventId}`;
-      const connection = this.connections.get(connectionKey);
-      if (connection) {
-        const { toFlow, toComponent, toEvent } = connection;
-        this.logger.log(`[forwardingComponentEvent] [${toFlow}.${toComponent}.${toEvent}]`);
-        
-        const targetComponent = this.componentRegistry.getComponent(toFlow, toComponent);
-        if (targetComponent) {
-          this.logger.log(`Forwarding event to component: ${targetComponent.componentId}`);
-          await targetComponent.handleEvent(toEvent, eventData);
-        } else {
-          this.logger.warn(`Target component not found: ${toComponent} in flow: ${toFlow}`);
-        }
-      }
-    } else {
-      this.logger.warn(`Component not found: ${flowId}.${componentId}`);
-    }
-  }
-
-  @RabbitSubscribe({
-    exchange: 'flow_exchange',
-    routingKey: 'createConnection',
-    queue: 'create_connection_queue',
-  })
-  async createConnection(msg: {flowId: string, fromComponent: string, fromEvent: string, toComponent: string, toEvent: string}) {
-    const { flowId, fromComponent, fromEvent, toComponent, toEvent } = msg;
-    this.logger.log(`Received createConnection: ${flowId}.${fromComponent}.${fromEvent} -> ${toComponent}.${toEvent}`);
-    
-    const connectionKey = `${flowId}.${fromComponent}.${fromEvent}`;
-    this.connections.set(connectionKey, { toFlow: flowId, toComponent, toEvent });
-    this.logger.log(`Connection created: ${connectionKey} -> ${toComponent}.${toEvent}`);
-    
-    return { success: true, message: 'Connection created successfully' };
-  }
+export interface Connection {
+  toFlow: string;
+  toComponent: string;
+  toEvent: string;
+  connectedTo: Component | undefined;
+  fromFlow: string;
+  fromComponent: string;
+  fromEvent: string;
+  connectedFrom: Component | undefined;
 }
 </FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/bootstrap/app.bootstrap.ts">
@@ -894,15 +906,13 @@ bootstrap().catch((error) => {
   <%- include('style') %>
 </head>
 <body>
-  <div class="swimlane">
-    <div id="input-swimlane" class="input-swimlane"></div>
-    <div id="main-swimlane" class="main-swimlane" 
+  <div id="swimlane-container" class="swimlane-container">
+    <div id="main-swimlane" class="swimlane" data-index="0"
          hx-get="/document/<%= selected.flowId %>/<%= selected.componentId %>"
          hx-trigger="load"
          hx-target="#main-swimlane">
-      <!-- Component will be loaded here -->
+      <!-- Main component will be loaded here -->
     </div>
-    <div id="output-swimlane" class="output-swimlane"></div>
   </div>
 
   <script>
@@ -919,38 +929,11 @@ bootstrap().catch((error) => {
     htmx.on("htmx:configRequest", (event) => {
       event.detail.headers['Content-Type'] = 'application/json';
     });
-
-    function loadConnectedComponents(direction, flowId, componentId, port) {
-      const swimlane = direction === 'input' ? document.getElementById('input-swimlane') : document.getElementById('output-swimlane');
-      swimlane.innerHTML = '';
-      const eventElement = document.createElement('div');
-      eventElement.setAttribute("id", `${flowId}.${componentId}.${port}`);
-      swimlane.appendChild(eventElement);
-      
-      htmx.ajax('GET', `/document/${flowId}/${componentId}/${port}`, {
-        swap: 'none',
-        handler: (dom, event) => {
-          console.log(event.xhr.response);
-          document.getElementById(`${flowId}.${componentId}.${port}`).outerHTML = event.xhr.response;
-        }
-      });
-    }
-
-    function loadMainComponent(flowId, componentId) {
-      const swimlane = document.getElementById('main-swimlane');
-      
-      htmx.ajax('GET', `/document/${flowId}/${componentId}`, {
-        swap: 'none',
-        handler: (dom, event) => {
-          console.log(event.xhr.response);
-          document.getElementById(`main-swimlane`).innerHTML = event.xhr.response;
-        }
-      });
-    }
   </script>
+  <%- include('methods') %> 
 </body>
 </html>
 </FILE>
 <REQUEST>
-i want the swimlanes to be dynamic. so everthing left of main is a negative numbered swimlane and everything to the right of main is a positive numbered swimlane. also, input buttons open up the component in the swimlane to the left... output buttons open up the component in the swimlane to the right... there could be an unlimited number of swimlanes added/removed because of input/output button clicking.
+component.ejs and method.ejs should both include swimlane id because none of the swimlanes are loading properly except main.... also swimlaneId needs to exists for connectedComponents
 </REQUEST>

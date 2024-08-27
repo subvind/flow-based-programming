@@ -1,11 +1,11 @@
 <% if (component) { %>
-  <div id="<%- component.flowId %>.<%- component.componentId %>">
+  <div id="<%- component.flowId %>.<%- component.componentId %>" class="swimlane-content" data-swimlane-id="<%- swimlaneId %>">
     <div class="event-anchor input-anchors">
       <% component.ports.inputs.forEach((input, index) => { %>
         <% if (index !== 0) { %>
          <hr>
         <% } %>
-        <button onclick="loadConnectedComponents('input', '<%- component.flowId %>', '<%- component.componentId %>', '<%- input %>')">input</button>
+        <button onclick="loadConnectedComponents('input', '<%- component.flowId %>', '<%- component.componentId %>', '<%- input %>', '<%- swimlaneId %>')">input</button>
         <div style="float: right;">
           <%- input %>
         </div>
@@ -15,7 +15,7 @@
     <div id="number-generator" class="component">
       <h2><%- component.slug %></h2>
       <p><%- component.description %> </p>
-      <button hx-post="/trigger-event/example-flow.gen1.start"
+      <button hx-post="/trigger-event/<%- component.flowId %>.<%- component.componentId %>.start"
         hx-swap="none" 
         hx-ext='json-enc'
         hx-headers='{"Content-Type": "application/json"}'
@@ -23,7 +23,7 @@
       >
         Start Generating
       </button>
-      <button hx-post="/trigger-event/example-flow.gen1.stop"
+      <button hx-post="/trigger-event/<%- component.flowId %>.<%- component.componentId %>.stop"
         hx-swap="none" 
         hx-ext='json-enc'
         hx-headers='{"Content-Type": "application/json"}'
@@ -31,14 +31,13 @@
       >
         Stop Generating
       </button>
-      <!-- <div id="example-flow.gen1.number-generator"></div> -->
     </div>
     <div class="event-anchor output-anchors">
       <% component.ports.outputs.forEach((output, index) => { %>
         <% if (index !== 0) { %>
          <hr>
         <% } %>
-        <button onclick="loadConnectedComponents('output', '<%- component.flowId %>', '<%- component.componentId %>', '<%- output %>')" style="float: right;">output</button>
+        <button onclick="loadConnectedComponents('output', '<%- component.flowId %>', '<%- component.componentId %>', '<%- output %>', '<%- swimlaneId %>')" style="float: right;">output</button>
         <%- output %> <br />
       <% }) %>
     </div>

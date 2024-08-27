@@ -1,6 +1,6 @@
 <script>
-  function loadConnectedComponents(direction, flowId, componentId, port) {
-    const mainSwimlane = document.getElementById('main-swimlane');
+  function loadConnectedComponents(direction, flowId, componentId, port, swimlaneId) {
+    const mainSwimlane = document.getElementById(swimlaneId);
     const mainIndex = parseInt(mainSwimlane.getAttribute('data-index'));
     
     let targetIndex, targetSwimlane;
@@ -17,7 +17,7 @@
     targetSwimlane.innerHTML = '';
     targetSwimlane.appendChild(eventElement);
     
-    htmx.ajax('GET', `/document/${flowId}/${componentId}/${port}`, {
+    htmx.ajax('GET', `/document/${flowId}/${componentId}/${port}/${targetSwimlane.id}`, {
       swap: 'none',
       handler: (dom, event) => {
         document.getElementById(`${flowId}.${componentId}.${port}`).outerHTML = event.xhr.response;
@@ -25,35 +25,16 @@
     });
   }
 
-  function loadMainComponent(flowId, componentId) {
-    const clickedSwimlane = event.target.closest('.swimlane');
-    const clickedIndex = parseInt(clickedSwimlane.getAttribute('data-index'));
-    
-    // Move the clicked swimlane to the center
-    const container = document.getElementById('swimlane-container');
-    const swimlanes = Array.from(container.children);
-    swimlanes.forEach(swimlane => {
-      const currentIndex = parseInt(swimlane.getAttribute('data-index'));
-      swimlane.setAttribute('data-index', currentIndex - clickedIndex);
-    });
-
+  function loadMainComponent(flowId, componentId, swimlaneId) {
     // Update the main swimlane
-    const mainSwimlane = document.getElementById('main-swimlane');
+    const mainSwimlane = document.getElementById(swimlaneId);
     mainSwimlane.setAttribute('data-index', '0');
     mainSwimlane.innerHTML = '';
     
-    htmx.ajax('GET', `/document/${flowId}/${componentId}`, {
+    htmx.ajax('GET', `/document/${flowId}/${componentId}/${swimlaneId}`, {
       swap: 'none',
       handler: (dom, event) => {
         mainSwimlane.innerHTML = event.xhr.response;
-      }
-    });
-
-    // Remove unnecessary swimlanes
-    swimlanes.forEach(swimlane => {
-      const index = parseInt(swimlane.getAttribute('data-index'));
-      if (Math.abs(index) > 5) {
-        swimlane.remove();
       }
     });
   }
@@ -64,6 +45,7 @@
       swimlane = document.createElement('div');
       swimlane.className = 'swimlane';
       swimlane.setAttribute('data-index', index);
+      swimlane.id = `swimlane-${index}`;
       
       const container = document.getElementById('swimlane-container');
       if (index < 0) {

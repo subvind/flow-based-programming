@@ -38,27 +38,34 @@ export class AppController {
     };
   }
 
-  @Get('document/:flowId/:componentId')
+  @Get('document/:flowId/:componentId/:swimlaneId')
   @Render('document/component')
-  async documentComponent(@Param('flowId') flowId: string, @Param('componentId') componentId: string) {
+  async documentComponent(
+    @Param('flowId') flowId: string,
+    @Param('componentId') componentId: string,
+    @Param('swimlaneId') swimlaneId: string,
+  ) {
     const component = this.componentRegistry.getComponent(flowId, componentId);
-
+  
     if (component) {
       return {
-        component
+        component,
+        swimlaneId
       };
     }
     return {
-      component: null
+      component: null,
+      swimlaneId
     };
   }
 
-  @Get('document/:flowId/:componentId/:portId')
+  @Get('document/:flowId/:componentId/:portId/:swimlaneId')
   @Render('document/connections')
   async documentConnections( 
     @Param('flowId') flowId: string, 
     @Param('componentId') componentId: string,
     @Param('portId') portId: string,
+    @Param('swimlaneId') swimlaneId: string,
   ) {
     const params = { flowId, componentId, portId };
     const component = this.componentRegistry.getComponent(flowId, componentId);
@@ -73,21 +80,24 @@ export class AppController {
           return {
             ...params,
             port,
-            connections
+            connections,
+            swimlaneId
           };
         } else {
           let displayHtmxId = `${flowId}.${componentId}.${port.eventId}`
           return {
             ...params,
             port,
-            displayHtmxId
+            displayHtmxId,
+            swimlaneId
           }
         }
       }
     }
     return {
       ...params,
-      port: null
+      port: null,
+      swimlaneId
     };
   }
 
