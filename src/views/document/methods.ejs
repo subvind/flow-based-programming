@@ -1,0 +1,77 @@
+<script>
+  function loadConnectedComponents(direction, flowId, componentId, port) {
+    const mainSwimlane = document.getElementById('main-swimlane');
+    const mainIndex = parseInt(mainSwimlane.getAttribute('data-index'));
+    
+    let targetIndex, targetSwimlane;
+    if (direction === 'input') {
+      targetIndex = mainIndex - 1;
+      targetSwimlane = getOrCreateSwimlane(targetIndex);
+    } else {
+      targetIndex = mainIndex + 1;
+      targetSwimlane = getOrCreateSwimlane(targetIndex);
+    }
+
+    const eventElement = document.createElement('div');
+    eventElement.setAttribute("id", `${flowId}.${componentId}.${port}`);
+    targetSwimlane.innerHTML = '';
+    targetSwimlane.appendChild(eventElement);
+    
+    htmx.ajax('GET', `/document/${flowId}/${componentId}/${port}`, {
+      swap: 'none',
+      handler: (dom, event) => {
+        document.getElementById(`${flowId}.${componentId}.${port}`).outerHTML = event.xhr.response;
+      }
+    });
+  }
+
+  function loadMainComponent(flowId, componentId) {
+    const clickedSwimlane = event.target.closest('.swimlane');
+    const clickedIndex = parseInt(clickedSwimlane.getAttribute('data-index'));
+    
+    // Move the clicked swimlane to the center
+    const container = document.getElementById('swimlane-container');
+    const swimlanes = Array.from(container.children);
+    swimlanes.forEach(swimlane => {
+      const currentIndex = parseInt(swimlane.getAttribute('data-index'));
+      swimlane.setAttribute('data-index', currentIndex - clickedIndex);
+    });
+
+    // Update the main swimlane
+    const mainSwimlane = document.getElementById('main-swimlane');
+    mainSwimlane.setAttribute('data-index', '0');
+    mainSwimlane.innerHTML = '';
+    
+    htmx.ajax('GET', `/document/${flowId}/${componentId}`, {
+      swap: 'none',
+      handler: (dom, event) => {
+        mainSwimlane.innerHTML = event.xhr.response;
+      }
+    });
+
+    // Remove unnecessary swimlanes
+    swimlanes.forEach(swimlane => {
+      const index = parseInt(swimlane.getAttribute('data-index'));
+      if (Math.abs(index) > 5) {
+        swimlane.remove();
+      }
+    });
+  }
+
+  function getOrCreateSwimlane(index) {
+    let swimlane = document.querySelector(`.swimlane[data-index="${index}"]`);
+    if (!swimlane) {
+      swimlane = document.createElement('div');
+      swimlane.className = 'swimlane';
+      swimlane.setAttribute('data-index', index);
+      
+      const container = document.getElementById('swimlane-container');
+      if (index < 0) {
+        container.insertBefore(swimlane, container.firstChild);
+      } else {
+        container.appendChild(swimlane);
+      }
+    }
+    return swimlane;
+  }
+</script>

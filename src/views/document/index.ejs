@@ -10,15 +10,13 @@
   <%- include('style') %>
 </head>
 <body>
-  <div class="swimlane">
-    <div id="input-swimlane" class="input-swimlane"></div>
-    <div id="main-swimlane" class="main-swimlane" 
+  <div id="swimlane-container" class="swimlane-container">
+    <div id="main-swimlane" class="swimlane" data-index="0"
          hx-get="/document/<%= selected.flowId %>/<%= selected.componentId %>"
          hx-trigger="load"
          hx-target="#main-swimlane">
-      <!-- Component will be loaded here -->
+      <!-- Main component will be loaded here -->
     </div>
-    <div id="output-swimlane" class="output-swimlane"></div>
   </div>
 
   <script>
@@ -35,34 +33,7 @@
     htmx.on("htmx:configRequest", (event) => {
       event.detail.headers['Content-Type'] = 'application/json';
     });
-
-    function loadConnectedComponents(direction, flowId, componentId, port) {
-      const swimlane = direction === 'input' ? document.getElementById('input-swimlane') : document.getElementById('output-swimlane');
-      swimlane.innerHTML = '';
-      const eventElement = document.createElement('div');
-      eventElement.setAttribute("id", `${flowId}.${componentId}.${port}`);
-      swimlane.appendChild(eventElement);
-      
-      htmx.ajax('GET', `/document/${flowId}/${componentId}/${port}`, {
-        swap: 'none',
-        handler: (dom, event) => {
-          console.log(event.xhr.response);
-          document.getElementById(`${flowId}.${componentId}.${port}`).outerHTML = event.xhr.response;
-        }
-      });
-    }
-
-    function loadMainComponent(flowId, componentId) {
-      const swimlane = document.getElementById('main-swimlane');
-      
-      htmx.ajax('GET', `/document/${flowId}/${componentId}`, {
-        swap: 'none',
-        handler: (dom, event) => {
-          console.log(event.xhr.response);
-          document.getElementById(`main-swimlane`).innerHTML = event.xhr.response;
-        }
-      });
-    }
   </script>
+  <%- include('methods') %> 
 </body>
 </html>
