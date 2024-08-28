@@ -1,5 +1,6 @@
 <div id="<%= _flowId %>.<%= _componentId %>.<%= _templateId %>">
-  <p>Last received number: <%= input %></p>
-  <p>Multiplied result: <%= result %></p>
+  <p>First number: <%= firstNumber !== null ? firstNumber : 'Waiting...' %></p>
+  <p>Second number: <%= secondNumber !== null ? secondNumber : 'Waiting...' %></p>
+  <p>Multiplied result: <%= result !== undefined ? result : 'Waiting for both numbers...' %></p>
   <p>Processed at: <%= new Date(timestamp).toLocaleString() %></p>
 </div>

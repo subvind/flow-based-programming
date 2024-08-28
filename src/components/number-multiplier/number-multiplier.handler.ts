@@ -11,7 +11,8 @@ export class NumberMultiplierComponent extends ComponentBase {
   public logger;
   public ports = { // io format: <dataType>.<dataMethod>.<eventId>
     inputs: [
-      'number.publish.numberReceived',
+      'number.publish.firstNumberReceived',
+      'number.publish.secondNumberReceived',
     ],
     outputs: [
       'number.publish.numberMultiplied',
@@ -19,13 +20,16 @@ export class NumberMultiplierComponent extends ComponentBase {
     ]
   }
 
+  public firstNumber: number | null = null;
+  public secondNumber: number | null = null;
+
   constructor(
     @Inject('FLOW_ID') flowId: string,
     @Inject('COMPONENT_ID') componentId: string,
     @Inject(AmqpConnection) amqpConnection: AmqpConnection,
     @Inject('WEB_SOCKET_SERVER') protected server: Server
   ) {
-    super('numberMultiplier', 'number-multiplier', 'Multiplies received number by 2', flowId, componentId, amqpConnection, server);
+    super('numberMultiplier', 'number-multiplier', 'Multiplies two received numbers', flowId, componentId, amqpConnection, server);
     this.flowId = flowId;
     this.componentId = componentId;
     this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
@@ -34,15 +38,18 @@ export class NumberMultiplierComponent extends ComponentBase {
   async handleEvent(eventId: string, data: any): Promise<void> {
     this.logger.log(`NumberMultiplier handling event: ${eventId} ${JSON.stringify(data, null, 2)}`);
     switch (eventId) {
-      case 'numberReceived':
-        await this.numberReceived(data);
+      case 'firstNumberReceived':
+        await this.numberReceived(data, 'first');
+        break;
+      case 'secondNumberReceived':
+        await this.numberReceived(data, 'second');
         break;
       default:
         break;
     }
   }
 
-  private numberReceived(data): Promise<void> {
-    return numberReceived(this, data);
+  private numberReceived(data: any, which: 'first' | 'second'): Promise<void> {
+    return numberReceived(this, data, which);
   }
 }

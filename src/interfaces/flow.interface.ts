@@ -5,6 +5,7 @@ export interface Flow {
   components: {
     componentId: string;
     componentRef: string;
+    init: any | undefined;
   }[];
   connections: Connection[];
 }

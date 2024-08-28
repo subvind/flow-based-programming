@@ -4,6 +4,7 @@ import { ComponentBase } from '../../bases/component.base';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { Server } from 'socket.io';
 
+import { init } from './init.event';
 import { initializeMachine } from './initialize-machine.event';
 import { transition } from './transition.event';
 
@@ -40,26 +41,35 @@ export class StateMachineComponent extends ComponentBase {
   }
 
   async handleEvent(eventId: string, data: any): Promise<void> {
-    this.logger.log(`StateMachine (${this.flowId}) handling event: ${eventId}`);
+    this.logger.log(`handling event: ${eventId}`);
     switch (eventId) {
+      case "init": {
+        this.logger.log(`init machine`);
+        await this.init(data);
+        break;
+      }
       case "initializeMachine": {
-        this.logger.log(`StateMachine (${this.flowId}) initializing machine`);
+        this.logger.log(`initializing machine`);
         await this.initializeMachine(data);
         break;
       }
       case "transition": {
-        this.logger.log(`StateMachine (${this.flowId}) transitioning`);
+        this.logger.log(`transitioning`);
         await this.transition(data);
         break;
       }
     }
   }
 
-  private async initializeMachine(data): Promise<void> {
+  public async init(data): Promise<void> {
+    return init(this, data);
+  }
+
+  public async initializeMachine(data): Promise<void> {
     return initializeMachine(this, data);
   }
 
-  private async transition(data): Promise<void> {
+  public async transition(data): Promise<void> {
     return transition(this, data);
   }
 }

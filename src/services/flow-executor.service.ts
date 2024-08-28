@@ -45,8 +45,8 @@ export class FlowExecutorService {
           flowId: flow.id,
           componentId: component.componentId, // dynamically defined
           componentRef: component.componentRef, // hard code defined
-          eventId: 'init',
-          data: {},
+          eventId: 'init', // flow executor defined
+          data: component.init, // dynamically defined
         });
       } catch (error) {
         this.logger.error(`Error initializing component ${component.componentId} for flow ${flow.id}:`, error);
