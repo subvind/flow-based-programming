@@ -274,7 +274,7 @@ You will now be given the actual INPUT you must work with.
 
 <FILE path="/home/travis/Projects/flow-based-programming/src/views/document/component.ejs">
 <% if (component) { %>
-  <div id="<%- component.flowId %>.<%- component.componentId %>" class="swimlane-content">
+  <div id="<%- component.flowId %>.<%- component.componentId %>" class="swimlane-content" data-swimlane-id="<%- swimlaneId %>">
     <div class="event-anchor input-anchors">
       <% component.ports.inputs.forEach((input, index) => { %>
         <% if (index !== 0) { %>
@@ -321,6 +321,42 @@ You will now be given the actual INPUT you must work with.
   <p>no component found</p>  
 <% } %>
 </FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/views/document/connections.ejs">
+<div id="<%- flowId %>.<%- componentId %>.<%- portId %>">
+  <% if (port && port.dataMethod) { %>
+    <% if (port.dataMethod === 'publish') { %>
+      <% if (connections.length) { %>
+        <% connections.forEach(connection => { %>
+          <% if (connection.connectedTo) { %>
+            <%- include('component', { component: connection.connectedTo }); %> 
+          <% } else { %>
+            <%- include('component', { component: connection.connectedFrom }); %> 
+          <% } %>
+        <% }) %>
+      <% } else { %>
+        <br />
+        <div class="component">no connections found</div>  
+      <% } %>
+    <% } %>
+  
+    <% if (port.dataMethod === 'display') { %>
+      <div class="event-anchor input-anchors">
+        <button onclick="loadMainComponent('<%- flowId %>', '<%- componentId %>', '<%- swimlaneId %>')">input</button>
+        <div style="float: right;">
+          <%- portId %> 
+        </div>
+        <br>
+      </div>
+      <div class="component">
+        <div id="<%- displayHtmxId %>"></div>
+      </div>
+    <% } %>
+  <% } else { %>
+    <div>component not found</div>  
+  <% } %>
+</div>
+
+</FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/views/document/methods.ejs">
 <script>
   function loadConnectedComponents(direction, flowId, componentId, port, swimlaneId) {
@@ -341,7 +377,7 @@ You will now be given the actual INPUT you must work with.
     targetSwimlane.innerHTML = '';
     targetSwimlane.appendChild(eventElement);
     
-    htmx.ajax('GET', `/document/${flowId}/${componentId}/${port}`, {
+    htmx.ajax('GET', `/document/${flowId}/${componentId}/${port}/${targetSwimlane.id}`, {
       swap: 'none',
       handler: (dom, event) => {
         document.getElementById(`${flowId}.${componentId}.${port}`).outerHTML = event.xhr.response;
@@ -349,35 +385,16 @@ You will now be given the actual INPUT you must work with.
     });
   }
 
-  function loadMainComponent(flowId, componentId) {
-    const clickedSwimlane = event.target.closest('.swimlane');
-    const clickedIndex = parseInt(clickedSwimlane.getAttribute('data-index'));
-    
-    // Move the clicked swimlane to the center
-    const container = document.getElementById('swimlane-container');
-    const swimlanes = Array.from(container.children);
-    swimlanes.forEach(swimlane => {
-      const currentIndex = parseInt(swimlane.getAttribute('data-index'));
-      swimlane.setAttribute('data-index', currentIndex - clickedIndex);
-    });
-
+  function loadMainComponent(flowId, componentId, swimlaneId) {
     // Update the main swimlane
-    const mainSwimlane = document.getElementById('main-swimlane');
+    const mainSwimlane = document.getElementById(swimlaneId);
     mainSwimlane.setAttribute('data-index', '0');
     mainSwimlane.innerHTML = '';
     
-    htmx.ajax('GET', `/document/${flowId}/${componentId}`, {
+    htmx.ajax('GET', `/document/${flowId}/${componentId}/${swimlaneId}`, {
       swap: 'none',
       handler: (dom, event) => {
         mainSwimlane.innerHTML = event.xhr.response;
-      }
-    });
-
-    // Remove unnecessary swimlanes
-    swimlanes.forEach(swimlane => {
-      const index = parseInt(swimlane.getAttribute('data-index'));
-      if (Math.abs(index) > 5) {
-        swimlane.remove();
       }
     });
   }
@@ -484,42 +501,6 @@ You will now be given the actual INPUT you must work with.
   }
 </style>
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/views/document/connections.ejs">
-<div id="<%- flowId %>.<%- componentId %>.<%- portId %>">
-  <% if (port && port.dataMethod) { %>
-    <% if (port.dataMethod === 'publish') { %>
-      <% if (connections.length) { %>
-        <% connections.forEach(connection => { %>
-          <% if (connection.connectedTo) { %>
-            <%- include('component', { component: connection.connectedTo }); %> 
-          <% } else { %>
-            <%- include('component', { component: connection.connectedFrom }); %> 
-          <% } %>
-        <% }) %>
-      <% } else { %>
-        <br />
-        <div class="component">no connections found</div>  
-      <% } %>
-    <% } %>
-  
-    <% if (port.dataMethod === 'display') { %>
-      <div class="event-anchor input-anchors">
-        <button onclick="loadMainComponent('<%- flowId %>', '<%- componentId %>')">input</button>
-        <div style="float: right;">
-          <%- portId %> 
-        </div>
-        <br>
-      </div>
-      <div class="component">
-        <div id="<%- displayHtmxId %>"></div>
-      </div>
-    <% } %>
-  <% } else { %>
-    <div>component not found</div>  
-  <% } %>
-</div>
-
-</FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/controllers/app.controller.ts">
 import { Logger, Controller, Get, Post, Render, Body, Param, Res, Req } from '@nestjs/common';
 import { Response, Request } from 'express';
@@ -561,32 +542,34 @@ export class AppController {
     };
   }
 
-  @Get('document/:flowId/:componentId')
+  @Get('document/:flowId/:componentId/:swimlaneId')
   @Render('document/component')
   async documentComponent(
     @Param('flowId') flowId: string,
-    @Param('componentId') componentId: string
+    @Param('componentId') componentId: string,
+    @Param('swimlaneId') swimlaneId: string,
   ) {
     const component = this.componentRegistry.getComponent(flowId, componentId);
   
     if (component) {
       return {
         component,
-        swimlaneId: 'main-swimlane'
+        swimlaneId
       };
     }
     return {
       component: null,
-      swimlaneId: 'main-swimlane'
+      swimlaneId
     };
   }
 
-  @Get('document/:flowId/:componentId/:portId')
+  @Get('document/:flowId/:componentId/:portId/:swimlaneId')
   @Render('document/connections')
   async documentConnections( 
     @Param('flowId') flowId: string, 
     @Param('componentId') componentId: string,
     @Param('portId') portId: string,
+    @Param('swimlaneId') swimlaneId: string,
   ) {
     const params = { flowId, componentId, portId };
     const component = this.componentRegistry.getComponent(flowId, componentId);
@@ -601,21 +584,24 @@ export class AppController {
           return {
             ...params,
             port,
-            connections
+            connections,
+            swimlaneId
           };
         } else {
           let displayHtmxId = `${flowId}.${componentId}.${port.eventId}`
           return {
             ...params,
             port,
-            displayHtmxId
+            displayHtmxId,
+            swimlaneId
           }
         }
       }
     }
     return {
       ...params,
-      port: null
+      port: null,
+      swimlaneId
     };
   }
 
@@ -728,6 +714,229 @@ export class ComponentRegistry {
   }
 }
 </FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/components/event-trigger/event-trigger.handler.ts">
+import { CustomLogger } from '../../logger/custom-logger';
+import { Injectable, Inject } from '@nestjs/common';
+import { ComponentBase } from '../../bases/component.base';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { Server } from 'socket.io';
+
+import { triggerEvent } from './trigger-event.event';
+
+@Injectable()
+export class EventTriggerComponent extends ComponentBase {
+  public logger;
+  public ports = { // io format: <dataType>.<dataMethod>.<eventId>
+    inputs: [
+      'any.publish.triggerEvent',
+    ],
+    outputs: [
+      'any.publish.any'
+    ]
+  }
+
+  constructor(
+    @Inject('FLOW_ID') flowId: string,
+    @Inject('COMPONENT_ID') componentId: string,
+    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
+    @Inject('WEB_SOCKET_SERVER') protected server: Server
+  ) {
+    super('eventTrigger', 'event-trigger', 'Handles HTMX requests and triggers events', flowId, componentId, amqpConnection, server);
+    this.flowId = flowId;
+    this.componentId = componentId;
+    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
+  }
+
+  async handleEvent(eventId: string, data: any): Promise<void> {
+    switch (eventId) {
+      case 'triggerEvent':
+        await this.triggerEvent(data);
+        break;
+      default:
+        break;
+    }
+  }
+
+  private async triggerEvent(data): Promise<void> {
+    return await triggerEvent(this, data);
+  }
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/components/number-generator/number-generator.handler.ts">
+import { CustomLogger } from '../../logger/custom-logger';
+import { Injectable, Inject } from '@nestjs/common';
+import { ComponentBase } from '../../bases/component.base';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { Server } from 'socket.io';
+
+import { startGenerating } from './start-generating.event';
+import { stopGenerating } from './stop-generating.event';
+
+@Injectable()
+export class NumberGeneratorComponent extends ComponentBase {
+  public logger;
+  private interval: NodeJS.Timeout | null = null;
+  public ports = { // io format: <dataType>.<dataMethod>.<eventId>
+    inputs: [
+      'any.publish.start',
+      'any.publish.stop'
+    ],
+    outputs: [
+      'number.publish.numberGenerated',
+      'htmx.display.number-generator'
+    ]
+  }
+
+  constructor(
+    @Inject('FLOW_ID') flowId: string,
+    @Inject('COMPONENT_ID') componentId: string,
+    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
+    @Inject('WEB_SOCKET_SERVER') protected server: Server
+  ) {
+    super('numberGenerator', 'number-generator', 'Generates random numbers periodically', flowId, componentId, amqpConnection, server);
+    this.flowId = flowId;
+    this.componentId = componentId;
+    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
+  }
+
+  async handleEvent(eventId: string, data: any): Promise<void> {
+    this.logger.log(`NumberGenerator (${this.flowId}) handling event: ${eventId}`);
+    switch (eventId) {
+      case "start": {
+        this.logger.log(`NumberGenerator (${this.flowId}) starting number generation`);
+        this.startGenerating(data);
+        break;
+      }
+      case "stop": {
+        this.logger.log(`NumberGenerator (${this.flowId}) stopping number generation`);
+        this.stopGenerating(data);
+        break;
+      }
+    }
+  }
+
+  private startGenerating(data): void {
+    return startGenerating(this, data);
+  }
+
+  private stopGenerating(data): void {
+    return stopGenerating(this, data);
+  }
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/components/number-multiplier/number-multiplier.handler.ts">
+import { CustomLogger } from '../../logger/custom-logger';
+import { Injectable, Inject } from '@nestjs/common';
+import { ComponentBase } from '../../bases/component.base';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { Server } from 'socket.io';
+
+import { numberReceived } from './number-received.event';
+
+@Injectable()
+export class NumberMultiplierComponent extends ComponentBase {
+  public logger;
+  public ports = { // io format: <dataType>.<dataMethod>.<eventId>
+    inputs: [
+      'number.publish.numberReceived',
+    ],
+    outputs: [
+      'number.publish.numberMultiplied',
+      'htmx.display.number-multiplier',
+    ]
+  }
+
+  constructor(
+    @Inject('FLOW_ID') flowId: string,
+    @Inject('COMPONENT_ID') componentId: string,
+    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
+    @Inject('WEB_SOCKET_SERVER') protected server: Server
+  ) {
+    super('numberMultiplier', 'number-multiplier', 'Multiplies received number by 2', flowId, componentId, amqpConnection, server);
+    this.flowId = flowId;
+    this.componentId = componentId;
+    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
+  }
+
+  async handleEvent(eventId: string, data: any): Promise<void> {
+    this.logger.log(`NumberMultiplier handling event: ${eventId} ${JSON.stringify(data, null, 2)}`);
+    switch (eventId) {
+      case 'numberReceived':
+        await this.numberReceived(data);
+        break;
+      default:
+        break;
+    }
+  }
+
+  private numberReceived(data): Promise<void> {
+    return numberReceived(this, data);
+  }
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/processors/event.processor.ts">
+import { Injectable, Logger } from '@nestjs/common';
+import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
+import { ComponentRegistry } from '../services/component-registry.service';
+
+@Injectable()
+export class EventProcessor {
+  private readonly logger = new Logger(EventProcessor.name);
+  private connections: Map<string, { toFlow: string; toComponent: string; toEvent: string }> = new Map();
+
+  constructor(private componentRegistry: ComponentRegistry) {}
+
+  @RabbitSubscribe({
+    exchange: 'flow_exchange',
+    routingKey: 'componentEvent',
+    queue: 'component_event_queue',
+  })
+  async handleComponentEvent(msg: {flowId: string, componentId: string, eventId: string, data: any}) {
+    const { flowId, componentId, eventId, data: eventData } = msg;
+    this.logger.log(`[handleComponentEvent] [${flowId}.${componentId}.${eventId}] data: ${JSON.stringify(eventData)}`);
+    
+    const component = this.componentRegistry.getComponent(flowId, componentId);
+    if (component) {
+      this.logger.log(`Passing event to component: ${componentId}`);
+      await component.handleEvent(eventId, eventData);
+
+      // Check if there's a connection for this event
+      const connectionKey = `${flowId}.${componentId}.${eventId}`;
+      const connection = this.connections.get(connectionKey);
+      if (connection) {
+        const { toFlow, toComponent, toEvent } = connection;
+        this.logger.log(`[forwardingComponentEvent] [${toFlow}.${toComponent}.${toEvent}]`);
+        
+        const targetComponent = this.componentRegistry.getComponent(toFlow, toComponent);
+        if (targetComponent) {
+          this.logger.log(`Forwarding event to component: ${targetComponent.componentId}`);
+          await targetComponent.handleEvent(toEvent, eventData);
+        } else {
+          this.logger.warn(`Target component not found: ${toComponent} in flow: ${toFlow}`);
+        }
+      }
+    } else {
+      this.logger.warn(`Component not found: ${flowId}.${componentId}`);
+    }
+  }
+
+  @RabbitSubscribe({
+    exchange: 'flow_exchange',
+    routingKey: 'createConnection',
+    queue: 'create_connection_queue',
+  })
+  async createConnection(msg: {flowId: string, fromComponent: string, fromEvent: string, toComponent: string, toEvent: string}) {
+    const { flowId, fromComponent, fromEvent, toComponent, toEvent } = msg;
+    this.logger.log(`Received createConnection: ${flowId}.${fromComponent}.${fromEvent} -> ${toComponent}.${toEvent}`);
+    
+    const connectionKey = `${flowId}.${fromComponent}.${fromEvent}`;
+    this.connections.set(connectionKey, { toFlow: flowId, toComponent, toEvent });
+    this.logger.log(`Connection created: ${connectionKey} -> ${toComponent}.${toEvent}`);
+    
+    return { success: true, message: 'Connection created successfully' };
+  }
+}
+</FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/component.interface.ts">
 import { Connection } from "./connection.interface";
 import { Port } from "./port.interface";
@@ -756,20 +965,6 @@ export interface Flow {
     componentRef: string;
   }[];
   connections: Connection[];
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/connection.interface.ts">
-import { Component } from "./component.interface";
-
-export interface Connection {
-  toFlow: string;
-  toComponent: string;
-  toEvent: string;
-  connectedTo: Component | undefined;
-  fromFlow: string;
-  fromComponent: string;
-  fromEvent: string;
-  connectedFrom: Component | undefined;
 }
 </FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/bootstrap/app.bootstrap.ts">
@@ -857,42 +1052,6 @@ const metadata = {
 
 export const AppModule = initializeAppModule(metadata)
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/main.ts">
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './modules/app.module';
-import { CustomLogger } from './logger/custom-logger';
-import { bootstrapApp } from './bootstrap/app.bootstrap';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-
-async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule);
-  
-  // Get the AmqpConnection from the app context
-  const amqpConnection = app.get(AmqpConnection);
-  
-  // Create the CustomLogger with the AmqpConnection
-  const logger = new CustomLogger('Bootstrap', amqpConnection);
-  
-  try {
-    logger.log('Starting main application...');
-    const mainApp = await bootstrapApp(logger);
-
-    process.on('SIGINT', async () => {
-      CustomLogger.clearSTDOUT();
-      await mainApp.close();
-      process.exit();
-    });
-  } catch (error) {
-    logger.error(`Bootstrap error: ${error.message}`, error.stack);
-    process.exit(1);
-  }
-}
-
-bootstrap().catch((error) => {
-  console.error('Unhandled bootstrap error:', error);
-  process.exit(1);
-});
-</FILE>
 <FILE path="src/views/document/index.ejs" TARGET>
 <!DOCTYPE html>
 <html lang="en">
@@ -908,7 +1067,7 @@ bootstrap().catch((error) => {
 <body>
   <div id="swimlane-container" class="swimlane-container">
     <div id="main-swimlane" class="swimlane" data-index="0"
-         hx-get="/document/<%= selected.flowId %>/<%= selected.componentId %>"
+         hx-get="/document/<%= selected.flowId %>/<%= selected.componentId %>/main-swimlane"
          hx-trigger="load"
          hx-target="#main-swimlane">
       <!-- Main component will be loaded here -->
@@ -935,5 +1094,5 @@ bootstrap().catch((error) => {
 </html>
 </FILE>
 <REQUEST>
-component.ejs and method.ejs should both include swimlane id because none of the swimlanes are loading properly except main.... also swimlaneId needs to exists for connectedComponents
+clicking on input button from an htmx display component causes the swimline ids to go out of order
 </REQUEST>

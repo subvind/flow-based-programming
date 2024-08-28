@@ -1,6 +1,5 @@
 <script>
-  function loadConnectedComponents(direction, flowId, componentId, port, swimlaneId) {
-    const mainSwimlane = document.getElementById(swimlaneId);
+  function getNextSwimlane(direction, mainSwimlane) {
     const mainIndex = parseInt(mainSwimlane.getAttribute('data-index'));
     
     let targetIndex, targetSwimlane;
@@ -12,12 +11,24 @@
       targetSwimlane = getOrCreateSwimlane(targetIndex);
     }
 
+    return {
+      mainIndex,
+      targetIndex,
+      targetSwimlane
+    }
+  }
+
+  function loadConnectedComponents(direction, flowId, componentId, port, swimlaneId) {
+    console.log('swimload load connected', swimlaneId, direction);
+    const mainSwimlane = document.getElementById(swimlaneId);
+    let next = getNextSwimlane(direction, mainSwimlane);
+
     const eventElement = document.createElement('div');
     eventElement.setAttribute("id", `${flowId}.${componentId}.${port}`);
-    targetSwimlane.innerHTML = '';
-    targetSwimlane.appendChild(eventElement);
+    next.targetSwimlane.innerHTML = '';
+    next.targetSwimlane.appendChild(eventElement);
     
-    htmx.ajax('GET', `/document/${flowId}/${componentId}/${port}/${targetSwimlane.id}`, {
+    htmx.ajax('GET', `/document/${flowId}/${componentId}/${port}/${next.targetSwimlane.id}`, {
       swap: 'none',
       handler: (dom, event) => {
         document.getElementById(`${flowId}.${componentId}.${port}`).outerHTML = event.xhr.response;
@@ -25,22 +36,28 @@
     });
   }
 
-  function loadMainComponent(flowId, componentId, swimlaneId) {
+  function loadMainComponent(direction, flowId, componentId, swimlaneId) {
+    console.log('swimload load main', swimlaneId, direction);
     // Update the main swimlane
     const mainSwimlane = document.getElementById(swimlaneId);
-    mainSwimlane.setAttribute('data-index', '0');
-    mainSwimlane.innerHTML = '';
+    let next = getNextSwimlane(direction, mainSwimlane);
+    next.targetSwimlane.innerHTML = '';
     
-    htmx.ajax('GET', `/document/${flowId}/${componentId}/${swimlaneId}`, {
+    htmx.ajax('GET', `/document/${flowId}/${componentId}/${next.targetSwimlane.id}`, {
       swap: 'none',
       handler: (dom, event) => {
-        mainSwimlane.innerHTML = event.xhr.response;
+        next.targetSwimlane.innerHTML = event.xhr.response;
       }
     });
   }
 
   function getOrCreateSwimlane(index) {
     let swimlane = document.querySelector(`.swimlane[data-index="${index}"]`);
+    if (swimlane) {
+      console.log('swimlane found', index, swimlane)
+    } else {
+      console.log('swimlane not found', index)
+    }
     if (!swimlane) {
       swimlane = document.createElement('div');
       swimlane.className = 'swimlane';

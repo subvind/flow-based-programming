@@ -1,5 +1,5 @@
 <% if (component) { %>
-  <div id="<%- component.flowId %>.<%- component.componentId %>" class="swimlane-content" data-swimlane-id="<%- swimlaneId %>">
+  <div id="<%- component.flowId %>.<%- component.componentId %>">
     <div class="event-anchor input-anchors">
       <% component.ports.inputs.forEach((input, index) => { %>
         <% if (index !== 0) { %>

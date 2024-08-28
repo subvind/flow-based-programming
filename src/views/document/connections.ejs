@@ -1,12 +1,12 @@
-<div id="<%- flowId %>.<%- componentId %>.<%- portId %>">
+<div id="<%- flowId %>.<%- componentId %>.<%- portId %>" class="swimlane-content" data-swimlane-id="<%- swimlaneId %>">
   <% if (port && port.dataMethod) { %>
     <% if (port.dataMethod === 'publish') { %>
       <% if (connections.length) { %>
         <% connections.forEach(connection => { %>
           <% if (connection.connectedTo) { %>
-            <%- include('component', { component: connection.connectedTo }); %> 
+            <%- include('component', { component: connection.connectedTo, swimlaneId }); %> 
           <% } else { %>
-            <%- include('component', { component: connection.connectedFrom }); %> 
+            <%- include('component', { component: connection.connectedFrom, swimlaneId }); %> 
           <% } %>
         <% }) %>
       <% } else { %>
@@ -16,15 +16,17 @@
     <% } %>
   
     <% if (port.dataMethod === 'display') { %>
-      <div class="event-anchor input-anchors">
-        <button onclick="loadMainComponent('<%- flowId %>', '<%- componentId %>', '<%- swimlaneId %>')">input</button>
-        <div style="float: right;">
-          <%- portId %> 
+      <div id="<%- flowId %>.<%- componentId %>">
+        <div class="event-anchor input-anchors">
+          <button onclick="loadMainComponent('input', '<%- flowId %>', '<%- componentId %>', '<%- swimlaneId %>')">input</button>
+          <div style="float: right;">
+            <%- portId %> 
+          </div>
+          <br>
         </div>
-        <br>
-      </div>
-      <div class="component">
-        <div id="<%- displayHtmxId %>"></div>
+        <div class="component">
+          <div id="<%- displayHtmxId %>"></div>
+        </div>
       </div>
     <% } %>
   <% } else { %>
