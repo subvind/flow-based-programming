@@ -1,13 +1,13 @@
 import { FlowBase } from "../bases/flow.base"
 
-export let exampleFlow = new FlowBase(
-  'example-flow',
-  [
+export default {
+  id: 'example-flow',
+  components: [
     { componentId: 'main', componentRef: 'eventTrigger' },
     { componentId: 'gen1', componentRef: 'numberGenerator' },
     { componentId: 'mult1', componentRef: 'numberMultiplier' },
   ],
-  [
+  connections: [
     {
       fromComponent: 'gen1',
       fromEvent: 'numberGenerated',
@@ -15,4 +15,4 @@ export let exampleFlow = new FlowBase(
       toEvent: 'numberReceived',
     },
   ],
-)
+}

@@ -54,7 +54,7 @@ export abstract class ComponentBase implements Component {
     this.publish(flowId, componentId, 'clientEventReceived', eventData);
   }
 
-  protected async display(flowId: string, componentId: string, templateId: string, data: any) {
+  public async display(flowId: string, componentId: string, templateId: string, data: any) {
     data._flowId = flowId;
     data._componentId = componentId;
     data._templateId = templateId;

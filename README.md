@@ -80,4 +80,7 @@ vim ./ingress/data/services.json
 
 # install proxy-server using pm2
 # cd ingress and view the README.md
+
+# after a new container is built
+kubectl rollout restart deployment flow-deployment
 ```

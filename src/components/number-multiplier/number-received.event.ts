@@ -1,4 +1,8 @@
-export async function numberReceived (process, message) {
+import { NumberMultiplierComponent } from "./number-multiplier.handler";
+
+// networks of black box processes, which exchange data
+// across predefined connections by message passing
+export async function numberReceived (process: NumberMultiplierComponent, message: any) {
   const fid = process.flowId;
   const cid = process.componentId;
 

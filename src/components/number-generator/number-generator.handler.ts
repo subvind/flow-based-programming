@@ -10,7 +10,7 @@ import { stopGenerating } from './stop-generating.event';
 @Injectable()
 export class NumberGeneratorComponent extends ComponentBase {
   public logger;
-  private interval: NodeJS.Timeout | null = null;
+  public interval: NodeJS.Timeout | null = null;
   public ports = { // io format: <dataType>.<dataMethod>.<eventId>
     inputs: [
       'any.publish.start',

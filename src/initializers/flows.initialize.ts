@@ -1,7 +1,9 @@
-import { exampleFlow } from "src/flows/example-flow.flow";
+import { FlowBase } from "src/bases/flow.base";
+
+import {default as exampleFlow} from "src/flows/example-flow.flow";
 
 const flows = [
-  exampleFlow
+  new FlowBase(exampleFlow.id, exampleFlow.components, exampleFlow.connections),
 ];
 
 export async function initializeFlows(flowExecutor) {

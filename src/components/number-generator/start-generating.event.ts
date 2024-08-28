@@ -1,4 +1,8 @@
-export function startGenerating (process, message) {
+import { NumberGeneratorComponent } from "./number-generator.handler";
+
+// networks of black box processes, which exchange data
+// across predefined connections by message passing
+export function startGenerating (process: NumberGeneratorComponent, message: any) {
   const fid = process.flowId;
   const cid = process.componentId;
 
