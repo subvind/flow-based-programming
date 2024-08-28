@@ -38,7 +38,7 @@ export class AppController {
     };
   }
 
-  @Get('document/:flowId/:componentId/:swimlaneId')
+  @Get('documentComponent/:flowId/:componentId/:swimlaneId')
   @Render('document/component')
   async documentComponent(
     @Param('flowId') flowId: string,
@@ -59,7 +59,7 @@ export class AppController {
     };
   }
 
-  @Get('document/:flowId/:componentId/:portId/:swimlaneId')
+  @Get('documentConnections/:flowId/:componentId/:portId/:swimlaneId')
   @Render('document/connections')
   async documentConnections( 
     @Param('flowId') flowId: string, 
@@ -74,6 +74,16 @@ export class AppController {
       let port: Port = await component.findPort(portId);
 
       let connections: Connection[] = await component.findConnections(port);
+
+      connections.forEach((connection) => {
+        if (port.direction === 'input') {
+          // console.log('documentConnections input to', connection.connectedFrom.componentId);
+          connection.next = connection.connectedFrom;
+        } else {
+          // console.log('documentConnections output from', connection.connectedTo.componentId);
+          connection.next = connection.connectedTo;
+        }
+      });
 
       if (port) {
         if (port.dataMethod === 'publish') {

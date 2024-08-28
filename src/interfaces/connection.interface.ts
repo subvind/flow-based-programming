@@ -9,4 +9,5 @@ export interface Connection {
   fromComponent: string;
   fromEvent: string;
   connectedFrom: Component | undefined;
+  next: Component | undefined;
 }

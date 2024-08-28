@@ -26,7 +26,8 @@ export class FlowBase implements Flow {
         toFlow: this.id,
         fromFlow: this.id,
         connectedTo: undefined, // TODO
-        connectedFrom: undefined // TODO
+        connectedFrom: undefined, // TODO
+        next: undefined // TODO
       }
       this.connections.push(c);
     })

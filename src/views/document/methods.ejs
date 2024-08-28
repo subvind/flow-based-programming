@@ -28,7 +28,7 @@
     next.targetSwimlane.innerHTML = '';
     next.targetSwimlane.appendChild(eventElement);
     
-    htmx.ajax('GET', `/document/${flowId}/${componentId}/${port}/${next.targetSwimlane.id}`, {
+    htmx.ajax('GET', `/documentConnections/${flowId}/${componentId}/${port}/${next.targetSwimlane.id}`, {
       swap: 'none',
       handler: (dom, event) => {
         document.getElementById(`${flowId}.${componentId}.${port}`).outerHTML = event.xhr.response;
@@ -43,7 +43,7 @@
     let next = getNextSwimlane(direction, mainSwimlane);
     next.targetSwimlane.innerHTML = '';
     
-    htmx.ajax('GET', `/document/${flowId}/${componentId}/${next.targetSwimlane.id}`, {
+    htmx.ajax('GET', `/documentComponent/${flowId}/${componentId}/${next.targetSwimlane.id}`, {
       swap: 'none',
       handler: (dom, event) => {
         next.targetSwimlane.innerHTML = event.xhr.response;

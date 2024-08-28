@@ -3,11 +3,7 @@
     <% if (port.dataMethod === 'publish') { %>
       <% if (connections.length) { %>
         <% connections.forEach(connection => { %>
-          <% if (connection.connectedTo) { %>
-            <%- include('component', { component: connection.connectedTo, swimlaneId }); %> 
-          <% } else { %>
-            <%- include('component', { component: connection.connectedFrom, swimlaneId }); %> 
-          <% } %>
+          <%- include('component', { component: connection.next, swimlaneId }); %> 
         <% }) %>
       <% } else { %>
         <br />
