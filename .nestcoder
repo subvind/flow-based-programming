@@ -272,140 +272,7 @@ export function dot(a: V3, b: V3): number {
 
 You will now be given the actual INPUT you must work with.
 
-<FILE path="/home/travis/Projects/flow-based-programming/src/components/state-machine/state-machine.handler.ts">
-import { CustomLogger } from '../../logger/custom-logger';
-import { Injectable, Inject } from '@nestjs/common';
-import { ComponentBase } from '../../bases/component.base';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import { Server } from 'socket.io';
-
-import { initializeMachine } from './initialize-machine.event';
-import { transition } from './transition.event';
-
-@Injectable()
-export class StateMachineComponent extends ComponentBase {
-  public logger;
-  public currentState: string;
-  public states: Set<string>;
-  public transitions: Map<string, Map<string, string>>;
-  
-  public ports = { // io format: <dataType>.<dataMethod>.<eventId>
-    inputs: [
-      'any.publish.initializeMachine',
-      'any.publish.transition'
-    ],
-    outputs: [
-      'any.publish.stateChanged',
-      'htmx.display.state-machine'
-    ]
-  }
-
-  constructor(
-    @Inject('FLOW_ID') flowId: string,
-    @Inject('COMPONENT_ID') componentId: string,
-    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
-    @Inject('WEB_SOCKET_SERVER') protected server: Server
-  ) {
-    super('stateMachine', 'state-machine', 'Implements a simple state machine', flowId, componentId, amqpConnection, server);
-    this.flowId = flowId;
-    this.componentId = componentId;
-    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
-    this.states = new Set();
-    this.transitions = new Map();
-  }
-
-  async handleEvent(eventId: string, data: any): Promise<void> {
-    this.logger.log(`StateMachine (${this.flowId}) handling event: ${eventId}`);
-    switch (eventId) {
-      case "initializeMachine": {
-        this.logger.log(`StateMachine (${this.flowId}) initializing machine`);
-        await this.initializeMachine(data);
-        break;
-      }
-      case "transition": {
-        this.logger.log(`StateMachine (${this.flowId}) transitioning`);
-        await this.transition(data);
-        break;
-      }
-    }
-  }
-
-  private async initializeMachine(data): Promise<void> {
-    return initializeMachine(this, data);
-  }
-
-  private async transition(data): Promise<void> {
-    return transition(this, data);
-  }
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/components/state-machine/initialize-machine.event.ts">
-import { StateMachineComponent } from './state-machine.handler';
-
-// networks of black box processes, which exchange data
-// across predefined connections by message passing
-export async function initializeMachine(process: StateMachineComponent, message: any): Promise<void> {
-  const { initialState, states, transitions } = message;
-
-  process.currentState = initialState;
-  process.states = new Set(states);
-  
-  process.transitions = new Map();
-  for (const [fromState, events] of Object.entries(transitions)) {
-    process.transitions.set(fromState, new Map(Object.entries(events as Record<string, string>)));
-  }
-
-  process.logger.log(`State machine initialized with initial state: ${process.currentState}`);
-  
-  await process.publish(process.flowId, process.componentId, 'stateChanged', { 
-    currentState: process.currentState 
-  });
-
-  await process.display(process.flowId, process.componentId, 'state-machine', {
-    currentState: process.currentState,
-    states: Array.from(process.states),
-    transitions: Object.fromEntries(process.transitions)
-  });
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/components/state-machine/transition.event.ts">
-import { StateMachineComponent } from './state-machine.handler';
-
-// networks of black box processes, which exchange data
-// across predefined connections by message passing
-export async function transition(process: StateMachineComponent, message: any): Promise<void> {
-  const { event } = message;
-  const currentState = process.currentState;
-
-  const stateTransitions = process.transitions.get(currentState);
-  if (!stateTransitions) {
-    process.logger.warn(`No transitions defined for state: ${currentState}`);
-    return;
-  }
-
-  const nextState = stateTransitions.get(event);
-  if (!nextState) {
-    process.logger.warn(`No transition defined for event '${event}' in state '${currentState}'`);
-    return;
-  }
-
-  process.currentState = nextState;
-  process.logger.log(`Transitioned from '${currentState}' to '${nextState}' on event '${event}'`);
-
-  await process.publish(process.flowId, process.componentId, 'stateChanged', { 
-    previousState: currentState,
-    currentState: process.currentState,
-    event
-  });
-
-  await process.display(process.flowId, process.componentId, 'state-machine', {
-    currentState: process.currentState,
-    states: Array.from(process.states),
-    transitions: Object.fromEntries(process.transitions)
-  });
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/components/state-machine/example.config.ts">
+<FILE path="/home/travis/Projects/flow-based-programming/src/stateMachines/job.state-machine.ts">
 export default {
   initialState: 'idle',
   states: ['idle', 'running', 'paused', 'finished'],
@@ -417,6 +284,174 @@ export default {
   }
 }
 
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/components/job-state-machine/job-state-machine.handler.ts">
+import { Injectable, Inject } from '@nestjs/common';
+import { ComponentBase } from '../../bases/component.base';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { Server } from 'socket.io';
+import { CustomLogger } from '../../logger/custom-logger';
+
+import jobStateMachine from '../../stateMachines/job.state-machine';
+import { StateMachineComponent } from '../state-machine/state-machine.handler';
+
+@Injectable()
+export class JobStateMachineComponent extends ComponentBase {
+  public logger: CustomLogger;
+  private stateMachine: StateMachineComponent;
+  
+  public ports = {
+    inputs: [
+      'any.publish.initializeMachine',
+      'any.publish.start',
+      'any.publish.pause',
+      'any.publish.resume',
+      'any.publish.finish',
+      'any.publish.reset'
+    ],
+    outputs: [
+      'any.publish.initializeMachine',
+      'any.publish.start',
+      'any.publish.pause',
+      'any.publish.resume',
+      'any.publish.finish',
+      'any.publish.reset',
+      'any.publish.stateChanged',
+      'htmx.display.job-state-machine'
+    ]
+  }
+
+  constructor(
+    @Inject('FLOW_ID') flowId: string,
+    @Inject('COMPONENT_ID') componentId: string,
+    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
+    @Inject('WEB_SOCKET_SERVER') protected server: Server,
+    @Inject(StateMachineComponent) stateMachine: StateMachineComponent
+  ) {
+    super('jobStateMachine', 'job-state-machine', 'Implements a job state machine', flowId, componentId, amqpConnection, server);
+    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
+    this.stateMachine = stateMachine;
+  }
+
+  async handleEvent(eventId: string, data: any): Promise<void> {
+    this.logger.log(`Handling event: ${eventId}`);
+    switch (eventId) {
+      case "initializeMachine": {
+        await this.initializeMachine(jobStateMachine);
+        break;
+      }
+      case "start":
+      case "pause":
+      case "resume":
+      case "finish":
+      case "reset": {
+        await this.transition(eventId);
+        break;
+      }
+    }
+  }
+
+  private async initializeMachine(data: any): Promise<void> {
+    await this.stateMachine.initializeMachine(data);
+    await this.updateDisplay();
+    await this.publish(this.flowId, this.componentId, 'initializeMachine', { 
+      currentState: await this.stateMachine.getCurrentState()
+    });
+  }
+
+  private async transition(event: string): Promise<void> {
+    const previousState = await this.stateMachine.getCurrentState();
+    await this.stateMachine.transition({ event });
+    const currentState = await this.stateMachine.getCurrentState();
+    
+    await this.updateDisplay();
+
+    // Publish to the specific event port
+    await this.publish(this.flowId, this.componentId, event, { 
+      previousState,
+      currentState
+    });
+
+    // Also publish to the general stateChanged port
+    await this.publish(this.flowId, this.componentId, 'stateChanged', { 
+      previousState,
+      currentState,
+      event
+    });
+  }
+
+  private async updateDisplay(): Promise<void> {
+    const currentState = await this.stateMachine.getCurrentState();
+    const states = await this.stateMachine.getStates();
+    const transitions = await this.stateMachine.getTransitions();
+
+    await this.display(this.flowId, this.componentId, 'job-state-machine', {
+      currentState,
+      states: Array.from(states),
+      transitions: Object.fromEntries(transitions)
+    });
+  }
+}
+</FILE>
+
+
+<FILE path="/home/travis/Projects/flow-based-programming/src/components/event-trigger/event-trigger.handler.ts">
+import { CustomLogger } from '../../logger/custom-logger';
+import { Injectable, Inject } from '@nestjs/common';
+import { ComponentBase } from '../../bases/component.base';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { Server } from 'socket.io';
+
+import { triggerEvent } from './trigger-event.event';
+
+@Injectable()
+export class EventTriggerComponent extends ComponentBase {
+  public logger;
+  public ports = { // io format: <dataType>.<dataMethod>.<eventId>
+    inputs: [
+      'any.publish.triggerEvent',
+    ],
+    outputs: [
+      'any.publish.any'
+    ]
+  }
+
+  constructor(
+    @Inject('FLOW_ID') flowId: string,
+    @Inject('COMPONENT_ID') componentId: string,
+    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
+    @Inject('WEB_SOCKET_SERVER') protected server: Server
+  ) {
+    super('eventTrigger', 'event-trigger', 'Handles HTMX requests and triggers events', flowId, componentId, amqpConnection, server);
+    this.flowId = flowId;
+    this.componentId = componentId;
+    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
+  }
+
+  async handleEvent(eventId: string, data: any): Promise<void> {
+    switch (eventId) {
+      case 'triggerEvent':
+        await this.triggerEvent(data);
+        break;
+      default:
+        break;
+    }
+  }
+
+  private async triggerEvent(data): Promise<void> {
+    return await triggerEvent(this, data);
+  }
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/components/event-trigger/trigger-event.event.ts">
+import { EventTriggerComponent } from "./event-trigger.handler";
+
+// networks of black box processes, which exchange data
+// across predefined connections by message passing
+export async function triggerEvent(process: EventTriggerComponent, message: any): Promise<void> {
+  const { _flowId, _componentId, _eventId } = message;
+  return await process.publish(_flowId, _componentId, _eventId, message);
+}
 </FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/components/number-generator/number-generator.handler.ts">
 import { CustomLogger } from '../../logger/custom-logger';
@@ -504,19 +539,6 @@ export function startGenerating (process: NumberGeneratorComponent, message: any
       timestamp: Date.now()
     });
   }, 1000);
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/components/number-generator/stop-generating.event.ts">
-import { NumberGeneratorComponent } from "./number-generator.handler";
-
-// networks of black box processes, which exchange data
-// across predefined connections by message passing
-export function stopGenerating(process: NumberGeneratorComponent, message: any) {
-  process.logger.log(`NumberGenerator (${process.flowId}) stopGenerating method called`);
-  if (process.interval) {
-    clearInterval(process.interval);
-    process.interval = null;
-  }
 }
 </FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/components/number-multiplier/number-multiplier.handler.ts">
@@ -626,6 +648,7 @@ export interface Flow {
   components: {
     componentId: string;
     componentRef: string;
+    init: any | undefined;
   }[];
   connections: Connection[];
 }
@@ -711,8 +734,8 @@ export class FlowExecutorService {
           flowId: flow.id,
           componentId: component.componentId, // dynamically defined
           componentRef: component.componentRef, // hard code defined
-          eventId: 'init',
-          data: {},
+          eventId: 'init', // flow executor defined
+          data: component.init, // dynamically defined
         });
       } catch (error) {
         this.logger.error(`Error initializing component ${component.componentId} for flow ${flow.id}:`, error);
@@ -746,87 +769,75 @@ export class ComponentRegistry {
   }
 }
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/processors/event.processor.ts">
-import { Injectable, Logger } from '@nestjs/common';
-import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
-import { ComponentRegistry } from '../services/component-registry.service';
-
-@Injectable()
-export class EventProcessor {
-  private readonly logger = new Logger(EventProcessor.name);
-  private connections: Map<string, { toFlow: string; toComponent: string; toEvent: string }> = new Map();
-
-  constructor(private componentRegistry: ComponentRegistry) {}
-
-  @RabbitSubscribe({
-    exchange: 'flow_exchange',
-    routingKey: 'componentEvent',
-    queue: 'component_event_queue',
-  })
-  async handleComponentEvent(msg: {flowId: string, componentId: string, eventId: string, data: any}) {
-    const { flowId, componentId, eventId, data: eventData } = msg;
-    this.logger.log(`[handleComponentEvent] [${flowId}.${componentId}.${eventId}] data: ${JSON.stringify(eventData)}`);
-    
-    const component = this.componentRegistry.getComponent(flowId, componentId);
-    if (component) {
-      this.logger.log(`Passing event to component: ${componentId}`);
-      await component.handleEvent(eventId, eventData);
-
-      // Check if there's a connection for this event
-      const connectionKey = `${flowId}.${componentId}.${eventId}`;
-      const connection = this.connections.get(connectionKey);
-      if (connection) {
-        const { toFlow, toComponent, toEvent } = connection;
-        this.logger.log(`[forwardingComponentEvent] [${toFlow}.${toComponent}.${toEvent}]`);
-        
-        const targetComponent = this.componentRegistry.getComponent(toFlow, toComponent);
-        if (targetComponent) {
-          this.logger.log(`Forwarding event to component: ${targetComponent.componentId}`);
-          await targetComponent.handleEvent(toEvent, eventData);
-        } else {
-          this.logger.warn(`Target component not found: ${toComponent} in flow: ${toFlow}`);
-        }
-      }
-    } else {
-      this.logger.warn(`Component not found: ${flowId}.${componentId}`);
-    }
-  }
-
-  @RabbitSubscribe({
-    exchange: 'flow_exchange',
-    routingKey: 'createConnection',
-    queue: 'create_connection_queue',
-  })
-  async createConnection(msg: {flowId: string, fromComponent: string, fromEvent: string, toComponent: string, toEvent: string}) {
-    const { flowId, fromComponent, fromEvent, toComponent, toEvent } = msg;
-    this.logger.log(`Received createConnection: ${flowId}.${fromComponent}.${fromEvent} -> ${toComponent}.${toEvent}`);
-    
-    const connectionKey = `${flowId}.${fromComponent}.${fromEvent}`;
-    this.connections.set(connectionKey, { toFlow: flowId, toComponent, toEvent });
-    this.logger.log(`Connection created: ${connectionKey} -> ${toComponent}.${toEvent}`);
-    
-    return { success: true, message: 'Connection created successfully' };
-  }
-}
-</FILE>
 <FILE path="src/flows/example-flow.flow.ts" TARGET>
+import { default as jobStateMachine } from "src/stateMachines/job.state-machine";
+
 export default {
   id: 'example-flow',
   components: [
     { componentId: 'main', componentRef: 'eventTrigger' },
+    { componentId: 'sm1', componentRef: 'stateMachine', init: jobStateMachine },
+    { componentId: 'jsm1', componentRef: 'jobStateMachine' },
     { componentId: 'gen1', componentRef: 'numberGenerator' },
+    { componentId: 'gen2', componentRef: 'numberGenerator' },
     { componentId: 'mult1', componentRef: 'numberMultiplier' },
   ],
   connections: [
+    // Initialize the state machines
+    {
+      fromComponent: 'main',
+      fromEvent: 'triggerFlow',
+      toComponent: 'sm1',
+      toEvent: 'initializeMachine',
+    },
+    {
+      fromComponent: 'main',
+      fromEvent: 'triggerFlow',
+      toComponent: 'jsm1',
+      toEvent: 'initializeMachine',
+    },
+    // State machine controls number generators
+    {
+      fromComponent: 'sm1',
+      fromEvent: 'stateChanged',
+      toComponent: 'gen1',
+      toEvent: 'start',
+    },
+    {
+      fromComponent: 'sm1',
+      fromEvent: 'stateChanged',
+      toComponent: 'gen2',
+      toEvent: 'start',
+    },
+    // Number generators send numbers to multiplier
     {
       fromComponent: 'gen1',
       fromEvent: 'numberGenerated',
       toComponent: 'mult1',
-      toEvent: 'numberReceived',
+      toEvent: 'firstNumberReceived',
+    },
+    {
+      fromComponent: 'gen2',
+      fromEvent: 'numberGenerated',
+      toComponent: 'mult1',
+      toEvent: 'secondNumberReceived',
+    },
+    // Multiplier result triggers state transition for both state machines
+    {
+      fromComponent: 'mult1',
+      fromEvent: 'numberMultiplied',
+      toComponent: 'sm1',
+      toEvent: 'transition',
+    },
+    {
+      fromComponent: 'mult1',
+      fromEvent: 'numberMultiplied',
+      toComponent: 'jsm1',
+      toEvent: 'transition',
     },
   ],
 }
 </FILE>
 <REQUEST>
-i want the state machines to generate numbers and multiply them in this flow
+update flow to use job-state-machine component
 </REQUEST>

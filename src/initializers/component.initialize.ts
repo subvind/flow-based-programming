@@ -2,6 +2,7 @@ import { EventTriggerComponent } from '../components/event-trigger/event-trigger
 import { NumberGeneratorComponent } from '../components/number-generator/number-generator.handler';
 import { NumberMultiplierComponent } from '../components/number-multiplier/number-multiplier.handler';
 import { StateMachineComponent } from 'src/components/state-machine/state-machine.handler';
+import { JobStateMachineComponent } from 'src/components/job-state-machine/job-state-machine.handler';
 
 export function initializeComponent(flow, component, amqpConnection, server) {
   let componentInstance;
@@ -17,6 +18,9 @@ export function initializeComponent(flow, component, amqpConnection, server) {
       break;
     case 'stateMachine':
       componentInstance = new StateMachineComponent(flow.id, component.componentId, amqpConnection, server);
+      break;
+    case 'jobStateMachine':
+      componentInstance = new JobStateMachineComponent(flow.id, component.componentId, amqpConnection, server);
       break;
     default:
       this.logger.warn(`Unknown component type: ${component.componentRef}`);

@@ -4,28 +4,29 @@ export default {
   id: 'example-flow',
   components: [
     { componentId: 'main', componentRef: 'eventTrigger' },
-    { componentId: 'sm1', componentRef: 'stateMachine', init: jobStateMachine },
+    { componentId: 'sm1', componentRef: 'stateMachine', init: jobStateMachine }, // required for jobStateMachine
+    { componentId: 'jsm1', componentRef: 'jobStateMachine' }, // requires stateMachine with init config
     { componentId: 'gen1', componentRef: 'numberGenerator' },
     { componentId: 'gen2', componentRef: 'numberGenerator' },
     { componentId: 'mult1', componentRef: 'numberMultiplier' },
   ],
   connections: [
-    // Initialize the state machine
-    {
-      fromComponent: 'main',
-      fromEvent: 'triggerFlow',
-      toComponent: 'sm1',
-      toEvent: 'initializeMachine',
-    },
-    // State machine controls number generators
+    // Initialize the job state machine
     {
       fromComponent: 'sm1',
+      fromEvent: 'initializeMachine',
+      toComponent: 'jsm1',
+      toEvent: 'initializeMachine',
+    },
+    // Job state machine controls number generators
+    {
+      fromComponent: 'jsm1',
       fromEvent: 'stateChanged',
       toComponent: 'gen1',
       toEvent: 'start',
     },
     {
-      fromComponent: 'sm1',
+      fromComponent: 'jsm1',
       fromEvent: 'stateChanged',
       toComponent: 'gen2',
       toEvent: 'start',
@@ -43,12 +44,12 @@ export default {
       toComponent: 'mult1',
       toEvent: 'secondNumberReceived',
     },
-    // Multiplier result triggers state transition
+    // Multiplier result triggers state transition for job state machine
     {
       fromComponent: 'mult1',
       fromEvent: 'numberMultiplied',
-      toComponent: 'sm1',
-      toEvent: 'transition',
+      toComponent: 'jsm1',
+      toEvent: 'finish',
     },
   ],
 }

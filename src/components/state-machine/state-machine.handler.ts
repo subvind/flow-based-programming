@@ -10,12 +10,12 @@ import { transition } from './transition.event';
 
 @Injectable()
 export class StateMachineComponent extends ComponentBase {
-  public logger;
+  public logger: CustomLogger;
   public currentState: string;
   public states: Set<string>;
   public transitions: Map<string, Map<string, string>>;
   
-  public ports = { // io format: <dataType>.<dataMethod>.<eventId>
+  public ports = {
     inputs: [
       'any.publish.initializeMachine',
       'any.publish.transition'
@@ -41,35 +41,47 @@ export class StateMachineComponent extends ComponentBase {
   }
 
   async handleEvent(eventId: string, data: any): Promise<void> {
-    this.logger.log(`handling event: ${eventId}`);
+    this.logger.log(`Handling event: ${eventId}`);
     switch (eventId) {
       case "init": {
-        this.logger.log(`init machine`);
         await this.init(data);
         break;
       }
       case "initializeMachine": {
-        this.logger.log(`initializing machine`);
         await this.initializeMachine(data);
         break;
       }
       case "transition": {
-        this.logger.log(`transitioning`);
         await this.transition(data);
         break;
+      }
+      default: {
+        this.logger.warn(`Unknown event: ${eventId}`);
       }
     }
   }
 
-  public async init(data): Promise<void> {
+  public async init(data: any): Promise<void> {
     return init(this, data);
   }
 
-  public async initializeMachine(data): Promise<void> {
+  public async initializeMachine(data: any): Promise<void> {
     return initializeMachine(this, data);
   }
 
-  public async transition(data): Promise<void> {
+  public async transition(data: any): Promise<void> {
     return transition(this, data);
+  }
+
+  public getCurrentState(): string {
+    return this.currentState;
+  }
+
+  public getStates(): Set<string> {
+    return this.states;
+  }
+
+  public getTransitions(): Map<string, Map<string, string>> {
+    return this.transitions;
   }
 }

@@ -1,0 +1,23 @@
+<div id="<%= _flowId %>.<%= _componentId %>.<%= _templateId %>" class="job-state-machine-content">
+  <h3>Job State Machine</h3>
+  <p>Current Job State: <strong><%= currentState %></strong></p>
+  <h4>Job States:</h4>
+  <ul>
+    <% states.forEach(function(state) { %>
+      <li><%= state %></li>
+    <% }); %>
+  </ul>
+  <h4>Job Transitions:</h4>
+  <ul>
+    <% for (const [fromState, events] of Object.entries(transitions)) { %>
+      <li>
+        <%= fromState %>:
+        <ul>
+          <% for (const [event, toState] of Object.entries(events)) { %>
+            <li><%= event %> -> <%= toState %></li>
+          <% } %>
+        </ul>
+      </li>
+    <% } %>
+  </ul>
+</div>
