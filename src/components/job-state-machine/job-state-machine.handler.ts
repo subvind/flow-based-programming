@@ -4,12 +4,14 @@ import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { Server } from 'socket.io';
 import { CustomLogger } from '../../logger/custom-logger';
 
-import { StateMachineComponent } from '../state-machine/state-machine.handler';
+import { StateMachine } from 'src/interfaces/state-machine.interface';
+import { initializeMachine } from 'src/events/initializeMachine.event';
+import { transition } from 'src/events/transition.event';
 
 @Injectable()
 export class JobStateMachineComponent extends ComponentBase {
   public logger: CustomLogger;
-  private stateMachine: StateMachineComponent;
+  public stateMachine: StateMachine;
   
   public ports = {
     inputs: [
@@ -61,56 +63,23 @@ export class JobStateMachineComponent extends ComponentBase {
     }
   }
 
-  private async initializeMachine(data: any): Promise<void> {
-    await this.getPorts();
-    this._ports.inputs.forEach((input) => {
-      input.connections.forEach(async (connection) => {
-        let smComponent: any = connection.connectedFrom;
-
-        await smComponent.initializeMachine(data);
-        await this.updateDisplay(smComponent);
-
-        let currentState = await smComponent.getCurrentState()
-        await this.publish(this.flowId, this.componentId, 'initializeMachine', { 
-          currentState
-        });
-      })
-    })
+  public initializeMachine(data): Promise<void> {
+    return initializeMachine(this, data);
   }
 
-  private async transition(event: string): Promise<void> {
-    let previousState;
-    let currentState;
-    await this.getPorts();
-    this._ports.inputs.forEach((input) => {
-      input.connections.forEach(async (connection) => {
-        let smComponent: any = connection.connectedFrom;
-        previousState = await smComponent.getCurrentState();
-        await this.stateMachine.transition({ event });
-        currentState = await smComponent.getCurrentState();
-
-        await this.updateDisplay(smComponent);
-      })
-    });
-    
-    // Publish to the specific event port
-    await this.publish(this.flowId, this.componentId, `get-${event}`, { 
-      previousState,
-      currentState
-    });
-
-    // Also publish to the general stateChanged port
-    await this.publish(this.flowId, this.componentId, 'stateChanged', { 
-      previousState,
-      currentState,
-      event
-    });
+  public transition(data): Promise<void> {
+    return transition(this, data);
   }
 
-  private async updateDisplay(stateMachineComponent): Promise<void> {
-    let currentState = await stateMachineComponent.getCurrentState();
-    let states = await stateMachineComponent.getStates();
-    let transitions = await stateMachineComponent.getTransitions();
+  public async updateDisplay(): Promise<void> {
+    if (!this.stateMachine) {
+      this.logger.error('[display] State machine not initialized');
+      return;
+    }
+
+    const currentState = this.stateMachine.getCurrentState();
+    const states = this.stateMachine.getStates();
+    const transitions = this.stateMachine.getTransitions();
 
     await this.display(this.flowId, this.componentId, 'job-state-machine', {
       currentState,

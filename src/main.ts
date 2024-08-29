@@ -3,8 +3,12 @@ import { AppModule } from './modules/app.module';
 import { CustomLogger } from './logger/custom-logger';
 import { bootstrapApp } from './bootstrap/app.bootstrap';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { EventEmitter } from 'events';
 
 async function bootstrap(): Promise<void> {
+  // Increase the maximum number of listeners
+  EventEmitter.defaultMaxListeners = 100;
+
   const app = await NestFactory.create(AppModule);
   
   // Get the AmqpConnection from the app context

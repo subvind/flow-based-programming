@@ -1,167 +1,165 @@
-c[[90m2:03:01 PM[0m] Starting compilation in watch mode...
+c[[90m3:39:24 PM[0m] Starting compilation in watch mode...
 
-[[90m2:03:02 PM[0m] Found 0 errors. Watching for file changes.
+[[90m3:39:25 PM[0m] Found 0 errors. Watching for file changes.
 
-[32m[Nest] 1481634  - [39m08/29/2024, 2:03:02 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
-[32m[Nest] 1481634  - [39m08/29/2024, 2:03:02 PM [32m    LOG[39m [38;5;3m[AmqpConnection] [39m[32mTrying to connect to RabbitMQ broker (default)[39m
-[32m[Nest] 1481634  - [39m08/29/2024, 2:03:02 PM [32m    LOG[39m [38;5;3m[RabbitMQModule] [39m[32mSuccessfully connected to RabbitMQ[39m
-[32m[Nest] 1481634  - [39m08/29/2024, 2:03:02 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDiscoveryModule dependencies initialized[39m[38;5;3m +7ms[39m
-[32m[Nest] 1481634  - [39m08/29/2024, 2:03:02 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRabbitMQModule dependencies initialized[39m[38;5;3m +1ms[39m
-[32m[Nest] 1481634  - [39m08/29/2024, 2:03:02 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +0ms[39m
-[2024-08-29T19:03:02.816Z] [LOG] [Bootstrap] Starting main application...
-[2024-08-29T19:03:02.817Z] [LOG] [Bootstrap] [NestFactory] Starting Nest application...
-[2024-08-29T19:03:02.819Z] [LOG] [Bootstrap] [AmqpConnection] Trying to connect to RabbitMQ broker (default)
-[2024-08-29T19:03:02.819Z] [LOG] [Bootstrap] [RabbitMQModule] Successfully connected to RabbitMQ
-[2024-08-29T19:03:02.820Z] [LOG] [Bootstrap] [InstanceLoader] DiscoveryModule dependencies initialized
-[2024-08-29T19:03:02.821Z] [LOG] [Bootstrap] [InstanceLoader] RabbitMQModule dependencies initialized
-[2024-08-29T19:03:02.821Z] [LOG] [Bootstrap] [InstanceLoader] AppModule dependencies initialized
-[2024-08-29T19:03:02.827Z] [LOG] [Bootstrap] [WebSocketsController] EventTriggerComponent subscribed to the "client-event" message
-[2024-08-29T19:03:02.828Z] [LOG] [Bootstrap] [WebSocketsController] NumberGeneratorComponent subscribed to the "client-event" message
-[2024-08-29T19:03:02.828Z] [LOG] [Bootstrap] [WebSocketsController] NumberMultiplierComponent subscribed to the "client-event" message
-[2024-08-29T19:03:02.828Z] [LOG] [Bootstrap] [WebSocketsController] StateMachineComponent subscribed to the "client-event" message
-[2024-08-29T19:03:02.829Z] [LOG] [Bootstrap] [WebSocketsController] JobStateMachineComponent subscribed to the "client-event" message
-[2024-08-29T19:03:02.829Z] [LOG] [Bootstrap] [WebSocketsController] ButtonTriggerComponent subscribed to the "client-event" message
-[2024-08-29T19:03:02.830Z] [LOG] [Bootstrap] [RoutesResolver] AppController {/}:
-[2024-08-29T19:03:02.831Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/, GET} route
-[2024-08-29T19:03:02.831Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/document, GET} route
-[2024-08-29T19:03:02.832Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/document/:flowId/:componentId, GET} route
-[2024-08-29T19:03:02.832Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentComponent/:flowId/:componentId/:swimlaneId, GET} route
-[2024-08-29T19:03:02.832Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentConnections/:flowId/:componentId/:portId/:swimlaneId, GET} route
-[2024-08-29T19:03:02.832Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/logger, GET} route
-[2024-08-29T19:03:02.832Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/trigger-event/:flowComponentEvent, POST} route
-[2024-08-29T19:03:02.833Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724958182819
-[2024-08-29T19:03:02.833Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724958182819
-[2024-08-29T19:03:02.833Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724958182819
-[2024-08-29T19:03:02.833Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724958182819
-[2024-08-29T19:03:02.833Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724958182819
-[2024-08-29T19:03:02.833Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724958182819
-[2024-08-29T19:03:02.834Z] [LOG] [Bootstrap] [RabbitMQModule] Initializing RabbitMQ Handlers
-[2024-08-29T19:03:02.836Z] [LOG] [Bootstrap] [RabbitMQModule] Registering rabbitmq handlers from EventProcessor
-[2024-08-29T19:03:02.836Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.handleComponentEvent {subscribe} -> flow_exchange::componentEvent::component_event_queue
-[2024-08-29T19:03:02.836Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.createConnection {subscribe} -> flow_exchange::createConnection::create_connection_queue
-[2024-08-29T19:03:02.837Z] [LOG] [Bootstrap] [RabbitMQModule] Initializing RabbitMQ Handlers
-[2024-08-29T19:03:02.837Z] [LOG] [Bootstrap] [RabbitMQModule] Registering rabbitmq handlers from EventProcessor
-[2024-08-29T19:03:02.837Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.handleComponentEvent {subscribe} -> flow_exchange::componentEvent::component_event_queue
-[2024-08-29T19:03:02.837Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.createConnection {subscribe} -> flow_exchange::createConnection::create_connection_queue
-[2024-08-29T19:03:02.837Z] [LOG] [Bootstrap] [NestApplication] Nest application successfully started
-[2024-08-29T19:03:02.837Z] [LOG] [Bootstrap] Starting flow execution...
-[2024-08-29T19:03:02.837Z] [LOG] [Bootstrap] [FlowExecutorService] Executing flow: example-flow
-[2024-08-29T19:03:02.837Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: sm1.initializeMachine -> jsm1.initializeMachine
-[2024-08-29T19:03:02.839Z] [LOG] [Bootstrap] Application is running on: http://localhost:3000
-[2024-08-29T19:03:02.892Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
-[2024-08-29T19:03:02.893Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
-[2024-08-29T19:03:02.898Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected a RabbitMQ channel "AmqpConnection"
-[2024-08-29T19:03:02.899Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected a RabbitMQ channel "AmqpConnection"
-[2024-08-29T19:03:02.900Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-start -> gen1.start
-[2024-08-29T19:03:02.901Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.sm1.initializeMachine -> jsm1.initializeMachine
-[2024-08-29T19:03:02.901Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.sm1.initializeMachine -> jsm1.initializeMachine
-[2024-08-29T19:03:02.901Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-start -> gen1.start
-[2024-08-29T19:03:02.901Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-start -> gen1.start
-[2024-08-29T19:03:02.901Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-stop -> gen1.stop
-[2024-08-29T19:03:02.901Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-start -> gen2.start
-[2024-08-29T19:03:02.901Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-stop -> gen1.stop
-[2024-08-29T19:03:02.902Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-stop -> gen1.stop
-[2024-08-29T19:03:02.944Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-start -> gen2.start
-[2024-08-29T19:03:02.944Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-start -> gen2.start
-[2024-08-29T19:03:02.944Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-stop -> gen2.stop
-[2024-08-29T19:03:02.944Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: gen1.numberGenerated -> multi.firstNumberReceived
-[2024-08-29T19:03:02.945Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-stop -> gen2.stop
-[2024-08-29T19:03:02.945Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-stop -> gen2.stop
-[2024-08-29T19:03:02.987Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.gen1.numberGenerated -> multi.firstNumberReceived
-[2024-08-29T19:03:02.987Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.gen1.numberGenerated -> multi.firstNumberReceived
-[2024-08-29T19:03:02.987Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: gen2.numberGenerated -> multi.secondNumberReceived
-[2024-08-29T19:03:02.988Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn1.buttonPressed -> jsm1.set-start
-[2024-08-29T19:03:02.989Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.gen2.numberGenerated -> multi.secondNumberReceived
-[2024-08-29T19:03:02.989Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.gen2.numberGenerated -> multi.secondNumberReceived
-(node:1481634) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 disconnect listeners added to [Socket]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
-(Use `node --trace-warnings ...` to show where the warning was created)
-[2024-08-29T19:03:03.031Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn1.buttonPressed -> jsm1.set-start
-[2024-08-29T19:03:03.031Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn1.buttonPressed -> jsm1.set-start
-[2024-08-29T19:03:03.031Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn2.buttonPressed -> jsm1.set-pause
-[2024-08-29T19:03:03.032Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn3.buttonPressed -> jsm1.set-resume
-[2024-08-29T19:03:03.032Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn2.buttonPressed -> jsm1.set-pause
-[2024-08-29T19:03:03.032Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn2.buttonPressed -> jsm1.set-pause
-[2024-08-29T19:03:03.074Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn3.buttonPressed -> jsm1.set-resume
-[2024-08-29T19:03:03.074Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn3.buttonPressed -> jsm1.set-resume
-[2024-08-29T19:03:03.074Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn4.buttonPressed -> jsm1.set-finish
-[2024-08-29T19:03:03.075Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn5.buttonPressed -> jsm1.set-reset
-[2024-08-29T19:03:03.075Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn4.buttonPressed -> jsm1.set-finish
-[2024-08-29T19:03:03.075Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn4.buttonPressed -> jsm1.set-finish
-[2024-08-29T19:03:03.117Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn5.buttonPressed -> jsm1.set-reset
-[2024-08-29T19:03:03.117Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn5.buttonPressed -> jsm1.set-reset
-[2024-08-29T19:03:03.117Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: main (eventTrigger) for flow: example-flow
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.main
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn1 (buttonTrigger) for flow: example-flow
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn1
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn2 (buttonTrigger) for flow: example-flow
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn2
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn3 (buttonTrigger) for flow: example-flow
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn3
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn4 (buttonTrigger) for flow: example-flow
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn4
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn5 (buttonTrigger) for flow: example-flow
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn5
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: sm1 (stateMachine) for flow: example-flow
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.sm1
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: jsm1 (jobStateMachine) for flow: example-flow
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.jsm1
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: gen1 (numberGenerator) for flow: example-flow
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.gen1
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: gen2 (numberGenerator) for flow: example-flow
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.gen2
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: multi (numberMultiplier) for flow: example-flow
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.multi
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: main (main) for flow: example-flow
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn1 (btn1) for flow: example-flow
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn2 (btn2) for flow: example-flow
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn3 (btn3) for flow: example-flow
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn4 (btn4) for flow: example-flow
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn5 (btn5) for flow: example-flow
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: sm1 (sm1) for flow: example-flow
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: jsm1 (jsm1) for flow: example-flow
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: gen1 (gen1) for flow: example-flow
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: gen2 (gen2) for flow: example-flow
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: multi (multi) for flow: example-flow
-[2024-08-29T19:03:03.118Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: main (eventTrigger) for flow: example-flow
-[2024-08-29T19:03:03.119Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn1 (buttonTrigger) for flow: example-flow
-[2024-08-29T19:03:03.119Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.main.init] data: undefined
-[2024-08-29T19:03:03.119Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: main
-[2024-08-29T19:03:03.160Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn1.init] data: undefined
-[2024-08-29T19:03:03.161Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn1
-[2024-08-29T19:03:03.161Z] [LOG] [example-flow.btn1] Handling event: init
-[2024-08-29T19:03:03.161Z] [LOG] [example-flow.btn1] Initializing ButtonTriggerComponent with message: undefined
-[2024-08-29T19:03:03.161Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn2 (buttonTrigger) for flow: example-flow
-[2024-08-29T19:03:03.162Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn3 (buttonTrigger) for flow: example-flow
-[2024-08-29T19:03:03.162Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn2.init] data: undefined
-[2024-08-29T19:03:03.162Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn2
-[2024-08-29T19:03:03.162Z] [LOG] [example-flow.btn2] Handling event: init
-[2024-08-29T19:03:03.162Z] [LOG] [example-flow.btn2] Initializing ButtonTriggerComponent with message: undefined
-[2024-08-29T19:03:03.204Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn3.init] data: undefined
-[2024-08-29T19:03:03.204Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn3
-[2024-08-29T19:03:03.204Z] [LOG] [example-flow.btn3] Handling event: init
-[2024-08-29T19:03:03.204Z] [LOG] [example-flow.btn3] Initializing ButtonTriggerComponent with message: undefined
-[2024-08-29T19:03:03.205Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn4 (buttonTrigger) for flow: example-flow
-[2024-08-29T19:03:03.205Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn5 (buttonTrigger) for flow: example-flow
-[2024-08-29T19:03:03.206Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn4.init] data: undefined
-[2024-08-29T19:03:03.206Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn4
-[2024-08-29T19:03:03.206Z] [LOG] [example-flow.btn4] Handling event: init
-[2024-08-29T19:03:03.206Z] [LOG] [example-flow.btn4] Initializing ButtonTriggerComponent with message: undefined
-[2024-08-29T19:03:03.250Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn5.init] data: undefined
-[2024-08-29T19:03:03.250Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn5
-[2024-08-29T19:03:03.250Z] [LOG] [example-flow.btn5] Handling event: init
-[2024-08-29T19:03:03.250Z] [LOG] [example-flow.btn5] Initializing ButtonTriggerComponent with message: undefined
-[2024-08-29T19:03:03.250Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: sm1 (stateMachine) for flow: example-flow
-[2024-08-29T19:03:03.251Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: jsm1 (jobStateMachine) for flow: example-flow
-[2024-08-29T19:03:03.251Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.sm1.init] data: {"initialState":"idle","states":["idle","running","paused","finished"],"transitions":{"idle":{"start":"running"},"running":{"pause":"paused","finish":"finished"},"paused":{"resume":"running","finish":"finished"},"finished":{"reset":"idle"}}}
-[2024-08-29T19:03:03.251Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: sm1
-[2024-08-29T19:03:03.251Z] [LOG] [example-flow.sm1] Handling event: init
-[2024-08-29T19:03:03.251Z] [LOG] [example-flow.sm1] State machine initialized with initial state: idle
-[2024-08-29T19:03:03.251Z] [LOG] [example-flow.sm1] Publishing: example-flow.sm1.stateChanged -> [object Object]
-[2024-08-29T19:03:03.294Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.jsm1.init] data: undefined
-[2024-08-29T19:03:03.294Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: jsm1
-[2024-08-29T19:03:03.294Z] [LOG] [example-flow.jsm1] Handling event: init
-[2024-08-29T19:03:03.294Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: gen1 (numberGenerator) for flow: example-flow
-[2024-08-29T19:03:03.296Z] [LOG] [example-flow.sm1] <div id="example-flow.sm1.state-machine" class="state-machine-content">
+[32m[Nest] 1538242  - [39m08/29/2024, 3:39:25 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 1538242  - [39m08/29/2024, 3:39:25 PM [32m    LOG[39m [38;5;3m[AmqpConnection] [39m[32mTrying to connect to RabbitMQ broker (default)[39m
+[32m[Nest] 1538242  - [39m08/29/2024, 3:39:25 PM [32m    LOG[39m [38;5;3m[RabbitMQModule] [39m[32mSuccessfully connected to RabbitMQ[39m
+[32m[Nest] 1538242  - [39m08/29/2024, 3:39:25 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDiscoveryModule dependencies initialized[39m[38;5;3m +7ms[39m
+[32m[Nest] 1538242  - [39m08/29/2024, 3:39:25 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRabbitMQModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 1538242  - [39m08/29/2024, 3:39:25 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +0ms[39m
+[2024-08-29T20:39:25.735Z] [LOG] [Bootstrap] Starting main application...
+[2024-08-29T20:39:25.736Z] [LOG] [Bootstrap] [NestFactory] Starting Nest application...
+[2024-08-29T20:39:25.739Z] [LOG] [Bootstrap] [AmqpConnection] Trying to connect to RabbitMQ broker (default)
+[2024-08-29T20:39:25.739Z] [LOG] [Bootstrap] [RabbitMQModule] Successfully connected to RabbitMQ
+[2024-08-29T20:39:25.740Z] [LOG] [Bootstrap] [InstanceLoader] DiscoveryModule dependencies initialized
+[2024-08-29T20:39:25.741Z] [LOG] [Bootstrap] [InstanceLoader] RabbitMQModule dependencies initialized
+[2024-08-29T20:39:25.741Z] [LOG] [Bootstrap] [InstanceLoader] AppModule dependencies initialized
+[2024-08-29T20:39:25.747Z] [LOG] [Bootstrap] [WebSocketsController] EventTriggerComponent subscribed to the "client-event" message
+[2024-08-29T20:39:25.748Z] [LOG] [Bootstrap] [WebSocketsController] NumberGeneratorComponent subscribed to the "client-event" message
+[2024-08-29T20:39:25.748Z] [LOG] [Bootstrap] [WebSocketsController] NumberMultiplierComponent subscribed to the "client-event" message
+[2024-08-29T20:39:25.748Z] [LOG] [Bootstrap] [WebSocketsController] StateMachineComponent subscribed to the "client-event" message
+[2024-08-29T20:39:25.748Z] [LOG] [Bootstrap] [WebSocketsController] JobStateMachineComponent subscribed to the "client-event" message
+[2024-08-29T20:39:25.749Z] [LOG] [Bootstrap] [WebSocketsController] ButtonTriggerComponent subscribed to the "client-event" message
+[2024-08-29T20:39:25.750Z] [LOG] [Bootstrap] [RoutesResolver] AppController {/}:
+[2024-08-29T20:39:25.751Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/, GET} route
+[2024-08-29T20:39:25.751Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/document, GET} route
+[2024-08-29T20:39:25.752Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/document/:flowId/:componentId, GET} route
+[2024-08-29T20:39:25.752Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentComponent/:flowId/:componentId/:swimlaneId, GET} route
+[2024-08-29T20:39:25.752Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentConnections/:flowId/:componentId/:portId/:swimlaneId, GET} route
+[2024-08-29T20:39:25.752Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/logger, GET} route
+[2024-08-29T20:39:25.752Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/trigger-event/:flowComponentEvent, POST} route
+[2024-08-29T20:39:25.753Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724963965739
+[2024-08-29T20:39:25.753Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724963965739
+[2024-08-29T20:39:25.753Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724963965739
+[2024-08-29T20:39:25.753Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724963965739
+[2024-08-29T20:39:25.753Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724963965739
+[2024-08-29T20:39:25.753Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1724963965739
+[2024-08-29T20:39:25.754Z] [LOG] [Bootstrap] [RabbitMQModule] Initializing RabbitMQ Handlers
+[2024-08-29T20:39:25.755Z] [LOG] [Bootstrap] [RabbitMQModule] Registering rabbitmq handlers from EventProcessor
+[2024-08-29T20:39:25.756Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.handleComponentEvent {subscribe} -> flow_exchange::componentEvent::component_event_queue
+[2024-08-29T20:39:25.756Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.createConnection {subscribe} -> flow_exchange::createConnection::create_connection_queue
+[2024-08-29T20:39:25.756Z] [LOG] [Bootstrap] [RabbitMQModule] Initializing RabbitMQ Handlers
+[2024-08-29T20:39:25.756Z] [LOG] [Bootstrap] [RabbitMQModule] Registering rabbitmq handlers from EventProcessor
+[2024-08-29T20:39:25.756Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.handleComponentEvent {subscribe} -> flow_exchange::componentEvent::component_event_queue
+[2024-08-29T20:39:25.756Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.createConnection {subscribe} -> flow_exchange::createConnection::create_connection_queue
+[2024-08-29T20:39:25.757Z] [LOG] [Bootstrap] [NestApplication] Nest application successfully started
+[2024-08-29T20:39:25.757Z] [LOG] [Bootstrap] Starting flow execution...
+[2024-08-29T20:39:25.757Z] [LOG] [Bootstrap] [FlowExecutorService] Executing flow: example-flow
+[2024-08-29T20:39:25.757Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: sm1.initializeMachine -> jsm1.initializeMachine
+[2024-08-29T20:39:25.759Z] [LOG] [Bootstrap] Application is running on: http://localhost:3000
+[2024-08-29T20:39:25.810Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
+[2024-08-29T20:39:25.811Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
+[2024-08-29T20:39:25.817Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected a RabbitMQ channel "AmqpConnection"
+[2024-08-29T20:39:25.818Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected a RabbitMQ channel "AmqpConnection"
+[2024-08-29T20:39:25.818Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-start -> gen1.start
+[2024-08-29T20:39:25.819Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.sm1.initializeMachine -> jsm1.initializeMachine
+[2024-08-29T20:39:25.819Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.sm1.initializeMachine -> jsm1.initializeMachine
+[2024-08-29T20:39:25.819Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-start -> gen1.start
+[2024-08-29T20:39:25.819Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-start -> gen1.start
+[2024-08-29T20:39:25.819Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-stop -> gen1.stop
+[2024-08-29T20:39:25.820Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-start -> gen2.start
+[2024-08-29T20:39:25.820Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-stop -> gen1.stop
+[2024-08-29T20:39:25.820Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-stop -> gen1.stop
+[2024-08-29T20:39:25.862Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-start -> gen2.start
+[2024-08-29T20:39:25.862Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-start -> gen2.start
+[2024-08-29T20:39:25.862Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-stop -> gen2.stop
+[2024-08-29T20:39:25.863Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: gen1.numberGenerated -> multi.firstNumberReceived
+[2024-08-29T20:39:25.863Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-stop -> gen2.stop
+[2024-08-29T20:39:25.863Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-stop -> gen2.stop
+[2024-08-29T20:39:25.909Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.gen1.numberGenerated -> multi.firstNumberReceived
+[2024-08-29T20:39:25.909Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.gen1.numberGenerated -> multi.firstNumberReceived
+[2024-08-29T20:39:25.909Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: gen2.numberGenerated -> multi.secondNumberReceived
+[2024-08-29T20:39:25.910Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn1.buttonPressed -> jsm1.set-start
+[2024-08-29T20:39:25.910Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.gen2.numberGenerated -> multi.secondNumberReceived
+[2024-08-29T20:39:25.910Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.gen2.numberGenerated -> multi.secondNumberReceived
+[2024-08-29T20:39:25.952Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn1.buttonPressed -> jsm1.set-start
+[2024-08-29T20:39:25.952Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn1.buttonPressed -> jsm1.set-start
+[2024-08-29T20:39:25.952Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn2.buttonPressed -> jsm1.set-pause
+[2024-08-29T20:39:25.953Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn2.buttonPressed -> jsm1.set-pause
+[2024-08-29T20:39:25.953Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn2.buttonPressed -> jsm1.set-pause
+[2024-08-29T20:39:25.954Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn3.buttonPressed -> jsm1.set-resume
+[2024-08-29T20:39:25.996Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn3.buttonPressed -> jsm1.set-resume
+[2024-08-29T20:39:25.996Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn3.buttonPressed -> jsm1.set-resume
+[2024-08-29T20:39:25.996Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn4.buttonPressed -> jsm1.set-finish
+[2024-08-29T20:39:25.997Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn5.buttonPressed -> jsm1.set-reset
+[2024-08-29T20:39:25.998Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn4.buttonPressed -> jsm1.set-finish
+[2024-08-29T20:39:25.998Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn4.buttonPressed -> jsm1.set-finish
+[2024-08-29T20:39:26.039Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn5.buttonPressed -> jsm1.set-reset
+[2024-08-29T20:39:26.039Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn5.buttonPressed -> jsm1.set-reset
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: main (eventTrigger) for flow: example-flow
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.main
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn1 (buttonTrigger) for flow: example-flow
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn1
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn2 (buttonTrigger) for flow: example-flow
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn2
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn3 (buttonTrigger) for flow: example-flow
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn3
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn4 (buttonTrigger) for flow: example-flow
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn4
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn5 (buttonTrigger) for flow: example-flow
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn5
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: sm1 (stateMachine) for flow: example-flow
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.sm1
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: jsm1 (jobStateMachine) for flow: example-flow
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.jsm1
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: gen1 (numberGenerator) for flow: example-flow
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.gen1
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: gen2 (numberGenerator) for flow: example-flow
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.gen2
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: multi (numberMultiplier) for flow: example-flow
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.multi
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: main (main) for flow: example-flow
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn1 (btn1) for flow: example-flow
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn2 (btn2) for flow: example-flow
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn3 (btn3) for flow: example-flow
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn4 (btn4) for flow: example-flow
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn5 (btn5) for flow: example-flow
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: sm1 (sm1) for flow: example-flow
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: jsm1 (jsm1) for flow: example-flow
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: gen1 (gen1) for flow: example-flow
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: gen2 (gen2) for flow: example-flow
+[2024-08-29T20:39:26.040Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: multi (multi) for flow: example-flow
+[2024-08-29T20:39:26.041Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: main (eventTrigger) for flow: example-flow
+[2024-08-29T20:39:26.041Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn1 (buttonTrigger) for flow: example-flow
+[2024-08-29T20:39:26.041Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.main.init] data: undefined
+[2024-08-29T20:39:26.042Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: main
+[2024-08-29T20:39:26.083Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn1.init] data: undefined
+[2024-08-29T20:39:26.083Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn1
+[2024-08-29T20:39:26.083Z] [LOG] [example-flow.btn1] Handling event: init
+[2024-08-29T20:39:26.083Z] [LOG] [example-flow.btn1] Initializing ButtonTriggerComponent with message: undefined
+[2024-08-29T20:39:26.083Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn2 (buttonTrigger) for flow: example-flow
+[2024-08-29T20:39:26.084Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn3 (buttonTrigger) for flow: example-flow
+[2024-08-29T20:39:26.084Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn2.init] data: undefined
+[2024-08-29T20:39:26.084Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn2
+[2024-08-29T20:39:26.084Z] [LOG] [example-flow.btn2] Handling event: init
+[2024-08-29T20:39:26.084Z] [LOG] [example-flow.btn2] Initializing ButtonTriggerComponent with message: undefined
+[2024-08-29T20:39:26.126Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn3.init] data: undefined
+[2024-08-29T20:39:26.126Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn3
+[2024-08-29T20:39:26.126Z] [LOG] [example-flow.btn3] Handling event: init
+[2024-08-29T20:39:26.126Z] [LOG] [example-flow.btn3] Initializing ButtonTriggerComponent with message: undefined
+[2024-08-29T20:39:26.126Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn4 (buttonTrigger) for flow: example-flow
+[2024-08-29T20:39:26.127Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn5 (buttonTrigger) for flow: example-flow
+[2024-08-29T20:39:26.127Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn4.init] data: undefined
+[2024-08-29T20:39:26.127Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn4
+[2024-08-29T20:39:26.127Z] [LOG] [example-flow.btn4] Handling event: init
+[2024-08-29T20:39:26.127Z] [LOG] [example-flow.btn4] Initializing ButtonTriggerComponent with message: undefined
+[2024-08-29T20:39:26.169Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn5.init] data: undefined
+[2024-08-29T20:39:26.169Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn5
+[2024-08-29T20:39:26.169Z] [LOG] [example-flow.btn5] Handling event: init
+[2024-08-29T20:39:26.169Z] [LOG] [example-flow.btn5] Initializing ButtonTriggerComponent with message: undefined
+[2024-08-29T20:39:26.169Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: sm1 (stateMachine) for flow: example-flow
+[2024-08-29T20:39:26.170Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: jsm1 (jobStateMachine) for flow: example-flow
+[2024-08-29T20:39:26.170Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.sm1.init] data: {"initialState":"idle","states":["idle","running","paused","finished"],"transitions":{"idle":{"start":"running"},"running":{"pause":"paused","finish":"finished"},"paused":{"resume":"running","finish":"finished"},"finished":{"reset":"idle"}}}
+[2024-08-29T20:39:26.170Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: sm1
+[2024-08-29T20:39:26.170Z] [LOG] [example-flow.sm1] Handling event: init
+[2024-08-29T20:39:26.170Z] [LOG] [example-flow.sm1] State machine initialized with initial state: idle
+[2024-08-29T20:39:26.170Z] [LOG] [example-flow.sm1] Publishing: example-flow.sm1.stateChanged -> [object Object]
+[2024-08-29T20:39:26.216Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.jsm1.init] data: undefined
+[2024-08-29T20:39:26.216Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: jsm1
+[2024-08-29T20:39:26.216Z] [LOG] [example-flow.jsm1] Handling event: init
+[2024-08-29T20:39:26.216Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: gen1 (numberGenerator) for flow: example-flow
+[2024-08-29T20:39:26.218Z] [LOG] [example-flow.sm1] <div id="example-flow.sm1.state-machine" class="state-machine-content">
   <h3>State Machine</h3>
   <p>Current State: <strong>idle</strong></p>
   <h4>States:</h4>
@@ -209,22 +207,22 @@
     
   </ul>
 </div>
-[2024-08-29T19:03:03.297Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.sm1.stateChanged] data: {"currentState":"idle"}
-[2024-08-29T19:03:03.297Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: sm1
-[2024-08-29T19:03:03.297Z] [LOG] [example-flow.sm1] Handling event: stateChanged
-[2024-08-29T19:03:03.297Z] [WARN] [example-flow.sm1] Unknown event: stateChanged
-[2024-08-29T19:03:03.298Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.init] data: undefined
-[2024-08-29T19:03:03.298Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
-[2024-08-29T19:03:03.298Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: init
-[2024-08-29T19:03:03.298Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: gen2 (numberGenerator) for flow: example-flow
-[2024-08-29T19:03:03.344Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: multi (numberMultiplier) for flow: example-flow
-[2024-08-29T19:03:03.344Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.init] data: undefined
-[2024-08-29T19:03:03.345Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-08-29T19:03:03.345Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: init
-[2024-08-29T19:03:03.345Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.multi.init] data: undefined
-[2024-08-29T19:03:03.345Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: multi
-[2024-08-29T19:03:03.345Z] [LOG] [example-flow.multi] NumberMultiplier handling event: init undefined
-[2024-08-29T19:03:04.163Z] [LOG] [example-flow.btn1] <div id="example-flow.btn1.button-trigger" class="button-trigger-content">
+[2024-08-29T20:39:26.220Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.sm1.stateChanged] data: {"currentState":"idle"}
+[2024-08-29T20:39:26.220Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: sm1
+[2024-08-29T20:39:26.220Z] [LOG] [example-flow.sm1] Handling event: stateChanged
+[2024-08-29T20:39:26.220Z] [WARN] [example-flow.sm1] Unknown event: stateChanged
+[2024-08-29T20:39:26.220Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.init] data: undefined
+[2024-08-29T20:39:26.220Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
+[2024-08-29T20:39:26.220Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: init
+[2024-08-29T20:39:26.220Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: gen2 (numberGenerator) for flow: example-flow
+[2024-08-29T20:39:26.262Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: multi (numberMultiplier) for flow: example-flow
+[2024-08-29T20:39:26.263Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.init] data: undefined
+[2024-08-29T20:39:26.263Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
+[2024-08-29T20:39:26.263Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: init
+[2024-08-29T20:39:26.263Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.multi.init] data: undefined
+[2024-08-29T20:39:26.263Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: multi
+[2024-08-29T20:39:26.263Z] [LOG] [example-flow.multi] NumberMultiplier handling event: init undefined
+[2024-08-29T20:39:27.086Z] [LOG] [example-flow.btn1] <div id="example-flow.btn1.button-trigger" class="button-trigger-content">
   <h3>Button Trigger</h3>
   <button hx-post="/trigger-event/example-flow.btn1.triggerButton"
           hx-swap="none"
@@ -237,7 +235,7 @@
   
   <p>Target: example-flow.jsm1.set-start</p>
 </div>
-[2024-08-29T19:03:04.164Z] [LOG] [example-flow.btn2] <div id="example-flow.btn2.button-trigger" class="button-trigger-content">
+[2024-08-29T20:39:27.087Z] [LOG] [example-flow.btn2] <div id="example-flow.btn2.button-trigger" class="button-trigger-content">
   <h3>Button Trigger</h3>
   <button hx-post="/trigger-event/example-flow.btn2.triggerButton"
           hx-swap="none"
@@ -250,7 +248,7 @@
   
   <p>Target: example-flow.jsm1.set-pause</p>
 </div>
-[2024-08-29T19:03:04.205Z] [LOG] [example-flow.btn3] <div id="example-flow.btn3.button-trigger" class="button-trigger-content">
+[2024-08-29T20:39:27.128Z] [LOG] [example-flow.btn3] <div id="example-flow.btn3.button-trigger" class="button-trigger-content">
   <h3>Button Trigger</h3>
   <button hx-post="/trigger-event/example-flow.btn3.triggerButton"
           hx-swap="none"
@@ -263,7 +261,7 @@
   
   <p>Target: example-flow.jsm1.set-resume</p>
 </div>
-[2024-08-29T19:03:04.206Z] [LOG] [example-flow.btn4] <div id="example-flow.btn4.button-trigger" class="button-trigger-content">
+[2024-08-29T20:39:27.129Z] [LOG] [example-flow.btn4] <div id="example-flow.btn4.button-trigger" class="button-trigger-content">
   <h3>Button Trigger</h3>
   <button hx-post="/trigger-event/example-flow.btn4.triggerButton"
           hx-swap="none"
@@ -276,7 +274,7 @@
   
   <p>Target: example-flow.jsm1.set-finish</p>
 </div>
-[2024-08-29T19:03:04.251Z] [LOG] [example-flow.btn5] <div id="example-flow.btn5.button-trigger" class="button-trigger-content">
+[2024-08-29T20:39:27.171Z] [LOG] [example-flow.btn5] <div id="example-flow.btn5.button-trigger" class="button-trigger-content">
   <h3>Button Trigger</h3>
   <button hx-post="/trigger-event/example-flow.btn5.triggerButton"
           hx-swap="none"
@@ -289,3 +287,37 @@
   
   <p>Target: example-flow.jsm1.set-reset</p>
 </div>
+[2024-08-29T20:39:28.533Z] [LOG] [Bootstrap] [AppController] [trigger-event] [example-flow] [btn2] [triggerButton]
+[2024-08-29T20:39:28.533Z] [LOG] [example-flow.component-1724963965739] Publishing: example-flow.btn2.triggerButton -> [object Object]
+[2024-08-29T20:39:28.536Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn2.triggerButton] data: {"targetFlow":"example-flow","targetComponent":"jsm1","targetEvent":"set-pause","_flowId":"example-flow","_componentId":"btn2","_eventId":"triggerButton"}
+[2024-08-29T20:39:28.536Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn2
+[2024-08-29T20:39:28.536Z] [LOG] [example-flow.btn2] Handling event: triggerButton
+[2024-08-29T20:39:28.536Z] [LOG] [example-flow.btn2] Button pressed: example-flow.btn2.triggerButton
+[2024-08-29T20:39:28.536Z] [LOG] [example-flow.btn2] Publishing: example-flow.btn2.buttonPressed -> [object Object]
+[2024-08-29T20:39:28.537Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn2.buttonPressed] data: {"pressedAt":"2024-08-29T20:39:28.536Z","targetFlow":"example-flow","targetComponent":"jsm1","targetEvent":"set-pause"}
+[2024-08-29T20:39:28.537Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn2
+[2024-08-29T20:39:28.537Z] [LOG] [example-flow.btn2] Handling event: buttonPressed
+[2024-08-29T20:39:28.537Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.jsm1.set-pause]
+[2024-08-29T20:39:28.537Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: jsm1
+[2024-08-29T20:39:28.537Z] [LOG] [example-flow.jsm1] Handling event: set-pause
+[2024-08-29T20:39:28.538Z] [ERROR] [example-flow.jsm1] [transition] State machine not initialized
+[2024-08-29T20:39:28.538Z] [LOG] [example-flow.btn2] Publishing: example-flow.jsm1.set-pause -> [object Object]
+[2024-08-29T20:39:28.538Z] [LOG] [example-flow.btn2] <div id="example-flow.btn2.button-trigger" class="button-trigger-content">
+  <h3>Button Trigger</h3>
+  <button hx-post="/trigger-event/example-flow.btn2.triggerButton"
+          hx-swap="none"
+          hx-ext="json-enc"
+          hx-headers='{"Content-Type": "application/json"}'
+          hx-vals='{"targetFlow": "example-flow", "targetComponent": "jsm1", "targetEvent": "set-pause"}'
+  >
+    Trigger Event
+  </button>
+  
+    <p>Last pressed: 2024-08-29T20:39:28.538Z</p>
+  
+  <p>Target: example-flow.jsm1.set-pause</p>
+</div>
+[2024-08-29T20:39:28.539Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.jsm1.set-pause] data: {"source":"example-flow.btn2","pressedAt":"2024-08-29T20:39:28.538Z"}
+[2024-08-29T20:39:28.539Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: jsm1
+[2024-08-29T20:39:28.539Z] [LOG] [example-flow.jsm1] Handling event: set-pause
+[2024-08-29T20:39:28.539Z] [ERROR] [example-flow.jsm1] [transition] State machine not initialized

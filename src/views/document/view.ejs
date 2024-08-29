@@ -28,12 +28,29 @@
       console.log(targetId, event.content);
       if (targetElement) {
         targetElement.outerHTML = event.content;
+        // Reinitialize HTMX on the new content
+        htmx.process(document.getElementById(targetId));
       }
     });
 
     htmx.on("htmx:configRequest", (event) => {
       event.detail.headers['Content-Type'] = 'application/json';
     });
+
+    // // Function to reinitialize HTMX on dynamically loaded content
+    // function reinitializeHtmx(element) {
+    //   htmx.process(element);
+    // }
+
+    // // Listen for HTMX after swap event
+    // document.body.addEventListener('htmx:afterSwap', function(event) {
+    //   reinitializeHtmx(event.detail.elt);
+    // });
+
+    // // Listen for HTMX after settle event
+    // document.body.addEventListener('htmx:afterSettle', function(event) {
+    //   reinitializeHtmx(event.detail.elt);
+    // });
   </script>
   <%- include('methods') %> 
 </body>
