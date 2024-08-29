@@ -10,6 +10,8 @@ export function schema(flow: any): Flow {
     return { componentId, componentRef, init };
   });
 
+  // console.log('components', components);
+
   const connections = flow.connections.map(connection => {
     const paths = extractPaths(flow.components, connection);
     const fromParts = paths.from.split('.');

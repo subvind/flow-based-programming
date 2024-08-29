@@ -83,10 +83,10 @@ export abstract class ComponentBase implements Component {
     }
   }
 
-  public async syncConnections(connections: Connection[], componentRegistry: ComponentRegistry): Promise<void> {
+  public syncConnections(connections: Connection[], componentRegistry: ComponentRegistry): void {
     if (connections) {
       this.connections = [];
-      connections.forEach(async (connection, index) => {
+      connections.forEach((connection, index) => {
         // console.log('connection', connection);
         // console.log('this.componentRegistry', componentRegistry)
         if (connection.fromFlow === this.flowId && connection.fromComponent === this.componentId) {

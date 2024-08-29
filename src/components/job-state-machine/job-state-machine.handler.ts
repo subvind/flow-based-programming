@@ -39,6 +39,8 @@ export class JobStateMachineComponent extends ComponentBase {
     @Inject('WEB_SOCKET_SERVER') protected server: Server,
   ) {
     super('jobStateMachine', 'job-state-machine', 'Implements a job state machine', flowId, componentId, amqpConnection, server);
+    this.flowId = flowId;
+    this.componentId = componentId;
     this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
   }
 

@@ -5,6 +5,7 @@ import { Flow } from '../interfaces/flow.interface';
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { initializeComponent } from '../initializers/component.initialize';
+import { Component } from 'src/interfaces/component.interface';
 
 @WebSocketGateway()
 @Injectable()
@@ -26,20 +27,29 @@ export class FlowExecutorService {
       await this.amqpConnection.publish('flow_exchange', 'createConnection', { ...connection, flowId: flow.id });
     }
 
-    // Init components
+    // Construct components
+    let instances = [];
     for (const component of flow.components) {
-      this.logger.log(`Initializing component: ${component.componentId} (${component.componentRef}) for flow: ${flow.id}`);
+      this.logger.log(`Constructing component: ${component.componentId} (${component.componentRef}) for flow: ${flow.id}`);
       
       // initialize a new component instance
-      let componentInstance = initializeComponent(flow, component, this.amqpConnection, this.server);
+      let componentInstance: Component = initializeComponent(flow, component, this.amqpConnection, this.server);
 
-      // register new instance with component registery 
+      // register new instance with component registery
       this.componentRegistry.registerComponent(componentInstance);
+      instances.push(componentInstance);
+    }
 
-      // sync connections with component
-      componentInstance.syncConnections(flow.connections, this.componentRegistry);
- 
-      // publish init eventId command 
+    // Sync connections for component
+    for (const instance of instances) {
+      this.logger.log(`Sync connections for component: ${instance.componentId} (${instance.componentRef}) for flow: ${instance.flowId}`);
+      instance.syncConnections(flow.connections, this.componentRegistry);
+    }
+    
+    // Init component
+    for (const component of flow.components) {
+      this.logger.log(`Initializing component: ${component.componentId} (${component.componentRef}) for flow: ${flow.id}`);
+
       try {
         await this.amqpConnection.publish('flow_exchange', 'componentEvent', {
           flowId: flow.id,
