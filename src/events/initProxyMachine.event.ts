@@ -2,23 +2,17 @@ import { StateMachine } from "src/interfaces/state-machine.interface";
 
 // networks of black box processes, which exchange data
 // across predefined connections by message passing
-export async function initializeMachine(process, message): Promise<void> {
+export async function initProxyMachine(process, message): Promise<void> {
   await process.getPorts();
   for (const input of process._ports.inputs) {
-    console.log('input', input)
+    // console.log('input', input)
     for (const connection of input.connections) {
-      console.log('connection', connection)
+      // console.log('connection', connection)
       const smComponent = connection.connectedFrom as StateMachine;
       if (smComponent) {
-        console.log('smComponent', smComponent)
+        // console.log('smComponent', smComponent)
         process.stateMachine = smComponent;
-        await process.stateMachine.initializeMachine(message);
-        await process.updateDisplay();
-
-        const currentState = process.stateMachine.getCurrentState();
-        await process.publish(process.flowId, process.componentId, 'initializeMachine', { 
-          currentState
-        });
+        console.log(process.stateMachine.componentId);
         break; // We only need to initialize one state machine
       }
     }

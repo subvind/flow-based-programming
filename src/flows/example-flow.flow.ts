@@ -27,7 +27,7 @@ let buttonTrigger = {
 let jobStateMachine = {
   ports: {
     inputs: {
-      initializeMachine: {},
+      initProxyMachine: {},
       'set-start': {},
       'set-pause': {},
       'set-resume': {},
@@ -64,7 +64,7 @@ let components = {
       init: initJobStateMachine,
       ports: {
         inputs: {
-          initializeMachine: {}
+          initStateMachine: {}
         },
         outputs: {}
       }
@@ -97,8 +97,8 @@ let flow = {
   components,
   connections: [
     {
-      from: 'components.sm1.stateMachine.ports.outputs.initializeMachine',
-      to: 'components.jsm1.jobStateMachine.ports.inputs.initializeMachine'
+      from: 'components.sm1.stateMachine.ports.outputs.initProxyMachine',
+      to: 'components.jsm1.jobStateMachine.ports.inputs.initProxyMachine'
     },
     {
       from: 'components.jsm1.jobStateMachine.ports.outputs.get-start',

@@ -5,7 +5,7 @@ import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { Server } from 'socket.io';
 
 import { init } from './init.event';
-import { initializeMachine } from './initialize-machine.event';
+import { initStateMachine } from './initStateMachine.event';
 import { transition } from './transition.event';
 
 @Injectable()
@@ -17,10 +17,11 @@ export class StateMachineComponent extends ComponentBase {
   
   public ports = {
     inputs: [
-      'any.publish.initializeMachine',
+      'any.publish.initStateMachine',
       'any.publish.transition'
     ],
     outputs: [
+      'any.publish.initProxyMachine',
       'any.publish.stateChanged',
       'htmx.display.state-machine'
     ]
@@ -47,8 +48,8 @@ export class StateMachineComponent extends ComponentBase {
         await this.init(data);
         break;
       }
-      case "initializeMachine": {
-        await this.initializeMachine(data);
+      case "initStateMachine": {
+        await this.initStateMachine(data);
         break;
       }
       case "transition": {
@@ -65,8 +66,8 @@ export class StateMachineComponent extends ComponentBase {
     return init(this, data);
   }
 
-  public async initializeMachine(data: any): Promise<void> {
-    return initializeMachine(this, data);
+  public async initStateMachine(data: any): Promise<void> {
+    return initStateMachine(this, data);
   }
 
   public async transition(data: any): Promise<void> {

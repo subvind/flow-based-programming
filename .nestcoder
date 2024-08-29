@@ -361,14 +361,137 @@ export class StateMachineComponent extends ComponentBase {
   }
 }
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/state-machine.interface.ts">
-import { Component } from "./component.interface";
+<FILE path="/home/travis/Projects/flow-based-programming/src/components/job-state-machine/job-state-machine.handler.ts">
+import { Injectable, Inject } from '@nestjs/common';
+import { ComponentBase } from '../../bases/component.base';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { Server } from 'socket.io';
+import { CustomLogger } from '../../logger/custom-logger';
 
-export interface StateMachine extends Component {
-  initializeMachine: (data: any) => Promise<void>;
-  getCurrentState: () => string;
-  getStates: () => Set<string>;
-  getTransitions: () => Map<string, Map<string, string>>;
+import { StateMachine } from 'src/interfaces/state-machine.interface';
+import { initializeMachine } from 'src/events/initializeMachine.event';
+import { transition } from 'src/events/transition.event';
+
+@Injectable()
+export class JobStateMachineComponent extends ComponentBase {
+  public logger: CustomLogger;
+  public stateMachine: StateMachine;
+  
+  public ports = {
+    inputs: [
+      'any.publish.initializeMachine',
+      'any.publish.set-start',
+      'any.publish.set-pause',
+      'any.publish.set-resume',
+      'any.publish.set-finish',
+      'any.publish.set-reset'
+    ],
+    outputs: [
+      'any.publish.get-start',
+      'any.publish.get-pause',
+      'any.publish.get-resume',
+      'any.publish.get-finish',
+      'any.publish.get-reset',
+      'any.publish.stateChanged',
+      'htmx.display.job-state-machine'
+    ]
+  }
+
+  constructor(
+    @Inject('FLOW_ID') flowId: string,
+    @Inject('COMPONENT_ID') componentId: string,
+    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
+    @Inject('WEB_SOCKET_SERVER') protected server: Server,
+  ) {
+    super('jobStateMachine', 'job-state-machine', 'Implements a job state machine', flowId, componentId, amqpConnection, server);
+    this.flowId = flowId;
+    this.componentId = componentId;
+    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
+  }
+
+  async handleEvent(eventId: string, data: any): Promise<void> {
+    this.logger.log(`Handling event: ${eventId}`);
+    switch (eventId) {
+      case "initializeMachine": {
+        await this.initializeMachine(data);
+        break;
+      }
+      case "set-start":
+      case "set-pause":
+      case "set-resume":
+      case "set-finish":
+      case "set-reset": {
+        await this.transition(eventId.substring(4)); // Remove 'set-' prefix
+        break;
+      }
+    }
+  }
+
+  public initializeMachine(data): Promise<void> {
+    return initializeMachine(this, data);
+  }
+
+  public transition(data): Promise<void> {
+    return transition(this, data);
+  }
+
+  public async updateDisplay(): Promise<void> {
+    if (!this.stateMachine) {
+      this.logger.error('[display] State machine not initialized');
+      return;
+    }
+
+    const currentState = this.stateMachine.getCurrentState();
+    const states = this.stateMachine.getStates();
+    const transitions = this.stateMachine.getTransitions();
+
+    await this.display(this.flowId, this.componentId, 'job-state-machine', {
+      currentState,
+      states: Array.from(states),
+      transitions: Object.fromEntries(transitions)
+    });
+  }
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/components/state-machine/init.event.ts">
+import { StateMachineComponent } from './state-machine.handler';
+
+// networks of black box processes, which exchange data
+// across predefined connections by message passing
+export async function init(process: StateMachineComponent, message: any): Promise<void> {
+  return await process.initializeMachine(message);
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/events/initializeMachine.event.ts">
+import { StateMachine } from "src/interfaces/state-machine.interface";
+
+// networks of black box processes, which exchange data
+// across predefined connections by message passing
+export async function initializeMachine(process, message): Promise<void> {
+  await process.getPorts();
+  for (const input of process._ports.inputs) {
+    console.log('input', input)
+    for (const connection of input.connections) {
+      console.log('connection', connection)
+      const smComponent = connection.connectedFrom as StateMachine;
+      if (smComponent) {
+        console.log('smComponent', smComponent)
+        process.stateMachine = smComponent;
+        await process.stateMachine.initializeMachine(message);
+        await process.updateDisplay();
+
+        const currentState = process.stateMachine.getCurrentState();
+        await process.publish(process.flowId, process.componentId, 'initializeMachine', { 
+          currentState
+        });
+        break; // We only need to initialize one state machine
+      }
+    }
+    if (process.stateMachine) break; // Exit if we've found and initialized a state machine
+  }
+  if (!process.stateMachine) {
+    process.logger.error('No valid state machine component found');
+  }
 }
 </FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/bases/component.base.ts">
@@ -593,114 +716,77 @@ export interface Component {
   findConnections: (port: Port) => Promise<Connection[]>
 }
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/logger/custom-logger.ts">
-import { ConsoleLogger, Injectable, Inject } from '@nestjs/common';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import * as fs from 'fs';
-import * as path from 'path';
+<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/flow.interface.ts">
+import { Connection } from "./connection.interface";
 
-@Injectable()
-export class CustomLogger extends ConsoleLogger {
-  constructor(
-    private logId: string,
-    @Inject(AmqpConnection) private amqpConnection: AmqpConnection
-  ) {
-    super(logId);
-    this.setLogLevels(['log', 'error', 'warn', 'debug', 'verbose']);
-  }
-
-  log(message: string, context?: string) {
-    this.printMessage(message, 'log', context);
-    // this.emitLogEvent('log', message);
-  }
-
-  warn(message: string, context?: string) {
-    this.printMessage(message, 'warn', context);
-    // this.emitLogEvent('warn', message);
-  }
-
-  error(message: string, trace?: string, context?: string) {
-    this.printMessage(message, 'error', context);
-    // this.emitLogEvent('error', message);
-    if (trace) {
-      this.printMessage(trace, 'error', context);
-    }
-  }
-
-  debug(message: string, context?: string) {
-    this.printMessage(message, 'debug', context);
-  }
-
-  verbose(message: string, context?: string) {
-    this.printMessage(message, 'verbose', context);
-  }
-
-  private printMessage(message: string, logLevel: string, context?: string) {
-    const output = context ? `[${context}] ${message}` : message;
-    console.log(`[${this.getNow()}] [${logLevel.toUpperCase()}] [${this.logId}] ${output}`);
-  }
-
-  private getNow(): string {
-    return new Date().toISOString();
-  }
-
-  static write_to_file(message: string) {
-    const logFile = path.join(process.cwd(), 'start:dev.stdout.txt');
-    fs.appendFile(logFile, message, (err) => {
-      if (err) {
-        console.error('Failed to write to log file:', err);
-      }
-    });
-  }
-
-  static clearSTDOUT() {
-    const logFile = path.join(process.cwd(), 'start:dev.stdout.txt');
-    try {
-      fs.writeFileSync(logFile, '');
-      console.log(`Log file cleared at ${logFile}`);
-    } catch (error) {
-      console.error('Failed to clear log file:', error);
-    }
-  }
+export interface Flow {
+  id: string;
+  components: {
+    componentId: string;
+    componentRef: string;
+    init: any | undefined;
+  }[];
+  connections: Connection[];
 }
 </FILE>
-
-
-<FILE path="/home/travis/Projects/flow-based-programming/src/stateMachines/job.state-machine.ts">
-export default {
-  initialState: 'idle',
-  states: ['idle', 'running', 'paused', 'finished'],
-  transitions: {
-    idle: { start: 'running' },
-    running: { pause: 'paused', finish: 'finished' },
-    paused: { resume: 'running', finish: 'finished' },
-    finished: { reset: 'idle' }
-  }
-}
-
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/services/component-registry.service.ts">
+<FILE path="/home/travis/Projects/flow-based-programming/src/processors/event.processor.ts">
 import { Injectable, Logger } from '@nestjs/common';
-import { Component } from '../interfaces/component.interface';
+import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
+import { ComponentRegistry } from '../services/component-registry.service';
 
 @Injectable()
-export class ComponentRegistry {
-  private components: Map<string, Component> = new Map();
-  private readonly logger = new Logger(ComponentRegistry.name);
+export class EventProcessor {
+  private readonly logger = new Logger(EventProcessor.name);
+  private connections: Map<string, { toFlow: string; toComponent: string; toEvent: string }> = new Map();
 
-  registerComponent(component: Component) {
-    const key = `${component.flowId}.${component.componentId}`;
-    this.logger.log(`Registering component: ${key}`);
-    this.components.set(key, component);
+  constructor(private componentRegistry: ComponentRegistry) {}
+
+  @RabbitSubscribe({
+    exchange: 'flow_exchange',
+    routingKey: 'componentEvent',
+    queue: 'component_event_queue',
+  })
+  async handleComponentEvent(msg: {flowId: string, componentId: string, eventId: string, data: any}): Promise<void> {
+    const { flowId, componentId, eventId, data: eventData } = msg;
+    this.logger.log(`[handleComponentEvent] [${flowId}.${componentId}.${eventId}] data: ${JSON.stringify(eventData)}`);
+    
+    const component = this.componentRegistry.getComponent(flowId, componentId);
+    if (component) {
+      this.logger.log(`Passing event to component: ${componentId}`);
+      await component.handleEvent(eventId, eventData);
+
+      // Check if there's a connection for this event
+      const connectionKey = `${flowId}.${componentId}.${eventId}`;
+      const connection = this.connections.get(connectionKey);
+      if (connection) {
+        const { toFlow, toComponent, toEvent } = connection;
+        this.logger.log(`[forwardingComponentEvent] [${toFlow}.${toComponent}.${toEvent}]`);
+        
+        const targetComponent = this.componentRegistry.getComponent(toFlow, toComponent);
+        if (targetComponent) {
+          this.logger.log(`Forwarding event to component: ${targetComponent.componentId}`);
+          await targetComponent.handleEvent(toEvent, eventData);
+        } else {
+          this.logger.warn(`Target component not found: ${toComponent} in flow: ${toFlow}`);
+        }
+      }
+    } else {
+      this.logger.warn(`Component not found: ${flowId}.${componentId}`);
+    }
   }
 
-  getComponent(flowId: string, componentId: string): Component | undefined {
-    const key = `${flowId}.${componentId}`;
-    const component = this.components.get(key);
-    if (!component) {
-      this.logger.warn(`Component not found: ${key}`);
-    }
-    return component;
+  @RabbitSubscribe({
+    exchange: 'flow_exchange',
+    routingKey: 'createConnection',
+    queue: 'create_connection_queue',
+  })
+  async createConnection(msg: {flowId: string, fromComponent: string, fromEvent: string, toComponent: string, toEvent: string}): Promise<void>  {
+    const { flowId, fromComponent, fromEvent, toComponent, toEvent } = msg;
+    this.logger.log(`Received createConnection: ${flowId}.${fromComponent}.${fromEvent} -> ${toComponent}.${toEvent}`);
+    
+    const connectionKey = `${flowId}.${fromComponent}.${fromEvent}`;
+    this.connections.set(connectionKey, { toFlow: flowId, toComponent, toEvent });
+    this.logger.log(`Connection created: ${connectionKey} -> ${toComponent}.${toEvent}`);
   }
 }
 </FILE>
@@ -772,309 +858,192 @@ export class FlowExecutorService {
   }
 }
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/processors/event.processor.ts">
-import { Injectable, Logger } from '@nestjs/common';
-import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
-import { ComponentRegistry } from '../services/component-registry.service';
-
-@Injectable()
-export class EventProcessor {
-  private readonly logger = new Logger(EventProcessor.name);
-  private connections: Map<string, { toFlow: string; toComponent: string; toEvent: string }> = new Map();
-
-  constructor(private componentRegistry: ComponentRegistry) {}
-
-  @RabbitSubscribe({
-    exchange: 'flow_exchange',
-    routingKey: 'componentEvent',
-    queue: 'component_event_queue',
-  })
-  async handleComponentEvent(msg: {flowId: string, componentId: string, eventId: string, data: any}): Promise<void> {
-    const { flowId, componentId, eventId, data: eventData } = msg;
-    this.logger.log(`[handleComponentEvent] [${flowId}.${componentId}.${eventId}] data: ${JSON.stringify(eventData)}`);
-    
-    const component = this.componentRegistry.getComponent(flowId, componentId);
-    if (component) {
-      this.logger.log(`Passing event to component: ${componentId}`);
-      await component.handleEvent(eventId, eventData);
-
-      // Check if there's a connection for this event
-      const connectionKey = `${flowId}.${componentId}.${eventId}`;
-      const connection = this.connections.get(connectionKey);
-      if (connection) {
-        const { toFlow, toComponent, toEvent } = connection;
-        this.logger.log(`[forwardingComponentEvent] [${toFlow}.${toComponent}.${toEvent}]`);
-        
-        const targetComponent = this.componentRegistry.getComponent(toFlow, toComponent);
-        if (targetComponent) {
-          this.logger.log(`Forwarding event to component: ${targetComponent.componentId}`);
-          await targetComponent.handleEvent(toEvent, eventData);
-        } else {
-          this.logger.warn(`Target component not found: ${toComponent} in flow: ${toFlow}`);
-        }
-      }
-    } else {
-      this.logger.warn(`Component not found: ${flowId}.${componentId}`);
-    }
-  }
-
-  @RabbitSubscribe({
-    exchange: 'flow_exchange',
-    routingKey: 'createConnection',
-    queue: 'create_connection_queue',
-  })
-  async createConnection(msg: {flowId: string, fromComponent: string, fromEvent: string, toComponent: string, toEvent: string}): Promise<void>  {
-    const { flowId, fromComponent, fromEvent, toComponent, toEvent } = msg;
-    this.logger.log(`Received createConnection: ${flowId}.${fromComponent}.${fromEvent} -> ${toComponent}.${toEvent}`);
-    
-    const connectionKey = `${flowId}.${fromComponent}.${fromEvent}`;
-    this.connections.set(connectionKey, { toFlow: flowId, toComponent, toEvent });
-    this.logger.log(`Connection created: ${connectionKey} -> ${toComponent}.${toEvent}`);
-  }
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/schema/flow.schema.ts">
-import { Flow } from "../interfaces/flow.interface";
-
-export function schema(flow: any): Flow {
-  const components = Object.entries(flow.components).map(([componentId, component]) => {
-    const [componentRef] = Object.keys(component);
-    let init;
-    let ports = { inputs: [], outputs: [] };
-
-    if (component[componentRef].init) {
-      init = component[componentRef].init;
-    }
-
-    if (component[componentRef].ports) {
-      if (component[componentRef].ports.inputs) {
-        ports.inputs = Object.keys(component[componentRef].ports.inputs);
-      }
-      if (component[componentRef].ports.outputs) {
-        ports.outputs = Object.keys(component[componentRef].ports.outputs);
-      }
-    }
-
-    return { componentId, componentRef, init, ports };
-  });
-
-  const connections = flow.connections.map((connection) => {
-    const fromParts = connection.from.split('.');
-    const toParts = connection.to.split('.');
-
-    // parts format: components.main.eventTrigger.ports.inputs.initializeMachine
-    
-    return {
-      fromFlow: flow.id,
-      fromComponent: fromParts[1],
-      fromEvent: fromParts[5],
-      toFlow: flow.id,
-      toComponent: toParts[1],
-      toEvent: toParts[5],
-    };
-  });
-
-  let code = {
-    id: flow.id,
-    components,
-    connections,
-  };
-
-  // console.log('code', code);
-
-  return code;
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/flow.interface.ts">
-import { Connection } from "./connection.interface";
-
-export interface Flow {
-  id: string;
-  components: {
-    componentId: string;
-    componentRef: string;
-    init: any | undefined;
-  }[];
-  connections: Connection[];
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/port.interface.ts">
-import { Connection } from "./connection.interface";
-
-// portId format: <dataType>.<dataMethod>.<eventId>
-export interface Port {
-  direction: 'input' | 'output'
-  dataType: string;
-  dataMethod: 'display' | 'publish';
-  eventId: string;
-  connections: Connection[];
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/connection.interface.ts">
+<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/state-machine.interface.ts">
 import { Component } from "./component.interface";
 
-export interface Connection {
-  toFlow: string;
-  toComponent: string;
-  toEvent: string;
-  connectedTo: Component | undefined;
-  fromFlow: string;
-  fromComponent: string;
-  fromEvent: string;
-  connectedFrom: Component | undefined;
-  next: Component | undefined;
+export interface StateMachine extends Component {
+  transition: (data: any) => Promise<void>;
+  initializeMachine: (data: any) => Promise<void>;
+  getCurrentState: () => string;
+  getStates: () => Set<string>;
+  getTransitions: () => Map<string, Map<string, string>>;
 }
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/templates/job-state-machine.ejs">
-<div id="<%= _flowId %>.<%= _componentId %>.<%= _templateId %>" class="job-state-machine-content">
-  <h3>Job State Machine</h3>
-  <p>Current Job State: <strong><%= currentState %></strong></p>
-  <h4>Job States:</h4>
-  <ul>
-    <% states.forEach(function(state) { %>
-      <li><%= state %></li>
-    <% }); %>
-  </ul>
-  <h4>Job Transitions:</h4>
-  <ul>
-    <% for (const [fromState, events] of Object.entries(transitions)) { %>
-      <li>
-        <%= fromState %>:
-        <ul>
-          <% for (const [event, toState] of Object.entries(events)) { %>
-            <li><%= event %> -> <%= toState %></li>
-          <% } %>
-        </ul>
-      </li>
-    <% } %>
-  </ul>
-</div>
-</FILE>
-<FILE path="src/components/job-state-machine/job-state-machine.handler.ts" TARGET>
-import { Injectable, Inject } from '@nestjs/common';
-import { ComponentBase } from '../../bases/component.base';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import { Server } from 'socket.io';
-import { CustomLogger } from '../../logger/custom-logger';
+<FILE path="/home/travis/Projects/flow-based-programming/src/stateMachines/job.state-machine.ts">
+export default {
+  initialState: 'idle',
+  states: ['idle', 'running', 'paused', 'finished'],
+  transitions: {
+    idle: { start: 'running' },
+    running: { pause: 'paused', finish: 'finished' },
+    paused: { resume: 'running', finish: 'finished' },
+    finished: { reset: 'idle' }
+  }
+}
 
-import { StateMachineComponent } from '../state-machine/state-machine.handler';
-import { Component } from 'src/interfaces/component.interface';
-import { StateMachine } from 'src/interfaces/state-machine.interface';
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/components/state-machine/transition.event.ts">
+import { StateMachineComponent } from './state-machine.handler';
+
+// networks of black box processes, which exchange data
+// across predefined connections by message passing
+export async function transition(process: StateMachineComponent, message: any): Promise<void> {
+  const { event } = message;
+  const currentState = process.currentState;
+
+  const stateTransitions = process.transitions.get(currentState);
+  if (!stateTransitions) {
+    process.logger.warn(`No transitions defined for state: ${currentState}`);
+    return;
+  }
+
+  const nextState = stateTransitions.get(event);
+  if (!nextState) {
+    process.logger.warn(`No transition defined for event '${event}' in state '${currentState}'`);
+    return;
+  }
+
+  process.currentState = nextState;
+  process.logger.log(`Transitioned from '${currentState}' to '${nextState}' on event '${event}'`);
+
+  await process.publish(process.flowId, process.componentId, 'stateChanged', { 
+    previousState: currentState,
+    currentState: process.currentState,
+    event
+  });
+
+  await process.display(process.flowId, process.componentId, 'state-machine', {
+    currentState: process.currentState,
+    states: Array.from(process.states),
+    transitions: Object.fromEntries(process.transitions)
+  });
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/logger/custom-logger.ts">
+import { ConsoleLogger, Injectable, Inject } from '@nestjs/common';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
-export class JobStateMachineComponent extends ComponentBase {
-  public logger: CustomLogger;
-  private stateMachine: StateMachineComponent;
-  
-  public ports = {
-    inputs: [
-      'any.publish.initializeMachine',
-      'any.publish.set-start',
-      'any.publish.set-pause',
-      'any.publish.set-resume',
-      'any.publish.set-finish',
-      'any.publish.set-reset'
-    ],
-    outputs: [
-      'any.publish.get-start',
-      'any.publish.get-pause',
-      'any.publish.get-resume',
-      'any.publish.get-finish',
-      'any.publish.get-reset',
-      'any.publish.stateChanged',
-      'htmx.display.job-state-machine'
-    ]
-  }
-
+export class CustomLogger extends ConsoleLogger {
   constructor(
-    @Inject('FLOW_ID') flowId: string,
-    @Inject('COMPONENT_ID') componentId: string,
-    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
-    @Inject('WEB_SOCKET_SERVER') protected server: Server,
+    private logId: string,
+    @Inject(AmqpConnection) private amqpConnection: AmqpConnection
   ) {
-    super('jobStateMachine', 'job-state-machine', 'Implements a job state machine', flowId, componentId, amqpConnection, server);
-    this.flowId = flowId;
-    this.componentId = componentId;
-    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
+    super(logId);
+    this.setLogLevels(['log', 'error', 'warn', 'debug', 'verbose']);
   }
 
-  async handleEvent(eventId: string, data: any): Promise<void> {
-    this.logger.log(`Handling event: ${eventId}`);
-    switch (eventId) {
-      case "initializeMachine": {
-        await this.initializeMachine(data);
-        break;
-      }
-      case "set-start":
-      case "set-pause":
-      case "set-resume":
-      case "set-finish":
-      case "set-reset": {
-        await this.transition(eventId.substring(4)); // Remove 'set-' prefix
-        break;
-      }
+  log(message: string, context?: string) {
+    this.printMessage(message, 'log', context);
+    // this.emitLogEvent('log', message);
+  }
+
+  warn(message: string, context?: string) {
+    this.printMessage(message, 'warn', context);
+    // this.emitLogEvent('warn', message);
+  }
+
+  error(message: string, trace?: string, context?: string) {
+    this.printMessage(message, 'error', context);
+    // this.emitLogEvent('error', message);
+    if (trace) {
+      this.printMessage(trace, 'error', context);
     }
   }
 
-  private async initializeMachine(data: any): Promise<void> {
-    await this.getPorts();
-    this._ports.inputs.forEach((input) => {
-      input.connections.forEach(async (connection) => {
-        let smComponent: any = connection.connectedFrom;
-
-        await smComponent.initializeMachine(data);
-        await this.updateDisplay(smComponent);
-
-        let currentState = await smComponent.getCurrentState()
-        await this.publish(this.flowId, this.componentId, 'initializeMachine', { 
-          currentState
-        });
-      })
-    })
+  debug(message: string, context?: string) {
+    this.printMessage(message, 'debug', context);
   }
 
-  private async transition(event: string): Promise<void> {
-    let previousState;
-    let currentState;
-    await this.getPorts();
-    this._ports.inputs.forEach((input) => {
-      input.connections.forEach(async (connection) => {
-        let smComponent: any = connection.connectedFrom;
-        previousState = await smComponent.getCurrentState();
-        await this.stateMachine.transition({ event });
-        currentState = await smComponent.getCurrentState();
+  verbose(message: string, context?: string) {
+    this.printMessage(message, 'verbose', context);
+  }
 
-        await this.updateDisplay(smComponent);
-      })
-    });
-    
-    // Publish to the specific event port
-    await this.publish(this.flowId, this.componentId, `get-${event}`, { 
-      previousState,
-      currentState
-    });
+  private printMessage(message: string, logLevel: string, context?: string) {
+    const output = context ? `[${context}] ${message}` : message;
+    console.log(`[${this.getNow()}] [${logLevel.toUpperCase()}] [${this.logId}] ${output}`);
+  }
 
-    // Also publish to the general stateChanged port
-    await this.publish(this.flowId, this.componentId, 'stateChanged', { 
-      previousState,
-      currentState,
-      event
+  private getNow(): string {
+    return new Date().toISOString();
+  }
+
+  static write_to_file(message: string) {
+    const logFile = path.join(process.cwd(), 'start:dev.stdout.txt');
+    fs.appendFile(logFile, message, (err) => {
+      if (err) {
+        console.error('Failed to write to log file:', err);
+      }
     });
   }
 
-  private async updateDisplay(stateMachineComponent): Promise<void> {
-    let currentState = await stateMachineComponent.getCurrentState();
-    let states = await stateMachineComponent.getStates();
-    let transitions = await stateMachineComponent.getTransitions();
-
-    await this.display(this.flowId, this.componentId, 'job-state-machine', {
-      currentState,
-      states: Array.from(states),
-      transitions: Object.fromEntries(transitions)
-    });
+  static clearSTDOUT() {
+    const logFile = path.join(process.cwd(), 'start:dev.stdout.txt');
+    try {
+      fs.writeFileSync(logFile, '');
+      console.log(`Log file cleared at ${logFile}`);
+    } catch (error) {
+      console.error('Failed to clear log file:', error);
+    }
   }
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/services/component-registry.service.ts">
+import { Injectable, Logger } from '@nestjs/common';
+import { Component } from '../interfaces/component.interface';
+
+@Injectable()
+export class ComponentRegistry {
+  private components: Map<string, Component> = new Map();
+  private readonly logger = new Logger(ComponentRegistry.name);
+
+  registerComponent(component: Component) {
+    const key = `${component.flowId}.${component.componentId}`;
+    this.logger.log(`Registering component: ${key}`);
+    this.components.set(key, component);
+  }
+
+  getComponent(flowId: string, componentId: string): Component | undefined {
+    const key = `${flowId}.${componentId}`;
+    const component = this.components.get(key);
+    if (!component) {
+      this.logger.warn(`Component not found: ${key}`);
+    }
+    return component;
+  }
+}
+</FILE>
+<FILE path="src/components/state-machine/initialize-machine.event.ts" TARGET>
+import { StateMachineComponent } from './state-machine.handler';
+
+// networks of black box processes, which exchange data
+// across predefined connections by message passing
+export async function initializeMachine(process: StateMachineComponent, message: any): Promise<void> {
+  const { initialState, states, transitions } = message;
+
+  process.currentState = initialState;
+  process.states = new Set(states);
+  
+  process.transitions = new Map();
+  for (const [fromState, events] of Object.entries(transitions)) {
+    process.transitions.set(fromState, new Map(Object.entries(events as Record<string, string>)));
+  }
+
+  process.logger.log(`State machine initialized with initial state: ${process.currentState}`);
+  
+  await process.publish(process.flowId, process.componentId, 'stateChanged', { 
+    currentState: process.currentState 
+  });
+
+  await process.display(process.flowId, process.componentId, 'state-machine', {
+    currentState: process.currentState,
+    states: Array.from(process.states),
+    transitions: Object.fromEntries(process.transitions)
+  });
 }
 </FILE>
 <REQUEST>
-TypeError: smComponent.getCurrentState is not a function
+should send init event to the connected job state machine component
 </REQUEST>

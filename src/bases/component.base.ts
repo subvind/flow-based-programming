@@ -61,7 +61,7 @@ export abstract class ComponentBase implements Component {
     const htmxContent = await this.generateHtmxContent(data);
     
     if (this.server) {
-      this.logger.log(htmxContent)
+      // this.logger.log(htmxContent);
       this.server.emit('display-flow-component-template-content', {
         flowId,
         componentId,

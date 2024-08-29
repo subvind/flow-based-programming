@@ -26,7 +26,7 @@ export function schema(flow: any): Flow {
     const fromParts = connection.from.split('.');
     const toParts = connection.to.split('.');
 
-    // parts format: components.main.eventTrigger.ports.inputs.initializeMachine
+    // parts format: components.<componentId>.<componentRef>.ports.inputs.<eventId>
     
     return {
       fromFlow: flow.id,

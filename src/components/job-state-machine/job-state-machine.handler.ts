@@ -5,7 +5,7 @@ import { Server } from 'socket.io';
 import { CustomLogger } from '../../logger/custom-logger';
 
 import { StateMachine } from 'src/interfaces/state-machine.interface';
-import { initializeMachine } from 'src/events/initializeMachine.event';
+import { initProxyMachine } from 'src/events/initProxyMachine.event';
 import { transition } from 'src/events/transition.event';
 
 @Injectable()
@@ -15,7 +15,7 @@ export class JobStateMachineComponent extends ComponentBase {
   
   public ports = {
     inputs: [
-      'any.publish.initializeMachine',
+      'any.publish.initProxyMachine',
       'any.publish.set-start',
       'any.publish.set-pause',
       'any.publish.set-resume',
@@ -48,8 +48,8 @@ export class JobStateMachineComponent extends ComponentBase {
   async handleEvent(eventId: string, data: any): Promise<void> {
     this.logger.log(`Handling event: ${eventId}`);
     switch (eventId) {
-      case "initializeMachine": {
-        await this.initializeMachine(data);
+      case "initProxyMachine": {
+        await this.initProxyMachine(data);
         break;
       }
       case "set-start":
@@ -63,8 +63,8 @@ export class JobStateMachineComponent extends ComponentBase {
     }
   }
 
-  public initializeMachine(data): Promise<void> {
-    return initializeMachine(this, data);
+  public initProxyMachine(data): Promise<void> {
+    return initProxyMachine(this, data);
   }
 
   public transition(data): Promise<void> {

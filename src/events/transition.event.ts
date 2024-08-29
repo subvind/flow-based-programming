@@ -1,13 +1,14 @@
 // networks of black box processes, which exchange data
 // across predefined connections by message passing
 export async function transition(process, message): Promise<void> {
+  // console.log('process', process.stateMachine)
   if (!process.stateMachine) {
     process.logger.error('[transition] State machine not initialized');
     return;
   }
 
   const previousState = process.stateMachine.getCurrentState();
-  await process.stateMachine.transition({ message });
+  await process.stateMachine.transition({ event: message });
   const currentState = process.stateMachine.getCurrentState();
 
   await process.updateDisplay();
