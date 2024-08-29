@@ -1,60 +1,57 @@
-export function schema (flow) {
-  
+import { Flow } from "../interfaces/flow.interface";
+
+export function schema(flow: any): Flow {
+  const components = Object.entries(flow.components).map(([componentId, component]) => {
+    const [componentRef] = Object.keys(component);
+    let init;
+    if (componentRef === 'stateMachine' && component[componentRef].init) {
+      init = component[componentRef].init;
+    }
+    return { componentId, componentRef, init };
+  });
+
+  const connections = flow.connections.map(connection => {
+    const paths = extractPaths(flow.components, connection);
+    const fromParts = paths.from.split('.');
+    const toParts = paths.to.split('.');
+    // console.log('fromParts', fromParts)
+    // example: main.eventTrigger.events.initializeMachine
+    return {
+      fromFlow: flow.id,
+      fromComponent: fromParts[0],
+      fromEvent: fromParts[fromParts.length - 1],
+      toFlow: flow.id,
+      toComponent: toParts[0],
+      toEvent: toParts[toParts.length - 1],
+    };
+  });
+
+  let code = {
+    id: flow.id,
+    components,
+    connections,
+  };
+
+  return code;
 }
 
-// TODO: use ./src/flow/example-flow.flow.ts for reference and
-// TODO: turn flow input into to the following format as an output and return it:
+function getObjectPath(obj, target) {
+  for (const [key, value] of Object.entries(obj)) {
+    if (value === target) return [key];
+    if (typeof value === 'object') {
+      const path = getObjectPath(value, target);
+      if (path) return [key, ...path];
+    }
+  }
+  return null;
+}
 
-// export default {
-//   id: 'example-flow',
-//   components: [
-//     { componentId: 'main', componentRef: 'eventTrigger' },
-//     { componentId: 'sm1', componentRef: 'stateMachine', init: jobStateMachine }, // required for jobStateMachine
-//     { componentId: 'jsm1', componentRef: 'jobStateMachine' }, // requires stateMachine with init config
-//     { componentId: 'gen1', componentRef: 'numberGenerator' },
-//     { componentId: 'gen2', componentRef: 'numberGenerator' },
-//     { componentId: 'mult1', componentRef: 'numberMultiplier' },
-//   ],
-//   connections: [
-//     // Initialize the job state machine
-//     {
-//       fromComponent: 'sm1',
-//       fromEvent: 'initializeMachine',
-//       toComponent: 'jsm1',
-//       toEvent: 'initializeMachine',
-//     },
-//     // Job state machine controls number generators
-//     {
-//       fromComponent: 'jsm1',
-//       fromEvent: 'stateChanged',
-//       toComponent: 'gen1',
-//       toEvent: 'start',
-//     },
-//     {
-//       fromComponent: 'jsm1',
-//       fromEvent: 'stateChanged',
-//       toComponent: 'gen2',
-//       toEvent: 'start',
-//     },
-//     // Number generators send numbers to multiplier
-//     {
-//       fromComponent: 'gen1',
-//       fromEvent: 'numberGenerated',
-//       toComponent: 'mult1',
-//       toEvent: 'firstNumberReceived',
-//     },
-//     {
-//       fromComponent: 'gen2',
-//       fromEvent: 'numberGenerated',
-//       toComponent: 'mult1',
-//       toEvent: 'secondNumberReceived',
-//     },
-//     // Multiplier result triggers state transition for job state machine
-//     {
-//       fromComponent: 'mult1',
-//       fromEvent: 'numberMultiplied',
-//       toComponent: 'jsm1',
-//       toEvent: 'finish',
-//     },
-//   ],
-// }
+function extractPaths(components, connection) {
+  const fromPath = getObjectPath(components, connection.from);
+  const toPath = getObjectPath(components, connection.to);
+
+  return {
+    from: fromPath ? fromPath.join('.') : null,
+    to: toPath ? toPath.join('.') : null
+  };
+}

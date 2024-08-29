@@ -27,7 +27,6 @@ let components = {
     jobStateMachine: {
       events: {
         initializeMachine: {},
-        stateChanged: {},
         start: {},
         finish: {}
       }
@@ -50,7 +49,8 @@ let components = {
   }
 }
 
-let exampleFlow = {
+let flow = {
+  id: 'example-flow',
   components,
   connections: [
     {
@@ -58,11 +58,11 @@ let exampleFlow = {
       to: components.jsm1.jobStateMachine.events.initializeMachine
     },
     {
-      from: components.jsm1.jobStateMachine.events.stateChanged,
+      from: components.jsm1.jobStateMachine.events.start,
       to: components.gen1.numberGenerator.events.start
     },
     {
-      from: components.jsm1.jobStateMachine.events.stateChanged,
+      from: components.jsm1.jobStateMachine.events.start,
       to: components.gen2.numberGenerator.events.start
     },
     {
@@ -80,4 +80,4 @@ let exampleFlow = {
   ]
 };
 
-export default schema(exampleFlow);
+export default schema(flow);
