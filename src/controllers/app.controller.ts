@@ -28,13 +28,27 @@ export class AppController {
 
   @Get('document')
   @Render('document/index')
-  async documentIndex(@Req() req: Request) {
+  async documentIndex(
+    @Req() req: Request
+  ) {
+    return {
+      message: 'document - steam engine // FBP' 
+    };
+  }
+
+  @Get('document/:flowId/:componentId')
+  @Render('document/view')
+  async documentView(
+    @Param('flowId') flowId: string,
+    @Param('componentId') componentId: string,
+    @Req() req: Request
+  ) {
     return {
       selected: {
-        flowId: 'example-flow',
-        componentId: 'gen1'
+        flowId,
+        componentId
       },
-      message: 'document - steam engine // FBP' 
+      message: `${flowId}.${componentId} - document - steam engine // FBP`
     };
   }
 
@@ -77,15 +91,10 @@ export class AppController {
 
       connections.forEach((connection) => {
         if (port.direction === 'input') {
-          // console.log('documentConnections input to', connection.connectedFrom.componentId);
           connection.next = connection.connectedFrom;
         } else {
-          // console.log('documentConnections output from', connection.connectedTo.componentId);
           connection.next = connection.connectedTo;
         }
-        let { toComponent, fromComponent, toEvent, fromEvent } = connection;
-        // console.log('connection', fromComponent, fromEvent, toComponent, toEvent);
-        // console.log('next', connection.next.componentId)
       });
 
       if (port) {

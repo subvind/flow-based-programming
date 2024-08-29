@@ -62,7 +62,7 @@ export class JobStateMachineComponent extends ComponentBase {
   }
 
   private async initializeMachine(data: any): Promise<void> {
-    this.getPorts();
+    await this.getPorts();
     this._ports.inputs.forEach((input) => {
       input.connections.forEach(async (connection) => {
         let smComponent: any = connection.connectedFrom;
@@ -81,7 +81,7 @@ export class JobStateMachineComponent extends ComponentBase {
   private async transition(event: string): Promise<void> {
     let previousState;
     let currentState;
-    this.getPorts();
+    await this.getPorts();
     this._ports.inputs.forEach((input) => {
       input.connections.forEach(async (connection) => {
         let smComponent: any = connection.connectedFrom;

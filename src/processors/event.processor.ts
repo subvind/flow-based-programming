@@ -14,7 +14,7 @@ export class EventProcessor {
     routingKey: 'componentEvent',
     queue: 'component_event_queue',
   })
-  async handleComponentEvent(msg: {flowId: string, componentId: string, eventId: string, data: any}) {
+  async handleComponentEvent(msg: {flowId: string, componentId: string, eventId: string, data: any}): Promise<void> {
     const { flowId, componentId, eventId, data: eventData } = msg;
     this.logger.log(`[handleComponentEvent] [${flowId}.${componentId}.${eventId}] data: ${JSON.stringify(eventData)}`);
     
@@ -48,14 +48,12 @@ export class EventProcessor {
     routingKey: 'createConnection',
     queue: 'create_connection_queue',
   })
-  async createConnection(msg: {flowId: string, fromComponent: string, fromEvent: string, toComponent: string, toEvent: string}) {
+  async createConnection(msg: {flowId: string, fromComponent: string, fromEvent: string, toComponent: string, toEvent: string}): Promise<void>  {
     const { flowId, fromComponent, fromEvent, toComponent, toEvent } = msg;
     this.logger.log(`Received createConnection: ${flowId}.${fromComponent}.${fromEvent} -> ${toComponent}.${toEvent}`);
     
     const connectionKey = `${flowId}.${fromComponent}.${fromEvent}`;
     this.connections.set(connectionKey, { toFlow: flowId, toComponent, toEvent });
     this.logger.log(`Connection created: ${connectionKey} -> ${toComponent}.${toEvent}`);
-    
-    return { success: true, message: 'Connection created successfully' };
   }
 }

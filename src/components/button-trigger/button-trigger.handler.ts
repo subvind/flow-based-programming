@@ -5,13 +5,16 @@ import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { Server } from 'socket.io';
 
 import { triggerButton } from './trigger-button.event';
+import { init } from './init.event';
 
 @Injectable()
 export class ButtonTriggerComponent extends ComponentBase {
+  public template: string = 'button-trigger';
   public logger: CustomLogger;
   public ports = {
     inputs: [
       'any.publish.triggerButton',
+      'any.publish.init',
     ],
     outputs: [
       'any.publish.buttonPressed',
@@ -34,6 +37,10 @@ export class ButtonTriggerComponent extends ComponentBase {
   async handleEvent(eventId: string, data: any): Promise<void> {
     this.logger.log(`Handling event: ${eventId}`);
     switch (eventId) {
+      case "init": {
+        await this.init(data);
+        break;
+      }
       case "triggerButton": {
         await this.triggerButton(data);
         break;
@@ -42,6 +49,10 @@ export class ButtonTriggerComponent extends ComponentBase {
         break;
       }
     }
+  }
+
+  private async init(data: any): Promise<void> {
+    return init(this, data);
   }
 
   private async triggerButton(data: any): Promise<void> {

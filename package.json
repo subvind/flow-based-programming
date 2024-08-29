@@ -8,7 +8,7 @@
     "copy-templates": "cp -R src/templates dist/",
     "build": "nest build && npm run copy-templates",
     "start": "nest start",
-    "start:dev": "nest start --watch 2>&1 | tee start:dev.stdout.txt",
+    "start:dev": "npm run copy-templates && nest start --watch 2>&1 | tee start:dev.stdout.txt",
     "start:prod": "node dist/main"
   },
   "dependencies": {
