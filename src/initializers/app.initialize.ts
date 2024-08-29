@@ -6,6 +6,7 @@ import { NumberMultiplierComponent } from '../components/number-multiplier/numbe
 import { EventTriggerComponent } from '../components/event-trigger/event-trigger.handler';
 import { StateMachineComponent } from '../components/state-machine/state-machine.handler';
 import { JobStateMachineComponent } from '../components/job-state-machine/job-state-machine.handler';
+import { ButtonTriggerComponent } from 'src/components/button-trigger/button-trigger.handler';
 
 export function initializeAppModule(metadata): any {
   @Module(metadata)
@@ -16,7 +17,8 @@ export function initializeAppModule(metadata): any {
       private numberGeneratorComponent: NumberGeneratorComponent,
       private numberMultiplierComponent: NumberMultiplierComponent,
       private stateMachineComponent: StateMachineComponent,
-      private jobJtateMachineComponent: JobStateMachineComponent,
+      private jobStateMachineComponent: JobStateMachineComponent,
+      private buttonTriggerComponent: ButtonTriggerComponent,
     ) {}
 
     onModuleInit() {
@@ -25,7 +27,8 @@ export function initializeAppModule(metadata): any {
       this.componentRegistry.registerComponent(this.numberGeneratorComponent);
       this.componentRegistry.registerComponent(this.numberMultiplierComponent);
       this.componentRegistry.registerComponent(this.stateMachineComponent);
-      this.componentRegistry.registerComponent(this.jobJtateMachineComponent);
+      this.componentRegistry.registerComponent(this.jobStateMachineComponent);
+      this.componentRegistry.registerComponent(this.buttonTriggerComponent);
     }
   }
 
@@ -38,4 +41,5 @@ export const components = [
   NumberMultiplierComponent,
   StateMachineComponent,
   JobStateMachineComponent,
+  ButtonTriggerComponent,
 ]

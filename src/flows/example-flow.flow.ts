@@ -9,18 +9,30 @@ let numberGenerator = {
   }
 }
 
+let buttonTrigger = {
+  events: {
+    triggerButton: {},
+    buttonPressed: {}
+  }
+}
+
 let components = {
   main: {
     eventTrigger: {
-      events: {
-        initializeMachine: {}
-      }
+      events: {}
     }
   },
+  btn1: { buttonTrigger },
+  btn2: { buttonTrigger },
+  btn3: { buttonTrigger },
+  btn4: { buttonTrigger },
+  btn5: { buttonTrigger },
   sm1: {
     stateMachine: {
       init: jobStateMachine,
-      events: {}
+      events: {
+        initializeMachine: {}
+      }
     }
   },
   jsm1: {
@@ -28,7 +40,10 @@ let components = {
       events: {
         initializeMachine: {},
         start: {},
-        finish: {}
+        pause: {},
+        resume: {},
+        finish: {},
+        reset: {}
       }
     }
   },
@@ -54,7 +69,7 @@ let flow = {
   components,
   connections: [
     {
-      from: 'components.main.eventTrigger.events.initializeMachine',
+      from: 'components.sm1.stateMachine.events.initializeMachine',
       to: 'components.jsm1.jobStateMachine.events.initializeMachine'
     },
     {
@@ -62,8 +77,16 @@ let flow = {
       to: 'components.gen1.numberGenerator.events.start'
     },
     {
+      from: 'components.jsm1.jobStateMachine.events.stop',
+      to: 'components.gen1.numberGenerator.events.stop'
+    },
+    {
       from: 'components.jsm1.jobStateMachine.events.start',
       to: 'components.gen2.numberGenerator.events.start'
+    },
+    {
+      from: 'components.jsm1.jobStateMachine.events.stop',
+      to: 'components.gen2.numberGenerator.events.stop'
     },
     {
       from: 'components.gen1.numberGenerator.events.numberGenerated',
@@ -74,9 +97,25 @@ let flow = {
       to: 'components.multi.numberMultiplier.events.secondNumberReceived'
     },
     {
-      from: 'components.multi.numberMultiplier.events.numberMultiplied',
+      from: 'components.btn1.buttonTrigger.events.buttonPressed',
+      to: 'components.jsm1.jobStateMachine.events.start'
+    },
+    {
+      from: 'components.btn2.buttonTrigger.events.buttonPressed',
+      to: 'components.jsm1.jobStateMachine.events.pause'
+    },
+    {
+      from: 'components.btn3.buttonTrigger.events.buttonPressed',
+      to: 'components.jsm1.jobStateMachine.events.resume'
+    },
+    {
+      from: 'components.btn4.buttonTrigger.events.buttonPressed',
       to: 'components.jsm1.jobStateMachine.events.finish'
-    }
+    },
+    {
+      from: 'components.btn5.buttonTrigger.events.buttonPressed',
+      to: 'components.jsm1.jobStateMachine.events.reset'
+    },
   ]
 };
 

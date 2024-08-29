@@ -168,7 +168,6 @@ export abstract class ComponentBase implements Component {
           }
         }
       });
-      console.log('connections', connections)
       return connections;
     } else {
       return [];

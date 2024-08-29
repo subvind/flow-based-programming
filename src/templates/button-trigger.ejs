@@ -1,0 +1,15 @@
+<div id="<%= _flowId %>.<%= _componentId %>.<%= _templateId %>" class="button-trigger-content">
+  <h3>Button Trigger</h3>
+  <button hx-post="/trigger-event/<%= _flowId %>.<%= _componentId %>.triggerButton"
+          hx-swap="none"
+          hx-ext="json-enc"
+          hx-headers='{"Content-Type": "application/json"}'
+          hx-vals='{"targetFlow": "<%= targetFlow %>", "targetComponent": "<%= targetComponent %>", "targetEvent": "<%= targetEvent %>"}'
+  >
+    Trigger Event
+  </button>
+  <% if (lastPressed) { %>
+    <p>Last pressed: <%= lastPressed %></p>
+  <% } %>
+  <p>Target: <%= targetFlow %>.<%= targetComponent %>.<%= targetEvent %></p>
+</div>
