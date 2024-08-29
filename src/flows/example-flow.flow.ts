@@ -1,55 +1,83 @@
+import { schema } from "../schema/flow.schema"; 
 import { default as jobStateMachine } from "src/stateMachines/job.state-machine";
 
-export default {
-  id: 'example-flow',
-  components: [
-    { componentId: 'main', componentRef: 'eventTrigger' },
-    { componentId: 'sm1', componentRef: 'stateMachine', init: jobStateMachine }, // required for jobStateMachine
-    { componentId: 'jsm1', componentRef: 'jobStateMachine' }, // requires stateMachine with init config
-    { componentId: 'gen1', componentRef: 'numberGenerator' },
-    { componentId: 'gen2', componentRef: 'numberGenerator' },
-    { componentId: 'mult1', componentRef: 'numberMultiplier' },
-  ],
-  connections: [
-    // Initialize the job state machine
-    {
-      fromComponent: 'sm1',
-      fromEvent: 'initializeMachine',
-      toComponent: 'jsm1',
-      toEvent: 'initializeMachine',
-    },
-    // Job state machine controls number generators
-    {
-      fromComponent: 'jsm1',
-      fromEvent: 'stateChanged',
-      toComponent: 'gen1',
-      toEvent: 'start',
-    },
-    {
-      fromComponent: 'jsm1',
-      fromEvent: 'stateChanged',
-      toComponent: 'gen2',
-      toEvent: 'start',
-    },
-    // Number generators send numbers to multiplier
-    {
-      fromComponent: 'gen1',
-      fromEvent: 'numberGenerated',
-      toComponent: 'mult1',
-      toEvent: 'firstNumberReceived',
-    },
-    {
-      fromComponent: 'gen2',
-      fromEvent: 'numberGenerated',
-      toComponent: 'mult1',
-      toEvent: 'secondNumberReceived',
-    },
-    // Multiplier result triggers state transition for job state machine
-    {
-      fromComponent: 'mult1',
-      fromEvent: 'numberMultiplied',
-      toComponent: 'jsm1',
-      toEvent: 'finish',
-    },
-  ],
+let numberGenerator = {
+  events: {
+    start: {},
+    stop: {},
+    numberGenerated: {}
+  }
 }
+
+let components = {
+  main: {
+    eventTrigger: {
+      events: {
+        initializeMachine: {}
+      }
+    }
+  },
+  sm1: {
+    stateMachine: {
+      init: jobStateMachine,
+      events: {}
+    }
+  },
+  jsm1: {
+    jobStateMachine: {
+      events: {
+        initializeMachine: {},
+        stateChanged: {},
+        start: {},
+        finish: {}
+      }
+    }
+  },
+  gen1: {
+    numberGenerator
+  },
+  gen2: {
+    numberGenerator
+  },
+  multi: {
+    numberMultiplier: {
+      events: {
+        numberMultiplied: {},
+        firstNumberReceived: {},
+        secondNumberReceived: {}
+      }
+    }
+  }
+}
+
+let exampleFlow = {
+  components,
+  connections: [
+    {
+      from: components.main.eventTrigger.events.initializeMachine,
+      to: components.jsm1.jobStateMachine.events.initializeMachine
+    },
+    {
+      from: components.jsm1.jobStateMachine.events.stateChanged,
+      to: components.gen1.numberGenerator.events.start
+    },
+    {
+      from: components.jsm1.jobStateMachine.events.stateChanged,
+      to: components.gen2.numberGenerator.events.start
+    },
+    {
+      from: components.gen1.numberGenerator.events.numberGenerated,
+      to: components.multi.numberMultiplier.events.firstNumberReceived
+    },
+    {
+      from: components.gen2.numberGenerator.events.numberGenerated,
+      to: components.multi.numberMultiplier.events.secondNumberReceived
+    },
+    {
+      from: components.multi.numberMultiplier.events.numberMultiplied,
+      to: components.jsm1.jobStateMachine.events.finish
+    }
+  ]
+};
+
+export default schema(exampleFlow);
