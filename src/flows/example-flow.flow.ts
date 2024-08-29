@@ -54,28 +54,28 @@ let flow = {
   components,
   connections: [
     {
-      from: components.main.eventTrigger.events.initializeMachine,
-      to: components.jsm1.jobStateMachine.events.initializeMachine
+      from: 'components.main.eventTrigger.events.initializeMachine',
+      to: 'components.jsm1.jobStateMachine.events.initializeMachine'
     },
     {
-      from: components.jsm1.jobStateMachine.events.start,
-      to: components.gen1.numberGenerator.events.start
+      from: 'components.jsm1.jobStateMachine.events.start',
+      to: 'components.gen1.numberGenerator.events.start'
     },
     {
-      from: components.jsm1.jobStateMachine.events.start,
-      to: components.gen2.numberGenerator.events.start
+      from: 'components.jsm1.jobStateMachine.events.start',
+      to: 'components.gen2.numberGenerator.events.start'
     },
     {
-      from: components.gen1.numberGenerator.events.numberGenerated,
-      to: components.multi.numberMultiplier.events.firstNumberReceived
+      from: 'components.gen1.numberGenerator.events.numberGenerated',
+      to: 'components.multi.numberMultiplier.events.firstNumberReceived'
     },
     {
-      from: components.gen2.numberGenerator.events.numberGenerated,
-      to: components.multi.numberMultiplier.events.secondNumberReceived
+      from: 'components.gen2.numberGenerator.events.numberGenerated',
+      to: 'components.multi.numberMultiplier.events.secondNumberReceived'
     },
     {
-      from: components.multi.numberMultiplier.events.numberMultiplied,
-      to: components.jsm1.jobStateMachine.events.finish
+      from: 'components.multi.numberMultiplier.events.numberMultiplied',
+      to: 'components.jsm1.jobStateMachine.events.finish'
     }
   ]
 };

@@ -11,12 +11,11 @@ export function schema(flow: any): Flow {
   });
 
   const connections = flow.connections.map((connection) => {
-    const paths = extractPaths(flow.components, connection);
-    const fromParts = paths.from.split('.');
-    const toParts = paths.to.split('.');
+    const fromParts = connection.from.split('.');
+    const toParts = connection.to.split('.');
 
-    console.log('fromParts', fromParts)
-    console.log('toParts', toParts)
+    // 0          1    2            3      4
+    // components.main.eventTrigger.events.initializeMachine
     
     return {
       fromFlow: flow.id,
@@ -34,46 +33,7 @@ export function schema(flow: any): Flow {
     connections,
   };
 
-  console.log('code', code);
+  // console.log('code', code);
 
   return code;
-}
-
-// example
-// let components = {
-//   main: {
-//     eventTrigger: {
-//       events: {
-//         initializeMachine: {}
-//       }
-//     }
-//   },
-// }
-
-function getObjectPath(components, target) {
-  for (const [componentId, component] of Object.entries(components)) {
-    const [componentRef] = Object.keys(component);
-    if (component[componentRef].events) {
-      for (const [eventId, event] of Object.entries(component[componentRef].events)) {
-        console.log('componentId', componentId)
-        console.log('componentRef', componentRef)
-        console.log('eventId', eventId)
-        console.log(event)
-        console.log(target)
-        if (event === target) {
-          let path = `components.${componentId}.${componentRef}.events.${eventId}`
-          console.log(path)
-          return path;
-        }
-      }
-    }
-  }
-  return null;
-}
-
-function extractPaths(components, connection) {
-  return {
-    from: getObjectPath(components, connection.from),
-    to: getObjectPath(components, connection.to)
-  };
 }
