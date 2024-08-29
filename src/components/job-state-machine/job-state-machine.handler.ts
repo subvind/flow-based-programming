@@ -14,19 +14,18 @@ export class JobStateMachineComponent extends ComponentBase {
   public ports = {
     inputs: [
       'any.publish.initializeMachine',
-      'any.publish.start',
-      'any.publish.pause',
-      'any.publish.resume',
-      'any.publish.finish',
-      'any.publish.reset'
+      'any.publish.set-start',
+      'any.publish.set-pause',
+      'any.publish.set-resume',
+      'any.publish.set-finish',
+      'any.publish.set-reset'
     ],
     outputs: [
-      'any.publish.initializeMachine',
-      'any.publish.start',
-      'any.publish.pause',
-      'any.publish.resume',
-      'any.publish.finish',
-      'any.publish.reset',
+      'any.publish.get-start',
+      'any.publish.get-pause',
+      'any.publish.get-resume',
+      'any.publish.get-finish',
+      'any.publish.get-reset',
       'any.publish.stateChanged',
       'htmx.display.job-state-machine'
     ]
@@ -51,12 +50,12 @@ export class JobStateMachineComponent extends ComponentBase {
         await this.initializeMachine(data);
         break;
       }
-      case "start":
-      case "pause":
-      case "resume":
-      case "finish":
-      case "reset": {
-        await this.transition(eventId);
+      case "set-start":
+      case "set-pause":
+      case "set-resume":
+      case "set-finish":
+      case "set-reset": {
+        await this.transition(eventId.substring(4)); // Remove 'set-' prefix
         break;
       }
     }
@@ -94,9 +93,8 @@ export class JobStateMachineComponent extends ComponentBase {
       })
     });
     
-
     // Publish to the specific event port
-    await this.publish(this.flowId, this.componentId, event, { 
+    await this.publish(this.flowId, this.componentId, `get-${event}`, { 
       previousState,
       currentState
     });

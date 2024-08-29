@@ -272,561 +272,6 @@ export function dot(a: V3, b: V3): number {
 
 You will now be given the actual INPUT you must work with.
 
-<FILE path="/home/travis/Projects/flow-based-programming/src/schema/flow.schema.ts">
-import { Flow } from "../interfaces/flow.interface";
-
-export function schema(flow: any): Flow {
-  const components = Object.entries(flow.components).map(([componentId, component]) => {
-    const [componentRef] = Object.keys(component);
-    let init;
-    if (componentRef === 'stateMachine' && component[componentRef].init) {
-      init = component[componentRef].init;
-    }
-    return { componentId, componentRef, init };
-  });
-
-  const connections = flow.connections.map((connection) => {
-    const fromParts = connection.from.split('.');
-    const toParts = connection.to.split('.');
-
-    // 0          1    2            3      4
-    // components.main.eventTrigger.events.initializeMachine
-    
-    return {
-      fromFlow: flow.id,
-      fromComponent: fromParts[1],
-      fromEvent: fromParts[4],
-      toFlow: flow.id,
-      toComponent: toParts[1],
-      toEvent: toParts[4],
-    };
-  });
-
-  let code = {
-    id: flow.id,
-    components,
-    connections,
-  };
-
-  // console.log('code', code);
-
-  return code;
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/stateMachines/job.state-machine.ts">
-export default {
-  initialState: 'idle',
-  states: ['idle', 'running', 'paused', 'finished'],
-  transitions: {
-    idle: { start: 'running' },
-    running: { pause: 'paused', finish: 'finished' },
-    paused: { resume: 'running', finish: 'finished' },
-    finished: { reset: 'idle' }
-  }
-}
-
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/component.interface.ts">
-import { Connection } from "./connection.interface";
-import { Port } from "./port.interface";
-
-export interface Component {
-  ports: { inputs: string[]; outputs: string[]; };
-  componentRef: string;
-  slug: string;
-  description?: string;
-  flowId: string;
-  componentId: string;
-  handleEvent: (eventId: string, data: any) => Promise<void>;
-  publish: (flowId: string, componentId: string, eventId: string, data: any) => Promise<void>;
-  getPorts: () => Promise<{ inputs: Port[], outputs: Port[] }>;
-  findPort: (portId: string) => Promise<Port>;
-  findConnections: (port: Port) => Promise<Connection[]>
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/connection.interface.ts">
-import { Component } from "./component.interface";
-
-export interface Connection {
-  toFlow: string;
-  toComponent: string;
-  toEvent: string;
-  connectedTo: Component | undefined;
-  fromFlow: string;
-  fromComponent: string;
-  fromEvent: string;
-  connectedFrom: Component | undefined;
-  next: Component | undefined;
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/flow.interface.ts">
-import { Connection } from "./connection.interface";
-
-export interface Flow {
-  id: string;
-  components: {
-    componentId: string;
-    componentRef: string;
-    init: any | undefined;
-  }[];
-  connections: Connection[];
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/port.interface.ts">
-import { Connection } from "./connection.interface";
-
-// portId format: <dataType>.<dataMethod>.<eventId>
-export interface Port {
-  direction: 'input' | 'output'
-  dataType: string;
-  dataMethod: 'display' | 'publish';
-  eventId: string;
-  connections: Connection[];
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/state-machine.interface.ts">
-import { Component } from "./component.interface";
-
-export interface StateMachine extends Component {
-  initializeMachine: (data: any) => Promise<void>;
-  getCurrentState: () => string;
-  getStates: () => Set<string>;
-  getTransitions: () => Map<string, Map<string, string>>;
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/components/button-trigger/button-trigger.handler.ts">
-import { CustomLogger } from '../../logger/custom-logger';
-import { Injectable, Inject } from '@nestjs/common';
-import { ComponentBase } from '../../bases/component.base';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import { Server } from 'socket.io';
-
-import { triggerButton } from './trigger-button.event';
-
-@Injectable()
-export class ButtonTriggerComponent extends ComponentBase {
-  public logger: CustomLogger;
-  public ports = {
-    inputs: [
-      'any.publish.triggerButton',
-    ],
-    outputs: [
-      'any.publish.buttonPressed',
-      'htmx.display.button-trigger'
-    ]
-  }
-
-  constructor(
-    @Inject('FLOW_ID') flowId: string,
-    @Inject('COMPONENT_ID') componentId: string,
-    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
-    @Inject('WEB_SOCKET_SERVER') protected server: Server
-  ) {
-    super('buttonTrigger', 'button-trigger', 'Handles button presses and triggers events', flowId, componentId, amqpConnection, server);
-    this.flowId = flowId;
-    this.componentId = componentId;
-    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
-  }
-
-  async handleEvent(eventId: string, data: any): Promise<void> {
-    this.logger.log(`Handling event: ${eventId}`);
-    switch (eventId) {
-      case "triggerButton": {
-        await this.triggerButton(data);
-        break;
-      }
-      default: {
-        break;
-      }
-    }
-  }
-
-  private async triggerButton(data: any): Promise<void> {
-    return triggerButton(this, data);
-  }
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/components/event-trigger/event-trigger.handler.ts">
-import { CustomLogger } from '../../logger/custom-logger';
-import { Injectable, Inject } from '@nestjs/common';
-import { ComponentBase } from '../../bases/component.base';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import { Server } from 'socket.io';
-
-import { triggerEvent } from './trigger-event.event';
-
-@Injectable()
-export class EventTriggerComponent extends ComponentBase {
-  public logger;
-  public ports = { // io format: <dataType>.<dataMethod>.<eventId>
-    inputs: [
-      'any.publish.triggerEvent',
-    ],
-    outputs: [
-      'any.publish.any'
-    ]
-  }
-
-  constructor(
-    @Inject('FLOW_ID') flowId: string,
-    @Inject('COMPONENT_ID') componentId: string,
-    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
-    @Inject('WEB_SOCKET_SERVER') protected server: Server
-  ) {
-    super('eventTrigger', 'event-trigger', 'Handles HTMX requests and triggers events', flowId, componentId, amqpConnection, server);
-    this.flowId = flowId;
-    this.componentId = componentId;
-    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
-  }
-
-  async handleEvent(eventId: string, data: any): Promise<void> {
-    switch (eventId) {
-      case 'triggerEvent':
-        await this.triggerEvent(data);
-        break;
-      default:
-        break;
-    }
-  }
-
-  private async triggerEvent(data): Promise<void> {
-    return await triggerEvent(this, data);
-  }
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/components/job-state-machine/job-state-machine.handler.ts">
-import { Injectable, Inject } from '@nestjs/common';
-import { ComponentBase } from '../../bases/component.base';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import { Server } from 'socket.io';
-import { CustomLogger } from '../../logger/custom-logger';
-
-import { StateMachineComponent } from '../state-machine/state-machine.handler';
-
-@Injectable()
-export class JobStateMachineComponent extends ComponentBase {
-  public logger: CustomLogger;
-  private stateMachine: StateMachineComponent;
-  
-  public ports = {
-    inputs: [
-      'any.publish.initializeMachine',
-      'any.publish.start',
-      'any.publish.pause',
-      'any.publish.resume',
-      'any.publish.finish',
-      'any.publish.reset'
-    ],
-    outputs: [
-      'any.publish.initializeMachine',
-      'any.publish.start',
-      'any.publish.pause',
-      'any.publish.resume',
-      'any.publish.finish',
-      'any.publish.reset',
-      'any.publish.stateChanged',
-      'htmx.display.job-state-machine'
-    ]
-  }
-
-  constructor(
-    @Inject('FLOW_ID') flowId: string,
-    @Inject('COMPONENT_ID') componentId: string,
-    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
-    @Inject('WEB_SOCKET_SERVER') protected server: Server,
-  ) {
-    super('jobStateMachine', 'job-state-machine', 'Implements a job state machine', flowId, componentId, amqpConnection, server);
-    this.flowId = flowId;
-    this.componentId = componentId;
-    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
-  }
-
-  async handleEvent(eventId: string, data: any): Promise<void> {
-    this.logger.log(`Handling event: ${eventId}`);
-    switch (eventId) {
-      case "initializeMachine": {
-        await this.initializeMachine(data);
-        break;
-      }
-      case "start":
-      case "pause":
-      case "resume":
-      case "finish":
-      case "reset": {
-        await this.transition(eventId);
-        break;
-      }
-    }
-  }
-
-  private async initializeMachine(data: any): Promise<void> {
-    this.getPorts();
-    this._ports.inputs.forEach((input) => {
-      input.connections.forEach(async (connection) => {
-        let smComponent: any = connection.connectedFrom;
-
-        await smComponent.initializeMachine(data);
-        await this.updateDisplay(smComponent);
-
-        let currentState = await smComponent.getCurrentState()
-        await this.publish(this.flowId, this.componentId, 'initializeMachine', { 
-          currentState
-        });
-      })
-    })
-  }
-
-  private async transition(event: string): Promise<void> {
-    let previousState;
-    let currentState;
-    this.getPorts();
-    this._ports.inputs.forEach((input) => {
-      input.connections.forEach(async (connection) => {
-        let smComponent: any = connection.connectedFrom;
-        previousState = await smComponent.getCurrentState();
-        await this.stateMachine.transition({ event });
-        currentState = await smComponent.getCurrentState();
-
-        await this.updateDisplay(smComponent);
-      })
-    });
-    
-
-    // Publish to the specific event port
-    await this.publish(this.flowId, this.componentId, event, { 
-      previousState,
-      currentState
-    });
-
-    // Also publish to the general stateChanged port
-    await this.publish(this.flowId, this.componentId, 'stateChanged', { 
-      previousState,
-      currentState,
-      event
-    });
-  }
-
-  private async updateDisplay(stateMachineComponent): Promise<void> {
-    let currentState = await stateMachineComponent.getCurrentState();
-    let states = await stateMachineComponent.getStates();
-    let transitions = await stateMachineComponent.getTransitions();
-
-    await this.display(this.flowId, this.componentId, 'job-state-machine', {
-      currentState,
-      states: Array.from(states),
-      transitions: Object.fromEntries(transitions)
-    });
-  }
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/components/number-generator/number-generator.handler.ts">
-import { CustomLogger } from '../../logger/custom-logger';
-import { Injectable, Inject } from '@nestjs/common';
-import { ComponentBase } from '../../bases/component.base';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import { Server } from 'socket.io';
-
-import { startGenerating } from './start-generating.event';
-import { stopGenerating } from './stop-generating.event';
-
-@Injectable()
-export class NumberGeneratorComponent extends ComponentBase {
-  public logger;
-  public interval: NodeJS.Timeout | null = null;
-  public ports = { // io format: <dataType>.<dataMethod>.<eventId>
-    inputs: [
-      'any.publish.start',
-      'any.publish.stop'
-    ],
-    outputs: [
-      'number.publish.numberGenerated',
-      'htmx.display.number-generator'
-    ]
-  }
-
-  constructor(
-    @Inject('FLOW_ID') flowId: string,
-    @Inject('COMPONENT_ID') componentId: string,
-    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
-    @Inject('WEB_SOCKET_SERVER') protected server: Server
-  ) {
-    super('numberGenerator', 'number-generator', 'Generates random numbers periodically', flowId, componentId, amqpConnection, server);
-    this.flowId = flowId;
-    this.componentId = componentId;
-    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
-  }
-
-  async handleEvent(eventId: string, data: any): Promise<void> {
-    this.logger.log(`NumberGenerator (${this.flowId}) handling event: ${eventId}`);
-    switch (eventId) {
-      case "start": {
-        this.logger.log(`NumberGenerator (${this.flowId}) starting number generation`);
-        this.startGenerating(data);
-        break;
-      }
-      case "stop": {
-        this.logger.log(`NumberGenerator (${this.flowId}) stopping number generation`);
-        this.stopGenerating(data);
-        break;
-      }
-    }
-  }
-
-  private startGenerating(data): void {
-    return startGenerating(this, data);
-  }
-
-  private stopGenerating(data): void {
-    return stopGenerating(this, data);
-  }
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/components/number-multiplier/number-multiplier.handler.ts">
-import { CustomLogger } from '../../logger/custom-logger';
-import { Injectable, Inject } from '@nestjs/common';
-import { ComponentBase } from '../../bases/component.base';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import { Server } from 'socket.io';
-
-import { numberReceived } from './number-received.event';
-
-@Injectable()
-export class NumberMultiplierComponent extends ComponentBase {
-  public logger;
-  public ports = { // io format: <dataType>.<dataMethod>.<eventId>
-    inputs: [
-      'number.publish.firstNumberReceived',
-      'number.publish.secondNumberReceived',
-    ],
-    outputs: [
-      'number.publish.numberMultiplied',
-      'htmx.display.number-multiplier',
-    ]
-  }
-
-  public firstNumber: number | null = null;
-  public secondNumber: number | null = null;
-
-  constructor(
-    @Inject('FLOW_ID') flowId: string,
-    @Inject('COMPONENT_ID') componentId: string,
-    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
-    @Inject('WEB_SOCKET_SERVER') protected server: Server
-  ) {
-    super('numberMultiplier', 'number-multiplier', 'Multiplies two received numbers', flowId, componentId, amqpConnection, server);
-    this.flowId = flowId;
-    this.componentId = componentId;
-    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
-  }
-
-  async handleEvent(eventId: string, data: any): Promise<void> {
-    this.logger.log(`NumberMultiplier handling event: ${eventId} ${JSON.stringify(data, null, 2)}`);
-    switch (eventId) {
-      case 'firstNumberReceived':
-        await this.numberReceived(data, 'first');
-        break;
-      case 'secondNumberReceived':
-        await this.numberReceived(data, 'second');
-        break;
-      default:
-        break;
-    }
-  }
-
-  private numberReceived(data: any, which: 'first' | 'second'): Promise<void> {
-    return numberReceived(this, data, which);
-  }
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/components/state-machine/state-machine.handler.ts">
-import { CustomLogger } from '../../logger/custom-logger';
-import { Injectable, Inject } from '@nestjs/common';
-import { ComponentBase } from '../../bases/component.base';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import { Server } from 'socket.io';
-
-import { init } from './init.event';
-import { initializeMachine } from './initialize-machine.event';
-import { transition } from './transition.event';
-
-@Injectable()
-export class StateMachineComponent extends ComponentBase {
-  public logger: CustomLogger;
-  public currentState: string;
-  public states: Set<string>;
-  public transitions: Map<string, Map<string, string>>;
-  
-  public ports = {
-    inputs: [
-      'any.publish.initializeMachine',
-      'any.publish.transition'
-    ],
-    outputs: [
-      'any.publish.stateChanged',
-      'htmx.display.state-machine'
-    ]
-  }
-
-  constructor(
-    @Inject('FLOW_ID') flowId: string,
-    @Inject('COMPONENT_ID') componentId: string,
-    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
-    @Inject('WEB_SOCKET_SERVER') protected server: Server
-  ) {
-    super('stateMachine', 'state-machine', 'Implements a simple state machine', flowId, componentId, amqpConnection, server);
-    this.flowId = flowId;
-    this.componentId = componentId;
-    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
-    this.states = new Set();
-    this.transitions = new Map();
-  }
-
-  async handleEvent(eventId: string, data: any): Promise<void> {
-    this.logger.log(`Handling event: ${eventId}`);
-    switch (eventId) {
-      case "init": {
-        await this.init(data);
-        break;
-      }
-      case "initializeMachine": {
-        await this.initializeMachine(data);
-        break;
-      }
-      case "transition": {
-        await this.transition(data);
-        break;
-      }
-      default: {
-        this.logger.warn(`Unknown event: ${eventId}`);
-      }
-    }
-  }
-
-  public async init(data: any): Promise<void> {
-    return init(this, data);
-  }
-
-  public async initializeMachine(data: any): Promise<void> {
-    return initializeMachine(this, data);
-  }
-
-  public async transition(data: any): Promise<void> {
-    return transition(this, data);
-  }
-
-  public getCurrentState(): string {
-    return this.currentState;
-  }
-
-  public getStates(): Set<string> {
-    return this.states;
-  }
-
-  public getTransitions(): Map<string, Map<string, string>> {
-    return this.transitions;
-  }
-}
-</FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/bases/component.base.ts">
 import { Inject, Injectable } from '@nestjs/common';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
@@ -1031,191 +476,1057 @@ export abstract class ComponentBase implements Component {
   }
 }
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/bases/flow.base.ts">
-import { Connection } from 'src/interfaces/connection.interface';
-import { Flow } from '../interfaces/flow.interface';
+<FILE path="/home/travis/Projects/flow-based-programming/src/components/state-machine/state-machine.handler.ts">
+import { CustomLogger } from '../../logger/custom-logger';
+import { Injectable, Inject } from '@nestjs/common';
+import { ComponentBase } from '../../bases/component.base';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { Server } from 'socket.io';
 
-export class FlowBase implements Flow {
-  public connections: Connection[] = [];
+import { init } from './init.event';
+import { initializeMachine } from './initialize-machine.event';
+import { transition } from './transition.event';
+
+@Injectable()
+export class StateMachineComponent extends ComponentBase {
+  public logger: CustomLogger;
+  public currentState: string;
+  public states: Set<string>;
+  public transitions: Map<string, Map<string, string>>;
+  
+  public ports = {
+    inputs: [
+      'any.publish.initializeMachine',
+      'any.publish.transition'
+    ],
+    outputs: [
+      'any.publish.stateChanged',
+      'htmx.display.state-machine'
+    ]
+  }
+
   constructor(
-    public id: string,
-    public components: any,
-    public _connections: {
-      fromComponent: string;
-      fromEvent: string;
-      toComponent: string;
-      toEvent: string;
-    }[]
+    @Inject('FLOW_ID') flowId: string,
+    @Inject('COMPONENT_ID') componentId: string,
+    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
+    @Inject('WEB_SOCKET_SERVER') protected server: Server
   ) {
-    this.id = id;
-    this.components = components;
-    this._connections = _connections;
-    this.setupConnections();
+    super('stateMachine', 'state-machine', 'Implements a simple state machine', flowId, componentId, amqpConnection, server);
+    this.flowId = flowId;
+    this.componentId = componentId;
+    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
+    this.states = new Set();
+    this.transitions = new Map();
   }
 
-  private async setupConnections(): Promise<Connection[]> {
-    this._connections.forEach((connection) => {
-      let c: Connection = {
-        ...connection,
-        toFlow: this.id,
-        fromFlow: this.id,
-        connectedTo: undefined, // TODO
-        connectedFrom: undefined, // TODO
-        next: undefined // TODO
+  async handleEvent(eventId: string, data: any): Promise<void> {
+    this.logger.log(`Handling event: ${eventId}`);
+    switch (eventId) {
+      case "init": {
+        await this.init(data);
+        break;
       }
-      this.connections.push(c);
-    })
-    return this.connections;
+      case "initializeMachine": {
+        await this.initializeMachine(data);
+        break;
+      }
+      case "transition": {
+        await this.transition(data);
+        break;
+      }
+      default: {
+        this.logger.warn(`Unknown event: ${eventId}`);
+      }
+    }
   }
-};
+
+  public async init(data: any): Promise<void> {
+    return init(this, data);
+  }
+
+  public async initializeMachine(data: any): Promise<void> {
+    return initializeMachine(this, data);
+  }
+
+  public async transition(data: any): Promise<void> {
+    return transition(this, data);
+  }
+
+  public getCurrentState(): string {
+    return this.currentState;
+  }
+
+  public getStates(): Set<string> {
+    return this.states;
+  }
+
+  public getTransitions(): Map<string, Map<string, string>> {
+    return this.transitions;
+  }
+}
 </FILE>
-<FILE path="src/flows/example-flow.flow.ts" TARGET>
-import { schema } from "../schema/flow.schema"; 
-import { default as jobStateMachine } from "src/stateMachines/job.state-machine";
+<FILE path="/home/travis/Projects/flow-based-programming/src/components/state-machine/initialize-machine.event.ts">
+import { StateMachineComponent } from './state-machine.handler';
 
-let numberGenerator = {
-  ports: {
-    inputs: {
-      start: {},
-      stop: {}
-    },
-    outputs: {
-      numberGenerated: {}
+// networks of black box processes, which exchange data
+// across predefined connections by message passing
+export async function initializeMachine(process: StateMachineComponent, message: any): Promise<void> {
+  const { initialState, states, transitions } = message;
+
+  process.currentState = initialState;
+  process.states = new Set(states);
+  
+  process.transitions = new Map();
+  for (const [fromState, events] of Object.entries(transitions)) {
+    process.transitions.set(fromState, new Map(Object.entries(events as Record<string, string>)));
+  }
+
+  process.logger.log(`State machine initialized with initial state: ${process.currentState}`);
+  
+  await process.publish(process.flowId, process.componentId, 'stateChanged', { 
+    currentState: process.currentState 
+  });
+
+  await process.display(process.flowId, process.componentId, 'state-machine', {
+    currentState: process.currentState,
+    states: Array.from(process.states),
+    transitions: Object.fromEntries(process.transitions)
+  });
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/components/state-machine/transition.event.ts">
+import { StateMachineComponent } from './state-machine.handler';
+
+// networks of black box processes, which exchange data
+// across predefined connections by message passing
+export async function transition(process: StateMachineComponent, message: any): Promise<void> {
+  const { event } = message;
+  const currentState = process.currentState;
+
+  const stateTransitions = process.transitions.get(currentState);
+  if (!stateTransitions) {
+    process.logger.warn(`No transitions defined for state: ${currentState}`);
+    return;
+  }
+
+  const nextState = stateTransitions.get(event);
+  if (!nextState) {
+    process.logger.warn(`No transition defined for event '${event}' in state '${currentState}'`);
+    return;
+  }
+
+  process.currentState = nextState;
+  process.logger.log(`Transitioned from '${currentState}' to '${nextState}' on event '${event}'`);
+
+  await process.publish(process.flowId, process.componentId, 'stateChanged', { 
+    previousState: currentState,
+    currentState: process.currentState,
+    event
+  });
+
+  await process.display(process.flowId, process.componentId, 'state-machine', {
+    currentState: process.currentState,
+    states: Array.from(process.states),
+    transitions: Object.fromEntries(process.transitions)
+  });
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/logger/custom-logger.ts">
+import { ConsoleLogger, Injectable, Inject } from '@nestjs/common';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import * as fs from 'fs';
+import * as path from 'path';
+
+@Injectable()
+export class CustomLogger extends ConsoleLogger {
+  constructor(
+    private logId: string,
+    @Inject(AmqpConnection) private amqpConnection: AmqpConnection
+  ) {
+    super(logId);
+    this.setLogLevels(['log', 'error', 'warn', 'debug', 'verbose']);
+  }
+
+  log(message: string, context?: string) {
+    this.printMessage(message, 'log', context);
+    // this.emitLogEvent('log', message);
+  }
+
+  warn(message: string, context?: string) {
+    this.printMessage(message, 'warn', context);
+    // this.emitLogEvent('warn', message);
+  }
+
+  error(message: string, trace?: string, context?: string) {
+    this.printMessage(message, 'error', context);
+    // this.emitLogEvent('error', message);
+    if (trace) {
+      this.printMessage(trace, 'error', context);
+    }
+  }
+
+  debug(message: string, context?: string) {
+    this.printMessage(message, 'debug', context);
+  }
+
+  verbose(message: string, context?: string) {
+    this.printMessage(message, 'verbose', context);
+  }
+
+  private printMessage(message: string, logLevel: string, context?: string) {
+    const output = context ? `[${context}] ${message}` : message;
+    console.log(`[${this.getNow()}] [${logLevel.toUpperCase()}] [${this.logId}] ${output}`);
+  }
+
+  private getNow(): string {
+    return new Date().toISOString();
+  }
+
+  static write_to_file(message: string) {
+    const logFile = path.join(process.cwd(), 'start:dev.stdout.txt');
+    fs.appendFile(logFile, message, (err) => {
+      if (err) {
+        console.error('Failed to write to log file:', err);
+      }
+    });
+  }
+
+  static clearSTDOUT() {
+    const logFile = path.join(process.cwd(), 'start:dev.stdout.txt');
+    try {
+      fs.writeFileSync(logFile, '');
+      console.log(`Log file cleared at ${logFile}`);
+    } catch (error) {
+      console.error('Failed to clear log file:', error);
     }
   }
 }
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/component.interface.ts">
+import { Connection } from "./connection.interface";
+import { Port } from "./port.interface";
 
-let buttonTrigger = {
-  ports: {
-    inputs: {
-      triggerButton: {}
-    },
-    outputs: {
-      buttonPressed: {}
-    }
-  }
+export interface Component {
+  ports: { inputs: string[]; outputs: string[]; };
+  componentRef: string;
+  slug: string;
+  description?: string;
+  flowId: string;
+  componentId: string;
+  handleEvent: (eventId: string, data: any) => Promise<void>;
+  publish: (flowId: string, componentId: string, eventId: string, data: any) => Promise<void>;
+  getPorts: () => Promise<{ inputs: Port[], outputs: Port[] }>;
+  findPort: (portId: string) => Promise<Port>;
+  findConnections: (port: Port) => Promise<Connection[]>
 }
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/flow.interface.ts">
+import { Connection } from "./connection.interface";
 
-let components = {
-  main: {
-    eventTrigger: {
-      ports: {
-        inputs: {},
-        outputs: {}
-      }
-    }
-  },
-  btn1: { buttonTrigger },
-  btn2: { buttonTrigger },
-  btn3: { buttonTrigger },
-  btn4: { buttonTrigger },
-  btn5: { buttonTrigger },
-  sm1: {
-    stateMachine: {
-      init: jobStateMachine,
-      ports: {
-        inputs: {
-          initializeMachine: {}
-        },
-        outputs: {}
-      }
-    }
-  },
-  jsm1: {
-    jobStateMachine: {
-      ports: {
-        inputs: {
-          initializeMachine: {},
-          start: {},
-          pause: {},
-          resume: {},
-          finish: {},
-          reset: {}
-        },
-        outputs: {
-          stateChanged: {}
-        }
-      }
-    }
-  },
-  gen1: {
-    numberGenerator
-  },
-  gen2: {
-    numberGenerator
-  },
-  multi: {
-    numberMultiplier: {
-      ports: {
-        inputs: {
-          firstNumberReceived: {},
-          secondNumberReceived: {}
-        },
-        outputs: {
-          numberMultiplied: {}
-        }
-      }
-    }
-  }
+export interface Flow {
+  id: string;
+  components: {
+    componentId: string;
+    componentRef: string;
+    init: any | undefined;
+  }[];
+  connections: Connection[];
 }
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/state-machine.interface.ts">
+import { Component } from "./component.interface";
 
-let flow = {
-  id: 'example-flow',
-  components,
-  connections: [
-    {
-      from: 'components.sm1.stateMachine.ports.outputs.initializeMachine',
-      to: 'components.jsm1.jobStateMachine.ports.inputs.initializeMachine'
-    },
-    {
-      from: 'components.jsm1.jobStateMachine.ports.outputs.stateChanged',
-      to: 'components.gen1.numberGenerator.ports.inputs.start'
-    },
-    {
-      from: 'components.jsm1.jobStateMachine.ports.outputs.stateChanged',
-      to: 'components.gen1.numberGenerator.ports.inputs.stop'
-    },
-    {
-      from: 'components.jsm1.jobStateMachine.ports.outputs.stateChanged',
-      to: 'components.gen2.numberGenerator.ports.inputs.start'
-    },
-    {
-      from: 'components.jsm1.jobStateMachine.ports.outputs.stateChanged',
-      to: 'components.gen2.numberGenerator.ports.inputs.stop'
-    },
-    {
-      from: 'components.gen1.numberGenerator.ports.outputs.numberGenerated',
-      to: 'components.multi.numberMultiplier.ports.inputs.firstNumberReceived'
-    },
-    {
-      from: 'components.gen2.numberGenerator.ports.outputs.numberGenerated',
-      to: 'components.multi.numberMultiplier.ports.inputs.secondNumberReceived'
-    },
-    {
-      from: 'components.btn1.buttonTrigger.ports.outputs.buttonPressed',
-      to: 'components.jsm1.jobStateMachine.ports.inputs.start'
-    },
-    {
-      from: 'components.btn2.buttonTrigger.ports.outputs.buttonPressed',
-      to: 'components.jsm1.jobStateMachine.ports.inputs.pause'
-    },
-    {
-      from: 'components.btn3.buttonTrigger.ports.outputs.buttonPressed',
-      to: 'components.jsm1.jobStateMachine.ports.inputs.resume'
-    },
-    {
-      from: 'components.btn4.buttonTrigger.ports.outputs.buttonPressed',
-      to: 'components.jsm1.jobStateMachine.ports.inputs.finish'
-    },
-    {
-      from: 'components.btn5.buttonTrigger.ports.outputs.buttonPressed',
-      to: 'components.jsm1.jobStateMachine.ports.inputs.reset'
-    },
-  ]
+export interface StateMachine extends Component {
+  initializeMachine: (data: any) => Promise<void>;
+  getCurrentState: () => string;
+  getStates: () => Set<string>;
+  getTransitions: () => Map<string, Map<string, string>>;
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/templates/job-state-machine.ejs">
+<div id="<%= _flowId %>.<%= _componentId %>.<%= _templateId %>" class="job-state-machine-content">
+  <h3>Job State Machine</h3>
+  <p>Current Job State: <strong><%= currentState %></strong></p>
+  <h4>Job States:</h4>
+  <ul>
+    <% states.forEach(function(state) { %>
+      <li><%= state %></li>
+    <% }); %>
+  </ul>
+  <h4>Job Transitions:</h4>
+  <ul>
+    <% for (const [fromState, events] of Object.entries(transitions)) { %>
+      <li>
+        <%= fromState %>:
+        <ul>
+          <% for (const [event, toState] of Object.entries(events)) { %>
+            <li><%= event %> -> <%= toState %></li>
+          <% } %>
+        </ul>
+      </li>
+    <% } %>
+  </ul>
+</div>
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/node_modules/@golevelup/nestjs-rabbitmq/lib/amqp/connection.d.ts">
+import { ChannelWrapper, AmqpConnectionManager } from 'amqp-connection-manager';
+import { ConsumeMessage, Channel, Connection, ConfirmChannel, Options } from 'amqplib';
+import { MessageHandlerOptions, RabbitMQConfig, RequestOptions, ConsumeOptions } from '../rabbitmq.interfaces';
+import { RpcResponse, SubscribeResponse } from './handlerResponses';
+export type ConsumerTag = string;
+export type SubscriberHandler<T = unknown> = (msg: T | undefined, rawMessage?: ConsumeMessage, headers?: any) => Promise<SubscribeResponse>;
+export interface CorrelationMessage {
+    correlationId: string;
+    requestId?: string;
+    message: Record<string, unknown>;
+}
+export interface SubscriptionResult {
+    consumerTag: ConsumerTag;
+}
+export type BaseConsumerHandler = {
+    consumerTag: string;
+    channel: ConfirmChannel;
 };
+export type ConsumerHandler<T, U> = (BaseConsumerHandler & {
+    type: 'subscribe';
+    msgOptions: MessageHandlerOptions;
+    handler: (msg: T | undefined, rawMessage?: ConsumeMessage, headers?: any) => Promise<SubscribeResponse>;
+}) | (BaseConsumerHandler & {
+    type: 'rpc';
+    rpcOptions: MessageHandlerOptions;
+    handler: (msg: T | undefined, rawMessage?: ConsumeMessage, headers?: any) => Promise<RpcResponse<U>>;
+});
+export declare class AmqpConnection {
+    private readonly messageSubject;
+    private readonly logger;
+    private readonly initialized;
+    private _managedConnection;
+    /**
+     * Will now specify the default managed channel.
+     */
+    private _managedChannel;
+    private _managedChannels;
+    /**
+     * Will now specify the default channel.
+     */
+    private _channel;
+    private _channels;
+    private _connection?;
+    private _consumers;
+    private readonly config;
+    private readonly outstandingMessageProcessing;
+    constructor(config: RabbitMQConfig);
+    get channel(): Channel;
+    get connection(): Connection;
+    get managedChannel(): ChannelWrapper;
+    get managedConnection(): AmqpConnectionManager;
+    get configuration(): Required<RabbitMQConfig>;
+    get channels(): Record<string, ConfirmChannel>;
+    get managedChannels(): Record<string, import("amqp-connection-manager/dist/types/ChannelWrapper").default>;
+    get connected(): boolean;
+    init(): Promise<void>;
+    private initCore;
+    private setupInitChannel;
+    private setupQueuesWithBindings;
+    private initDirectReplyQueue;
+    request<T>(requestOptions: RequestOptions): Promise<T>;
+    createSubscriber<T>(handler: SubscriberHandler<T>, msgOptions: MessageHandlerOptions, originalHandlerName: string, consumeOptions?: ConsumeOptions): Promise<SubscriptionResult>;
+    /**
+     * Wrap a consumer with logic that tracks the outstanding message processing to
+     * be able to wait for them on shutdown.
+     */
+    private wrapConsumer;
+    private setupSubscriberChannel;
+    createRpc<T, U>(handler: (msg: T | undefined, rawMessage?: ConsumeMessage, headers?: any) => Promise<RpcResponse<U>>, rpcOptions: MessageHandlerOptions): Promise<SubscriptionResult>;
+    setupRpcChannel<T, U>(handler: (msg: T | undefined, rawMessage?: ConsumeMessage, headers?: any) => Promise<RpcResponse<U>>, rpcOptions: MessageHandlerOptions, channel: ConfirmChannel): Promise<ConsumerTag>;
+    publish<T = any>(exchange: string, routingKey: string, message: T, options?: Options.Publish): Promise<boolean>;
+    private handleMessage;
+    private setupQueue;
+    private setupManagedChannel;
+    /**
+     * Selects managed channel based on name, if not found uses default.
+     * @param name name of the channel
+     * @returns channel wrapper
+     */
+    private selectManagedChannel;
+    private registerConsumerForQueue;
+    private unregisterConsumerForQueue;
+    private getConsumer;
+    get consumerTags(): string[];
+    cancelConsumer(consumerTag: ConsumerTag): Promise<void>;
+    resumeConsumer<T, U>(consumerTag: ConsumerTag): Promise<ConsumerTag | null>;
+    close(): Promise<void>;
+}
+//# sourceMappingURL=connection.d.ts.map
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/node_modules/@nestjs/common/index.d.ts">
+import 'reflect-metadata';
+export * from './decorators';
+export * from './enums';
+export * from './exceptions';
+export * from './file-stream';
+export { Abstract, ArgumentMetadata, ArgumentsHost, BeforeApplicationShutdown, CallHandler, CanActivate, ClassProvider, ContextType, DynamicModule, ExceptionFilter, ExecutionContext, ExistingProvider, FactoryProvider, ForwardReference, HttpServer, HttpExceptionBody, HttpExceptionBodyMessage, HttpRedirectResponse, INestApplication, INestApplicationContext, INestMicroservice, InjectionToken, IntrospectionResult, MessageEvent, MiddlewareConsumer, ModuleMetadata, NestApplicationOptions, NestHybridApplicationOptions, NestInterceptor, NestMiddleware, NestModule, OnApplicationBootstrap, OnApplicationShutdown, OnModuleDestroy, OnModuleInit, OptionalFactoryDependency, Paramtype, PipeTransform, Provider, RawBodyRequest, RpcExceptionFilter, Scope, ScopeOptions, Type, ValidationError, ValueProvider, VersioningOptions, VERSION_NEUTRAL, WebSocketAdapter, WsExceptionFilter, WsMessageHandler, } from './interfaces';
+export * from './module-utils';
+export * from './pipes';
+export * from './serializer';
+export * from './services';
+export * from './utils';
 
-export default schema(flow);
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/node_modules/socket.io/dist/index.d.ts">
+/// <reference types="node" />
+/// <reference types="node" />
+/// <reference types="node" />
+import http = require("http");
+import type { Server as HTTPSServer } from "https";
+import type { Http2SecureServer, Http2Server } from "http2";
+import type { ServerOptions as EngineOptions, AttachOptions, BaseServer } from "engine.io";
+import { ExtendedError, Namespace, ServerReservedEventsMap } from "./namespace";
+import { Adapter, Room, SocketId } from "socket.io-adapter";
+import * as parser from "socket.io-parser";
+import type { Encoder } from "socket.io-parser";
+import { Socket, DisconnectReason } from "./socket";
+import type { BroadcastOperator, RemoteSocket } from "./broadcast-operator";
+import { EventsMap, DefaultEventsMap, EventParams, StrictEventEmitter, EventNames, DecorateAcknowledgementsWithTimeoutAndMultipleResponses, AllButLast, Last, RemoveAcknowledgements, EventNamesWithAck, FirstNonErrorArg } from "./typed-events";
+declare type ParentNspNameMatchFn = (name: string, auth: {
+    [key: string]: any;
+}, fn: (err: Error | null, success: boolean) => void) => void;
+declare type AdapterConstructor = typeof Adapter | ((nsp: Namespace) => Adapter);
+declare type TServerInstance = http.Server | HTTPSServer | Http2SecureServer | Http2Server;
+interface ServerOptions extends EngineOptions, AttachOptions {
+    /**
+     * name of the path to capture
+     * @default "/socket.io"
+     */
+    path: string;
+    /**
+     * whether to serve the client files
+     * @default true
+     */
+    serveClient: boolean;
+    /**
+     * the adapter to use
+     * @default the in-memory adapter (https://github.com/socketio/socket.io-adapter)
+     */
+    adapter: AdapterConstructor;
+    /**
+     * the parser to use
+     * @default the default parser (https://github.com/socketio/socket.io-parser)
+     */
+    parser: any;
+    /**
+     * how many ms before a client without namespace is closed
+     * @default 45000
+     */
+    connectTimeout: number;
+    /**
+     * Whether to enable the recovery of connection state when a client temporarily disconnects.
+     *
+     * The connection state includes the missed packets, the rooms the socket was in and the `data` attribute.
+     */
+    connectionStateRecovery: {
+        /**
+         * The backup duration of the sessions and the packets.
+         *
+         * @default 120000 (2 minutes)
+         */
+        maxDisconnectionDuration?: number;
+        /**
+         * Whether to skip middlewares upon successful connection state recovery.
+         *
+         * @default true
+         */
+        skipMiddlewares?: boolean;
+    };
+    /**
+     * Whether to remove child namespaces that have no sockets connected to them
+     * @default false
+     */
+    cleanupEmptyChildNamespaces: boolean;
+}
+/**
+ * Represents a Socket.IO server.
+ *
+ * @example
+ * import { Server } from "socket.io";
+ *
+ * const io = new Server();
+ *
+ * io.on("connection", (socket) => {
+ *   console.log(`socket ${socket.id} connected`);
+ *
+ *   // send an event to the client
+ *   socket.emit("foo", "bar");
+ *
+ *   socket.on("foobar", () => {
+ *     // an event was received from the client
+ *   });
+ *
+ *   // upon disconnection
+ *   socket.on("disconnect", (reason) => {
+ *     console.log(`socket ${socket.id} disconnected due to ${reason}`);
+ *   });
+ * });
+ *
+ * io.listen(3000);
+ */
+export declare class Server<ListenEvents extends EventsMap = DefaultEventsMap, EmitEvents extends EventsMap = ListenEvents, ServerSideEvents extends EventsMap = DefaultEventsMap, SocketData = any> extends StrictEventEmitter<ServerSideEvents, RemoveAcknowledgements<EmitEvents>, ServerReservedEventsMap<ListenEvents, EmitEvents, ServerSideEvents, SocketData>> {
+    readonly sockets: Namespace<ListenEvents, EmitEvents, ServerSideEvents, SocketData>;
+    /**
+     * A reference to the underlying Engine.IO server.
+     *
+     * @example
+     * const clientsCount = io.engine.clientsCount;
+     *
+     */
+    engine: BaseServer;
+    /** @private */
+    readonly _parser: typeof parser;
+    /** @private */
+    readonly encoder: Encoder;
+    /**
+     * @private
+     */
+    _nsps: Map<string, Namespace<ListenEvents, EmitEvents, ServerSideEvents, SocketData>>;
+    private parentNsps;
+    /**
+     * A subset of the {@link parentNsps} map, only containing {@link ParentNamespace} which are based on a regular
+     * expression.
+     *
+     * @private
+     */
+    private parentNamespacesFromRegExp;
+    private _adapter?;
+    private _serveClient;
+    private readonly opts;
+    private eio;
+    private _path;
+    private clientPathRegex;
+    /**
+     * @private
+     */
+    _connectTimeout: number;
+    private httpServer;
+    private _corsMiddleware;
+    /**
+     * Server constructor.
+     *
+     * @param srv http server, port, or options
+     * @param [opts]
+     */
+    constructor(opts?: Partial<ServerOptions>);
+    constructor(srv?: TServerInstance | number, opts?: Partial<ServerOptions>);
+    constructor(srv: undefined | Partial<ServerOptions> | TServerInstance | number, opts?: Partial<ServerOptions>);
+    get _opts(): Partial<ServerOptions>;
+    /**
+     * Sets/gets whether client code is being served.
+     *
+     * @param v - whether to serve client code
+     * @return self when setting or value when getting
+     */
+    serveClient(v: boolean): this;
+    serveClient(): boolean;
+    serveClient(v?: boolean): this | boolean;
+    /**
+     * Executes the middleware for an incoming namespace not already created on the server.
+     *
+     * @param name - name of incoming namespace
+     * @param auth - the auth parameters
+     * @param fn - callback
+     *
+     * @private
+     */
+    _checkNamespace(name: string, auth: {
+        [key: string]: any;
+    }, fn: (nsp: Namespace<ListenEvents, EmitEvents, ServerSideEvents, SocketData> | false) => void): void;
+    /**
+     * Sets the client serving path.
+     *
+     * @param {String} v pathname
+     * @return {Server|String} self when setting or value when getting
+     */
+    path(v: string): this;
+    path(): string;
+    path(v?: string): this | string;
+    /**
+     * Set the delay after which a client without namespace is closed
+     * @param v
+     */
+    connectTimeout(v: number): this;
+    connectTimeout(): number;
+    connectTimeout(v?: number): this | number;
+    /**
+     * Sets the adapter for rooms.
+     *
+     * @param v pathname
+     * @return self when setting or value when getting
+     */
+    adapter(): AdapterConstructor | undefined;
+    adapter(v: AdapterConstructor): this;
+    /**
+     * Attaches socket.io to a server or port.
+     *
+     * @param srv - server or port
+     * @param opts - options passed to engine.io
+     * @return self
+     */
+    listen(srv: TServerInstance | number, opts?: Partial<ServerOptions>): this;
+    /**
+     * Attaches socket.io to a server or port.
+     *
+     * @param srv - server or port
+     * @param opts - options passed to engine.io
+     * @return self
+     */
+    attach(srv: TServerInstance | number, opts?: Partial<ServerOptions>): this;
+    attachApp(app: any, opts?: Partial<ServerOptions>): void;
+    /**
+     * Initialize engine
+     *
+     * @param srv - the server to attach to
+     * @param opts - options passed to engine.io
+     * @private
+     */
+    private initEngine;
+    /**
+     * Attaches the static file serving.
+     *
+     * @param srv http server
+     * @private
+     */
+    private attachServe;
+    /**
+     * Handles a request serving of client source and map
+     *
+     * @param req
+     * @param res
+     * @private
+     */
+    private serve;
+    /**
+     * @param filename
+     * @param req
+     * @param res
+     * @private
+     */
+    private static sendFile;
+    /**
+     * Binds socket.io to an engine.io instance.
+     *
+     * @param engine engine.io (or compatible) server
+     * @return self
+     */
+    bind(engine: BaseServer): this;
+    /**
+     * Called with each incoming transport connection.
+     *
+     * @param {engine.Socket} conn
+     * @return self
+     * @private
+     */
+    private onconnection;
+    /**
+     * Looks up a namespace.
+     *
+     * @example
+     * // with a simple string
+     * const myNamespace = io.of("/my-namespace");
+     *
+     * // with a regex
+     * const dynamicNsp = io.of(/^\/dynamic-\d+$/).on("connection", (socket) => {
+     *   const namespace = socket.nsp; // newNamespace.name === "/dynamic-101"
+     *
+     *   // broadcast to all clients in the given sub-namespace
+     *   namespace.emit("hello");
+     * });
+     *
+     * @param name - nsp name
+     * @param fn optional, nsp `connection` ev handler
+     */
+    of(name: string | RegExp | ParentNspNameMatchFn, fn?: (socket: Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>) => void): Namespace<ListenEvents, EmitEvents, ServerSideEvents, SocketData>;
+    /**
+     * Closes server connection
+     *
+     * @param [fn] optional, called as `fn([err])` on error OR all conns closed
+     */
+    close(fn?: (err?: Error) => void): void;
+    /**
+     * Registers a middleware, which is a function that gets executed for every incoming {@link Socket}.
+     *
+     * @example
+     * io.use((socket, next) => {
+     *   // ...
+     *   next();
+     * });
+     *
+     * @param fn - the middleware function
+     */
+    use(fn: (socket: Socket<ListenEvents, EmitEvents, ServerSideEvents, SocketData>, next: (err?: ExtendedError) => void) => void): this;
+    /**
+     * Targets a room when emitting.
+     *
+     * @example
+     * // the “foo” event will be broadcast to all connected clients in the “room-101” room
+     * io.to("room-101").emit("foo", "bar");
+     *
+     * // with an array of rooms (a client will be notified at most once)
+     * io.to(["room-101", "room-102"]).emit("foo", "bar");
+     *
+     * // with multiple chained calls
+     * io.to("room-101").to("room-102").emit("foo", "bar");
+     *
+     * @param room - a room, or an array of rooms
+     * @return a new {@link BroadcastOperator} instance for chaining
+     */
+    to(room: Room | Room[]): BroadcastOperator<import("./typed-events").DecorateAcknowledgementsWithMultipleResponses<EmitEvents>, SocketData>;
+    /**
+     * Targets a room when emitting. Similar to `to()`, but might feel clearer in some cases:
+     *
+     * @example
+     * // disconnect all clients in the "room-101" room
+     * io.in("room-101").disconnectSockets();
+     *
+     * @param room - a room, or an array of rooms
+     * @return a new {@link BroadcastOperator} instance for chaining
+     */
+    in(room: Room | Room[]): BroadcastOperator<import("./typed-events").DecorateAcknowledgementsWithMultipleResponses<EmitEvents>, SocketData>;
+    /**
+     * Excludes a room when emitting.
+     *
+     * @example
+     * // the "foo" event will be broadcast to all connected clients, except the ones that are in the "room-101" room
+     * io.except("room-101").emit("foo", "bar");
+     *
+     * // with an array of rooms
+     * io.except(["room-101", "room-102"]).emit("foo", "bar");
+     *
+     * // with multiple chained calls
+     * io.except("room-101").except("room-102").emit("foo", "bar");
+     *
+     * @param room - a room, or an array of rooms
+     * @return a new {@link BroadcastOperator} instance for chaining
+     */
+    except(room: Room | Room[]): BroadcastOperator<import("./typed-events").DecorateAcknowledgementsWithMultipleResponses<EmitEvents>, SocketData>;
+    /**
+     * Sends a `message` event to all clients.
+     *
+     * This method mimics the WebSocket.send() method.
+     *
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/send
+     *
+     * @example
+     * io.send("hello");
+     *
+     * // this is equivalent to
+     * io.emit("message", "hello");
+     *
+     * @return self
+     */
+    send(...args: EventParams<EmitEvents, "message">): this;
+    /**
+     * Sends a `message` event to all clients. Alias of {@link send}.
+     *
+     * @return self
+     */
+    write(...args: EventParams<EmitEvents, "message">): this;
+    /**
+     * Sends a message to the other Socket.IO servers of the cluster.
+     *
+     * @example
+     * io.serverSideEmit("hello", "world");
+     *
+     * io.on("hello", (arg1) => {
+     *   console.log(arg1); // prints "world"
+     * });
+     *
+     * // acknowledgements (without binary content) are supported too:
+     * io.serverSideEmit("ping", (err, responses) => {
+     *  if (err) {
+     *     // some servers did not acknowledge the event in the given delay
+     *   } else {
+     *     console.log(responses); // one response per server (except the current one)
+     *   }
+     * });
+     *
+     * io.on("ping", (cb) => {
+     *   cb("pong");
+     * });
+     *
+     * @param ev - the event name
+     * @param args - an array of arguments, which may include an acknowledgement callback at the end
+     */
+    serverSideEmit<Ev extends EventNames<ServerSideEvents>>(ev: Ev, ...args: EventParams<DecorateAcknowledgementsWithTimeoutAndMultipleResponses<ServerSideEvents>, Ev>): boolean;
+    /**
+     * Sends a message and expect an acknowledgement from the other Socket.IO servers of the cluster.
+     *
+     * @example
+     * try {
+     *   const responses = await io.serverSideEmitWithAck("ping");
+     *   console.log(responses); // one response per server (except the current one)
+     * } catch (e) {
+     *   // some servers did not acknowledge the event in the given delay
+     * }
+     *
+     * @param ev - the event name
+     * @param args - an array of arguments
+     *
+     * @return a Promise that will be fulfilled when all servers have acknowledged the event
+     */
+    serverSideEmitWithAck<Ev extends EventNamesWithAck<ServerSideEvents>>(ev: Ev, ...args: AllButLast<EventParams<ServerSideEvents, Ev>>): Promise<FirstNonErrorArg<Last<EventParams<ServerSideEvents, Ev>>>[]>;
+    /**
+     * Gets a list of socket ids.
+     *
+     * @deprecated this method will be removed in the next major release, please use {@link Server#serverSideEmit} or
+     * {@link Server#fetchSockets} instead.
+     */
+    allSockets(): Promise<Set<SocketId>>;
+    /**
+     * Sets the compress flag.
+     *
+     * @example
+     * io.compress(false).emit("hello");
+     *
+     * @param compress - if `true`, compresses the sending data
+     * @return a new {@link BroadcastOperator} instance for chaining
+     */
+    compress(compress: boolean): BroadcastOperator<import("./typed-events").DecorateAcknowledgementsWithMultipleResponses<EmitEvents>, SocketData>;
+    /**
+     * Sets a modifier for a subsequent event emission that the event data may be lost if the client is not ready to
+     * receive messages (because of network slowness or other issues, or because they’re connected through long polling
+     * and is in the middle of a request-response cycle).
+     *
+     * @example
+     * io.volatile.emit("hello"); // the clients may or may not receive it
+     *
+     * @return a new {@link BroadcastOperator} instance for chaining
+     */
+    get volatile(): BroadcastOperator<import("./typed-events").DecorateAcknowledgementsWithMultipleResponses<EmitEvents>, SocketData>;
+    /**
+     * Sets a modifier for a subsequent event emission that the event data will only be broadcast to the current node.
+     *
+     * @example
+     * // the “foo” event will be broadcast to all connected clients on this node
+     * io.local.emit("foo", "bar");
+     *
+     * @return a new {@link BroadcastOperator} instance for chaining
+     */
+    get local(): BroadcastOperator<import("./typed-events").DecorateAcknowledgementsWithMultipleResponses<EmitEvents>, SocketData>;
+    /**
+     * Adds a timeout in milliseconds for the next operation.
+     *
+     * @example
+     * io.timeout(1000).emit("some-event", (err, responses) => {
+     *   if (err) {
+     *     // some clients did not acknowledge the event in the given delay
+     *   } else {
+     *     console.log(responses); // one response per client
+     *   }
+     * });
+     *
+     * @param timeout
+     */
+    timeout(timeout: number): BroadcastOperator<import("./typed-events").DecorateAcknowledgements<import("./typed-events").DecorateAcknowledgementsWithMultipleResponses<EmitEvents>>, SocketData>;
+    /**
+     * Returns the matching socket instances.
+     *
+     * Note: this method also works within a cluster of multiple Socket.IO servers, with a compatible {@link Adapter}.
+     *
+     * @example
+     * // return all Socket instances
+     * const sockets = await io.fetchSockets();
+     *
+     * // return all Socket instances in the "room1" room
+     * const sockets = await io.in("room1").fetchSockets();
+     *
+     * for (const socket of sockets) {
+     *   console.log(socket.id);
+     *   console.log(socket.handshake);
+     *   console.log(socket.rooms);
+     *   console.log(socket.data);
+     *
+     *   socket.emit("hello");
+     *   socket.join("room1");
+     *   socket.leave("room2");
+     *   socket.disconnect();
+     * }
+     */
+    fetchSockets(): Promise<RemoteSocket<EmitEvents, SocketData>[]>;
+    /**
+     * Makes the matching socket instances join the specified rooms.
+     *
+     * Note: this method also works within a cluster of multiple Socket.IO servers, with a compatible {@link Adapter}.
+     *
+     * @example
+     *
+     * // make all socket instances join the "room1" room
+     * io.socketsJoin("room1");
+     *
+     * // make all socket instances in the "room1" room join the "room2" and "room3" rooms
+     * io.in("room1").socketsJoin(["room2", "room3"]);
+     *
+     * @param room - a room, or an array of rooms
+     */
+    socketsJoin(room: Room | Room[]): void;
+    /**
+     * Makes the matching socket instances leave the specified rooms.
+     *
+     * Note: this method also works within a cluster of multiple Socket.IO servers, with a compatible {@link Adapter}.
+     *
+     * @example
+     * // make all socket instances leave the "room1" room
+     * io.socketsLeave("room1");
+     *
+     * // make all socket instances in the "room1" room leave the "room2" and "room3" rooms
+     * io.in("room1").socketsLeave(["room2", "room3"]);
+     *
+     * @param room - a room, or an array of rooms
+     */
+    socketsLeave(room: Room | Room[]): void;
+    /**
+     * Makes the matching socket instances disconnect.
+     *
+     * Note: this method also works within a cluster of multiple Socket.IO servers, with a compatible {@link Adapter}.
+     *
+     * @example
+     * // make all socket instances disconnect (the connections might be kept alive for other namespaces)
+     * io.disconnectSockets();
+     *
+     * // make all socket instances in the "room1" room disconnect and close the underlying connections
+     * io.in("room1").disconnectSockets(true);
+     *
+     * @param close - whether to close the underlying connection
+     */
+    disconnectSockets(close?: boolean): void;
+}
+export { Socket, DisconnectReason, ServerOptions, Namespace, BroadcastOperator, RemoteSocket, };
+export { Event } from "./socket";
+
+</FILE>
+<FILE path="src/components/job-state-machine/job-state-machine.handler.ts" TARGET>
+import { Injectable, Inject } from '@nestjs/common';
+import { ComponentBase } from '../../bases/component.base';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { Server } from 'socket.io';
+import { CustomLogger } from '../../logger/custom-logger';
+
+import { StateMachineComponent } from '../state-machine/state-machine.handler';
+
+@Injectable()
+export class JobStateMachineComponent extends ComponentBase {
+  public logger: CustomLogger;
+  private stateMachine: StateMachineComponent;
+  
+  public ports = {
+    inputs: [
+      'any.publish.initializeMachine',
+      'any.publish.start',
+      'any.publish.pause',
+      'any.publish.resume',
+      'any.publish.finish',
+      'any.publish.reset'
+    ],
+    outputs: [
+      'any.publish.initializeMachine',
+      'any.publish.start',
+      'any.publish.pause',
+      'any.publish.resume',
+      'any.publish.finish',
+      'any.publish.reset',
+      'any.publish.stateChanged',
+      'htmx.display.job-state-machine'
+    ]
+  }
+
+  constructor(
+    @Inject('FLOW_ID') flowId: string,
+    @Inject('COMPONENT_ID') componentId: string,
+    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
+    @Inject('WEB_SOCKET_SERVER') protected server: Server,
+  ) {
+    super('jobStateMachine', 'job-state-machine', 'Implements a job state machine', flowId, componentId, amqpConnection, server);
+    this.flowId = flowId;
+    this.componentId = componentId;
+    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
+  }
+
+  async handleEvent(eventId: string, data: any): Promise<void> {
+    this.logger.log(`Handling event: ${eventId}`);
+    switch (eventId) {
+      case "initializeMachine": {
+        await this.initializeMachine(data);
+        break;
+      }
+      case "start":
+      case "pause":
+      case "resume":
+      case "finish":
+      case "reset": {
+        await this.transition(eventId);
+        break;
+      }
+    }
+  }
+
+  private async initializeMachine(data: any): Promise<void> {
+    this.getPorts();
+    this._ports.inputs.forEach((input) => {
+      input.connections.forEach(async (connection) => {
+        let smComponent: any = connection.connectedFrom;
+
+        await smComponent.initializeMachine(data);
+        await this.updateDisplay(smComponent);
+
+        let currentState = await smComponent.getCurrentState()
+        await this.publish(this.flowId, this.componentId, 'initializeMachine', { 
+          currentState
+        });
+      })
+    })
+  }
+
+  private async transition(event: string): Promise<void> {
+    let previousState;
+    let currentState;
+    this.getPorts();
+    this._ports.inputs.forEach((input) => {
+      input.connections.forEach(async (connection) => {
+        let smComponent: any = connection.connectedFrom;
+        previousState = await smComponent.getCurrentState();
+        await this.stateMachine.transition({ event });
+        currentState = await smComponent.getCurrentState();
+
+        await this.updateDisplay(smComponent);
+      })
+    });
+    
+
+    // Publish to the specific event port
+    await this.publish(this.flowId, this.componentId, event, { 
+      previousState,
+      currentState
+    });
+
+    // Also publish to the general stateChanged port
+    await this.publish(this.flowId, this.componentId, 'stateChanged', { 
+      previousState,
+      currentState,
+      event
+    });
+  }
+
+  private async updateDisplay(stateMachineComponent): Promise<void> {
+    let currentState = await stateMachineComponent.getCurrentState();
+    let states = await stateMachineComponent.getStates();
+    let transitions = await stateMachineComponent.getTransitions();
+
+    await this.display(this.flowId, this.componentId, 'job-state-machine', {
+      currentState,
+      states: Array.from(states),
+      transitions: Object.fromEntries(transitions)
+    });
+  }
+}
 </FILE>
 <REQUEST>
-flow.schema should reflect ports inputs and outputs
+state machine input events should be prefixed with set- and output events should be prefixed with get-
 </REQUEST>

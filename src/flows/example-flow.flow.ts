@@ -1,5 +1,5 @@
 import { schema } from "../schema/flow.schema"; 
-import { default as jobStateMachine } from "src/stateMachines/job.state-machine";
+import { default as initJobStateMachine } from "src/stateMachines/job.state-machine";
 
 let numberGenerator = {
   ports: {
@@ -24,6 +24,27 @@ let buttonTrigger = {
   }
 }
 
+let jobStateMachine = {
+  ports: {
+    inputs: {
+      initializeMachine: {},
+      'set-start': {},
+      'set-pause': {},
+      'set-resume': {},
+      'set-finish': {},
+      'set-reset': {},
+    },
+    outputs: {
+      'get-start': {},
+      'get-pause': {},
+      'get-resume': {},
+      'get-finish': {},
+      'get-reset': {},
+      stateChanged: {}
+    }
+  }
+}
+
 let components = {
   main: {
     eventTrigger: {
@@ -40,7 +61,7 @@ let components = {
   btn5: { buttonTrigger },
   sm1: {
     stateMachine: {
-      init: jobStateMachine,
+      init: initJobStateMachine,
       ports: {
         inputs: {
           initializeMachine: {}
@@ -49,23 +70,7 @@ let components = {
       }
     }
   },
-  jsm1: {
-    jobStateMachine: {
-      ports: {
-        inputs: {
-          initializeMachine: {},
-          start: {},
-          pause: {},
-          resume: {},
-          finish: {},
-          reset: {}
-        },
-        outputs: {
-          stateChanged: {}
-        }
-      }
-    }
-  },
+  jsm1: { jobStateMachine },
   gen1: {
     numberGenerator
   },
@@ -96,19 +101,19 @@ let flow = {
       to: 'components.jsm1.jobStateMachine.ports.inputs.initializeMachine'
     },
     {
-      from: 'components.jsm1.jobStateMachine.ports.outputs.stateChanged',
+      from: 'components.jsm1.jobStateMachine.ports.outputs.get-start',
       to: 'components.gen1.numberGenerator.ports.inputs.start'
     },
     {
-      from: 'components.jsm1.jobStateMachine.ports.outputs.stateChanged',
+      from: 'components.jsm1.jobStateMachine.ports.outputs.get-stop',
       to: 'components.gen1.numberGenerator.ports.inputs.stop'
     },
     {
-      from: 'components.jsm1.jobStateMachine.ports.outputs.stateChanged',
+      from: 'components.jsm1.jobStateMachine.ports.outputs.get-start',
       to: 'components.gen2.numberGenerator.ports.inputs.start'
     },
     {
-      from: 'components.jsm1.jobStateMachine.ports.outputs.stateChanged',
+      from: 'components.jsm1.jobStateMachine.ports.outputs.get-stop',
       to: 'components.gen2.numberGenerator.ports.inputs.stop'
     },
     {
@@ -121,23 +126,23 @@ let flow = {
     },
     {
       from: 'components.btn1.buttonTrigger.ports.outputs.buttonPressed',
-      to: 'components.jsm1.jobStateMachine.ports.inputs.start'
+      to: 'components.jsm1.jobStateMachine.ports.inputs.set-start'
     },
     {
       from: 'components.btn2.buttonTrigger.ports.outputs.buttonPressed',
-      to: 'components.jsm1.jobStateMachine.ports.inputs.pause'
+      to: 'components.jsm1.jobStateMachine.ports.inputs.set-pause'
     },
     {
       from: 'components.btn3.buttonTrigger.ports.outputs.buttonPressed',
-      to: 'components.jsm1.jobStateMachine.ports.inputs.resume'
+      to: 'components.jsm1.jobStateMachine.ports.inputs.set-resume'
     },
     {
       from: 'components.btn4.buttonTrigger.ports.outputs.buttonPressed',
-      to: 'components.jsm1.jobStateMachine.ports.inputs.finish'
+      to: 'components.jsm1.jobStateMachine.ports.inputs.set-finish'
     },
     {
       from: 'components.btn5.buttonTrigger.ports.outputs.buttonPressed',
-      to: 'components.jsm1.jobStateMachine.ports.inputs.reset'
+      to: 'components.jsm1.jobStateMachine.ports.inputs.set-reset'
     },
   ]
 };
