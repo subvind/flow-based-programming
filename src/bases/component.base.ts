@@ -90,7 +90,7 @@ export abstract class ComponentBase implements Component {
         // console.log('connection', connection);
         // console.log('this.componentRegistry', componentRegistry)
         if (connection.fromFlow === this.flowId && connection.fromComponent === this.componentId) {
-          console.log('from is the current instance so register to instance');
+          // console.log(`from is the current instance so register to instance`);
           const connectionKey = `${connection.fromEvent}>${connection.toFlow}.${connection.toComponent}.${connection.toEvent}`;
           const connectedComponentInstance = componentRegistry.getComponent(connection.toFlow, connection.toComponent);
           this._connections.set(connectionKey, connectedComponentInstance);
@@ -98,7 +98,7 @@ export abstract class ComponentBase implements Component {
           connection.connectedFrom = this;
           this.connections.push(connection);
         } else if (connection.toFlow === this.flowId && connection.toComponent === this.componentId) {
-          console.log('to is the current instance so register from instance');
+          // console.log(`to is the current instance so register from instance`);
           const connectionKey = `${connection.toEvent}>${connection.fromFlow}.${connection.fromComponent}.${connection.fromEvent}`;
           const connectedComponentInstance = componentRegistry.getComponent(connection.fromFlow, connection.fromComponent);
           this._connections.set(connectionKey, connectedComponentInstance);
@@ -168,6 +168,7 @@ export abstract class ComponentBase implements Component {
           }
         }
       });
+      console.log('connections', connections)
       return connections;
     } else {
       return [];

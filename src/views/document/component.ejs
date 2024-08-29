@@ -13,7 +13,7 @@
       <% }) %>
     </div>
     <div id="number-generator" class="component">
-      <h2><%- component.slug %></h2>
+      <h2><%- component.componentId %> (<%- component.slug %>)</h2>
       <p><%- component.description %> </p>
       <button hx-post="/trigger-event/<%- component.flowId %>.<%- component.componentId %>.start"
         hx-swap="none" 

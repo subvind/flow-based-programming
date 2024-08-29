@@ -83,6 +83,9 @@ export class AppController {
           // console.log('documentConnections output from', connection.connectedTo.componentId);
           connection.next = connection.connectedTo;
         }
+        let { toComponent, fromComponent, toEvent, fromEvent } = connection;
+        // console.log('connection', fromComponent, fromEvent, toComponent, toEvent);
+        // console.log('next', connection.next.componentId)
       });
 
       if (port) {

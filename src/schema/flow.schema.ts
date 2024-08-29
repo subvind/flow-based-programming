@@ -10,21 +10,21 @@ export function schema(flow: any): Flow {
     return { componentId, componentRef, init };
   });
 
-  // console.log('components', components);
-
-  const connections = flow.connections.map(connection => {
+  const connections = flow.connections.map((connection) => {
     const paths = extractPaths(flow.components, connection);
     const fromParts = paths.from.split('.');
     const toParts = paths.to.split('.');
-    // console.log('fromParts', fromParts)
-    // example: main.eventTrigger.events.initializeMachine
+
+    console.log('fromParts', fromParts)
+    console.log('toParts', toParts)
+    
     return {
       fromFlow: flow.id,
-      fromComponent: fromParts[0],
-      fromEvent: fromParts[fromParts.length - 1],
+      fromComponent: fromParts[1],
+      fromEvent: fromParts[4],
       toFlow: flow.id,
-      toComponent: toParts[0],
-      toEvent: toParts[toParts.length - 1],
+      toComponent: toParts[1],
+      toEvent: toParts[4],
     };
   });
 
@@ -34,26 +34,46 @@ export function schema(flow: any): Flow {
     connections,
   };
 
+  console.log('code', code);
+
   return code;
 }
 
-function getObjectPath(obj, target) {
-  for (const [key, value] of Object.entries(obj)) {
-    if (value === target) return [key];
-    if (typeof value === 'object') {
-      const path = getObjectPath(value, target);
-      if (path) return [key, ...path];
+// example
+// let components = {
+//   main: {
+//     eventTrigger: {
+//       events: {
+//         initializeMachine: {}
+//       }
+//     }
+//   },
+// }
+
+function getObjectPath(components, target) {
+  for (const [componentId, component] of Object.entries(components)) {
+    const [componentRef] = Object.keys(component);
+    if (component[componentRef].events) {
+      for (const [eventId, event] of Object.entries(component[componentRef].events)) {
+        console.log('componentId', componentId)
+        console.log('componentRef', componentRef)
+        console.log('eventId', eventId)
+        console.log(event)
+        console.log(target)
+        if (event === target) {
+          let path = `components.${componentId}.${componentRef}.events.${eventId}`
+          console.log(path)
+          return path;
+        }
+      }
     }
   }
   return null;
 }
 
 function extractPaths(components, connection) {
-  const fromPath = getObjectPath(components, connection.from);
-  const toPath = getObjectPath(components, connection.to);
-
   return {
-    from: fromPath ? fromPath.join('.') : null,
-    to: toPath ? toPath.join('.') : null
+    from: getObjectPath(components, connection.from),
+    to: getObjectPath(components, connection.to)
   };
 }
