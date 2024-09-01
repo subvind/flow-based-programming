@@ -3,6 +3,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { ComponentBase } from '../../bases/component.base';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { Server } from 'socket.io';
+import { TemplateCacheService } from 'src/services/template-cache.service';
 
 import { triggerEvent } from './trigger-event.event';
 
@@ -22,9 +23,10 @@ export class EventTriggerComponent extends ComponentBase {
     @Inject('FLOW_ID') flowId: string,
     @Inject('COMPONENT_ID') componentId: string,
     @Inject(AmqpConnection) amqpConnection: AmqpConnection,
-    @Inject('WEB_SOCKET_SERVER') protected server: Server
+    @Inject('WEB_SOCKET_SERVER') protected server: Server,
+    @Inject('TEMPLATES') templates: TemplateCacheService
   ) {
-    super('eventTrigger', 'event-trigger', 'Handles HTMX requests and triggers events', flowId, componentId, amqpConnection, server);
+    super('eventTrigger', 'event-trigger', 'Handles HTMX requests and triggers events', flowId, componentId, amqpConnection, server, templates);
     this.flowId = flowId;
     this.componentId = componentId;
     this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);

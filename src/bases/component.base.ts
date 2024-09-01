@@ -9,6 +9,7 @@ import * as path from 'path';
 import { Connection } from 'src/interfaces/connection.interface';
 import { Port } from 'src/interfaces/port.interface';
 import { ComponentRegistry } from 'src/services/component-registry.service';
+import { TemplateCacheService } from 'src/services/template-cache.service';
 
 @WebSocketGateway()
 @Injectable()
@@ -18,7 +19,7 @@ export abstract class ComponentBase implements Component {
   public ports: { inputs: string[]; outputs: string[]; };
   public _connections: Map<string, Component> = new Map();
   public connections: Connection[];
-
+  
   constructor(
     public componentId: string,
     public slug: string,
@@ -27,6 +28,7 @@ export abstract class ComponentBase implements Component {
     public componentRef: string,
     @Inject(AmqpConnection) protected amqpConnection: AmqpConnection,
     protected server: Server,
+    public templateCacheService: TemplateCacheService
   ) {
     this.logger = new CustomLogger(this.componentId, amqpConnection);
   }
@@ -60,6 +62,10 @@ export abstract class ComponentBase implements Component {
     data._templateId = templateId;
     const htmxContent = await this.generateHtmxContent(data);
     
+    // Cache the generated content
+    const cacheKey = `${flowId}.${componentId}.${templateId}`;
+    this.templateCacheService.setTemplate(cacheKey, htmxContent);
+
     if (this.server) {
       // this.logger.log(htmxContent);
       this.server.emit('display-flow-component-template-content', {

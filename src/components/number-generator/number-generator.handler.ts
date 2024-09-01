@@ -3,6 +3,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { ComponentBase } from '../../bases/component.base';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { Server } from 'socket.io';
+import { TemplateCacheService } from 'src/services/template-cache.service';
 
 import { startGenerating } from './start-generating.event';
 import { stopGenerating } from './stop-generating.event';
@@ -26,9 +27,10 @@ export class NumberGeneratorComponent extends ComponentBase {
     @Inject('FLOW_ID') flowId: string,
     @Inject('COMPONENT_ID') componentId: string,
     @Inject(AmqpConnection) amqpConnection: AmqpConnection,
-    @Inject('WEB_SOCKET_SERVER') protected server: Server
+    @Inject('WEB_SOCKET_SERVER') protected server: Server,
+    @Inject('TEMPLATES') templates: TemplateCacheService
   ) {
-    super('numberGenerator', 'number-generator', 'Generates random numbers periodically', flowId, componentId, amqpConnection, server);
+    super('numberGenerator', 'number-generator', 'Generates random numbers periodically', flowId, componentId, amqpConnection, server, templates);
     this.flowId = flowId;
     this.componentId = componentId;
     this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);

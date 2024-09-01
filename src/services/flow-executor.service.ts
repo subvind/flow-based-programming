@@ -6,6 +6,7 @@ import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { initializeComponent } from '../initializers/component.initialize';
 import { Component } from 'src/interfaces/component.interface';
+import { TemplateCacheService } from './template-cache.service';
 
 @WebSocketGateway()
 @Injectable()
@@ -13,10 +14,11 @@ export class FlowExecutorService {
   @WebSocketServer() server: Server;
   private readonly logger = new Logger(FlowExecutorService.name);
   private flows: Flow[] = [];
-
+  
   constructor(
     private amqpConnection: AmqpConnection,
-    private componentRegistry: ComponentRegistry
+    private componentRegistry: ComponentRegistry,
+    private templateCacheService: TemplateCacheService
   ) {
   }
 
@@ -50,7 +52,7 @@ export class FlowExecutorService {
       this.logger.log(`Constructing component: ${component.componentId} (${component.componentRef}) for flow: ${flow.id}`);
       
       // initialize a new component instance
-      let componentInstance: Component = initializeComponent(flow, component, this.amqpConnection, this.server);
+      let componentInstance: Component = initializeComponent(flow, component, this.amqpConnection, this.server, this.templateCacheService);
 
       // register new instance with component registery
       this.componentRegistry.registerComponent(componentInstance);

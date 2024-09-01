@@ -6,6 +6,7 @@ import { Server } from 'socket.io';
 
 import { triggerButton } from './trigger-button.event';
 import { init } from './init.event';
+import { TemplateCacheService } from 'src/services/template-cache.service';
 
 @Injectable()
 export class ButtonTriggerComponent extends ComponentBase {
@@ -26,9 +27,10 @@ export class ButtonTriggerComponent extends ComponentBase {
     @Inject('FLOW_ID') flowId: string,
     @Inject('COMPONENT_ID') componentId: string,
     @Inject(AmqpConnection) amqpConnection: AmqpConnection,
-    @Inject('WEB_SOCKET_SERVER') protected server: Server
+    @Inject('WEB_SOCKET_SERVER') protected server: Server,
+    @Inject('TEMPLATES') templates: TemplateCacheService
   ) {
-    super('buttonTrigger', 'button-trigger', 'Handles button presses and triggers events', flowId, componentId, amqpConnection, server);
+    super('buttonTrigger', 'button-trigger', 'Handles button presses and triggers events', flowId, componentId, amqpConnection, server, templates);
     this.flowId = flowId;
     this.componentId = componentId;
     this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);

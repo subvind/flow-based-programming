@@ -3,6 +3,7 @@ import { ComponentBase } from '../../bases/component.base';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { Server } from 'socket.io';
 import { CustomLogger } from '../../logger/custom-logger';
+import { TemplateCacheService } from 'src/services/template-cache.service';
 
 import { StateMachine } from 'src/interfaces/state-machine.interface';
 import { initProxyMachine } from 'src/events/initProxyMachine.event';
@@ -38,8 +39,9 @@ export class JobStateMachineComponent extends ComponentBase {
     @Inject('COMPONENT_ID') componentId: string,
     @Inject(AmqpConnection) amqpConnection: AmqpConnection,
     @Inject('WEB_SOCKET_SERVER') protected server: Server,
+    @Inject('TEMPLATES') templates: TemplateCacheService
   ) {
-    super('jobStateMachine', 'job-state-machine', 'Implements a job state machine', flowId, componentId, amqpConnection, server);
+    super('jobStateMachine', 'job-state-machine', 'Implements a job state machine', flowId, componentId, amqpConnection, server, templates);
     this.flowId = flowId;
     this.componentId = componentId;
     this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);

@@ -6,6 +6,7 @@ import { ComponentRegistry } from 'src/services/component-registry.service';
 import { Connection } from 'src/interfaces/connection.interface';
 import { Port } from 'src/interfaces/port.interface';
 import { FlowExecutorService } from 'src/services/flow-executor.service';
+import { TemplateCacheService } from 'src/services/template-cache.service';
 
 @Controller()
 export class AppController {
@@ -14,7 +15,8 @@ export class AppController {
   constructor(
     private eventTriggerComponent: EventTriggerComponent,
     private componentRegistry: ComponentRegistry,
-    private flowExecutorService: FlowExecutorService
+    private flowExecutorService: FlowExecutorService,
+    private templateCacheService: TemplateCacheService
   ) {}
 
   @Get()
@@ -176,5 +178,22 @@ export class AppController {
     data._eventId = eventId;
     await this.eventTriggerComponent.handleEvent('triggerEvent', data);
     res.sendStatus(200);
+  }
+
+  @Get('template/:flowId/:componentId/:templateId')
+  async getTemplate(
+    @Param('flowId') flowId: string,
+    @Param('componentId') componentId: string,
+    @Param('templateId') templateId: string,
+    @Res() res: Response
+  ) {
+    const cacheKey = `${flowId}.${componentId}.${templateId}`;
+    const cachedTemplate = this.templateCacheService.getTemplate(cacheKey);
+
+    if (cachedTemplate) {
+      res.send(cachedTemplate);
+    } else {
+      res.status(404).send('Template not found');
+    }
   }
 }

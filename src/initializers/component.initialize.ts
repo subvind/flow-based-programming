@@ -5,26 +5,26 @@ import { StateMachineComponent } from 'src/components/state-machine/state-machin
 import { JobStateMachineComponent } from 'src/components/job-state-machine/job-state-machine.handler';
 import { ButtonTriggerComponent } from 'src/components/button-trigger/button-trigger.handler';
 
-export function initializeComponent(flow, component, amqpConnection, server) {
+export function initializeComponent(flow, component, amqpConnection, server, templates) {
   let componentInstance;
   switch (component.componentRef) {
     case 'eventTrigger':
-      componentInstance = new EventTriggerComponent(flow.id, component.componentId, amqpConnection, server);
+      componentInstance = new EventTriggerComponent(flow.id, component.componentId, amqpConnection, server, templates);
       break;
     case 'numberGenerator':
-      componentInstance = new NumberGeneratorComponent(flow.id, component.componentId, amqpConnection, server);
+      componentInstance = new NumberGeneratorComponent(flow.id, component.componentId, amqpConnection, server, templates);
       break;
     case 'numberMultiplier':
-      componentInstance = new NumberMultiplierComponent(flow.id, component.componentId, amqpConnection, server);
+      componentInstance = new NumberMultiplierComponent(flow.id, component.componentId, amqpConnection, server, templates);
       break;
     case 'stateMachine':
-      componentInstance = new StateMachineComponent(flow.id, component.componentId, amqpConnection, server);
+      componentInstance = new StateMachineComponent(flow.id, component.componentId, amqpConnection, server, templates);
       break;
     case 'jobStateMachine':
-      componentInstance = new JobStateMachineComponent(flow.id, component.componentId, amqpConnection, server);
+      componentInstance = new JobStateMachineComponent(flow.id, component.componentId, amqpConnection, server, templates);
       break;
     case 'buttonTrigger':
-      componentInstance = new ButtonTriggerComponent(flow.id, component.componentId, amqpConnection, server);
+      componentInstance = new ButtonTriggerComponent(flow.id, component.componentId, amqpConnection, server, templates);
       break;
     default:
       this.logger.warn(`Unknown component type: ${component.componentRef}`);

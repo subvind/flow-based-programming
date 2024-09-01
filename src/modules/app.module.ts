@@ -4,6 +4,7 @@ import { FlowExecutorService } from '../services/flow-executor.service';
 import { EventProcessor } from '../processors/event.processor';
 import { CustomLogger } from '../logger/custom-logger';
 import { AppController } from '../controllers/app.controller';
+import { TemplateCacheService } from 'src/services/template-cache.service';
 
 import { initializeAppModule, components } from '../initializers/app.initialize';
 
@@ -25,6 +26,7 @@ const metadata = {
     EventProcessor,
     ComponentRegistry,
     FlowExecutorService,
+    TemplateCacheService,
     {
       provide: 'FLOW_ID',
       useValue: 'example-flow', // Use a default flow ID
@@ -36,6 +38,10 @@ const metadata = {
     {
       provide: 'WEB_SOCKET_SERVER',
       useValue: null, // This will be set later in the FlowExecutorService
+    },
+    {
+      provide: 'TEMPLATES',
+      useValue: null, // 
     },
     ...components,
     CustomLogger
