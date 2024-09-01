@@ -28,21 +28,33 @@ export class AppController {
    * ./src/public/chart/*
    */
 
-  @Get('document')
-  @Render('document/index')
-  async documentIndex(
+  @Get('flows')
+  @Render('flows/index')
+  async flowsIndex(
     @Req() req: Request
   ) {
     const flows = await this.flowExecutorService.getFlows();
-    const firstFlow = flows[0]; // Assuming we're working with the first flow
-    const components = firstFlow.components.map(c => ({
+    return {
+      message: 'flows - steam engine // FBP',
+      flows
+    };
+  }
+
+  @Get('flow/:flowId')
+  @Render('flow/index')
+  async flowComponents(
+    @Param('flowId') flowId: string,
+    @Req() req: Request
+  ) {
+    const flow = await this.flowExecutorService.getFlow(flowId);
+    const components = flow.components.map(c => ({
       componentId: c.componentId,
       componentRef: c.componentRef
     }));
 
     return {
-      message: 'document - steam engine // FBP',
-      flowId: firstFlow.id,
+      message: 'flow - steam engine // FBP',
+      flowId,
       components
     };
   }

@@ -7,20 +7,21 @@
   <script src="https://unpkg.com/htmx.org@2.0.2"></script>
   <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/json-enc.js"></script>
   <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
-  <%- include('style') %>
+  <%- include('../document/style') %>
 </head>
 <body>
   <div class="container">
     <div class="sidebar">
-      <%- include('component-selector', { flowId: selected.flowId, componentId: selected.componentId, components: components }) %>
+      <%- include('../document/flow-selector', { flows: flows }) %>
+      <div id="component-selector-container">
+        <!-- Component selector will be loaded here after flow selection -->
+      </div>
     </div>
     <div class="main-content">
-      <div id="swimlane-container" class="swimlane-container">
-        <div id="main-swimlane" class="swimlane" data-index="0"
-             hx-get="/documentComponent/<%= selected.flowId %>/<%= selected.componentId %>/main-swimlane"
-             hx-trigger="load"
-             hx-target="#main-swimlane">
-          <!-- Main component will be loaded here -->
+      <div style="padding: 1em 3em;">
+        <h1>Select a Flow</h1>
+        <div id="component-details">
+          <p>Select a flow and then a component to view its details.</p>
         </div>
       </div>
     </div>
@@ -44,6 +45,6 @@
       event.detail.headers['Content-Type'] = 'application/json';
     });
   </script>
-  <%- include('methods') %> 
+  <%- include('../document/methods') %> 
 </body>
 </html>

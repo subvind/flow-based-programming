@@ -1,0 +1,12 @@
+<div class="sidebar-selector">
+  <h3><a href="/">FBP</a> / Flows</h3>
+  <ul>
+    <% flows.forEach(function(flow) { %>
+      <li>
+        <a href="/flow/<%= flow.id %>">
+          <%= flow.id %>
+        </a>
+      </li>
+    <% }); %>
+  </ul>
+</div>

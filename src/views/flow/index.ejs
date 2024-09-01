@@ -7,7 +7,7 @@
   <script src="https://unpkg.com/htmx.org@2.0.2"></script>
   <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/json-enc.js"></script>
   <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
-  <%- include('style') %>
+  <%- include('../document/style') %>
 </head>
 <body>
   <div class="container">
@@ -15,9 +15,11 @@
       <%- include('component-selector', { flowId: flowId, components: components }) %>
     </div>
     <div class="main-content">
-      <h1>Flow Components</h1>
-      <div id="component-details">
-        <p>Select a component to view its details.</p>
+      <div style="padding: 1em 3em;">
+        <h1>Select a Component</h1>
+        <div id="component-details">
+          <p>Select a component to view its details.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -40,6 +42,6 @@
       event.detail.headers['Content-Type'] = 'application/json';
     });
   </script>
-  <%- include('methods') %> 
+  <%- include('../document/methods') %> 
 </body>
 </html>

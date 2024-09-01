@@ -1,5 +1,5 @@
 <div class="sidebar-selector">
-  <h3><a href="/">FBP</a> / <a href="/flow/<%- flowId %>"><%- flowId %></a> / Documents</h3>
+  <h3><a href="/">FBP</a> / <a href="/flows">Flows</a> / <%- flowId %> </h3>
   <ul>
     <% components.forEach(function(component) { %>
       <li>
@@ -9,9 +9,6 @@
            hx-push-url="true">
           <%= component.componentId %> (<%= component.componentRef %>)
         </a>
-        <% if (componentId === component.componentId) { %>
-          <div style="float: right; line-height: 0.85em;">&#8594;</div>
-        <% } %>
       </li>
     <% }); %>
   </ul>
