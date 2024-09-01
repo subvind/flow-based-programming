@@ -10,12 +10,19 @@
   <%- include('style') %>
 </head>
 <body>
-  <div id="swimlane-container" class="swimlane-container">
-    <div id="main-swimlane" class="swimlane" data-index="0"
-         hx-get="/documentComponent/<%= selected.flowId %>/<%= selected.componentId %>/main-swimlane"
-         hx-trigger="load"
-         hx-target="#main-swimlane">
-      <!-- Main component will be loaded here -->
+  <div class="container">
+    <div class="sidebar">
+      <%- include('component-selector', { flowId: selected.flowId, components: components }) %>
+    </div>
+    <div class="main-content">
+      <div id="swimlane-container" class="swimlane-container">
+        <div id="main-swimlane" class="swimlane" data-index="0"
+             hx-get="/documentComponent/<%= selected.flowId %>/<%= selected.componentId %>/main-swimlane"
+             hx-trigger="load"
+             hx-target="#main-swimlane">
+          <!-- Main component will be loaded here -->
+        </div>
+      </div>
     </div>
   </div>
 
@@ -36,21 +43,6 @@
     htmx.on("htmx:configRequest", (event) => {
       event.detail.headers['Content-Type'] = 'application/json';
     });
-
-    // // Function to reinitialize HTMX on dynamically loaded content
-    // function reinitializeHtmx(element) {
-    //   htmx.process(element);
-    // }
-
-    // // Listen for HTMX after swap event
-    // document.body.addEventListener('htmx:afterSwap', function(event) {
-    //   reinitializeHtmx(event.detail.elt);
-    // });
-
-    // // Listen for HTMX after settle event
-    // document.body.addEventListener('htmx:afterSettle', function(event) {
-    //   reinitializeHtmx(event.detail.elt);
-    // });
   </script>
   <%- include('methods') %> 
 </body>

@@ -12,14 +12,31 @@ import { Component } from 'src/interfaces/component.interface';
 export class FlowExecutorService {
   @WebSocketServer() server: Server;
   private readonly logger = new Logger(FlowExecutorService.name);
+  private flows: Flow[] = [];
 
   constructor(
     private amqpConnection: AmqpConnection,
     private componentRegistry: ComponentRegistry
-  ) {}
+  ) {
+  }
+
+  async getFlows(): Promise<Flow[]> {
+    return this.flows;
+  }
+
+  async getFlow(flowId: string): Promise<Flow | undefined> {
+    return this.flows.find(flow => flow.id === flowId);
+  }
 
   async executeFlow(flow: Flow) {
     this.logger.log(`Executing flow: ${flow.id}`);
+
+    // Remove old flow and add new flow
+    var filteredFlows = this.flows.filter(function(f: Flow) { 
+      return f.id != flow.id; 
+    });
+    this.flows = filteredFlows;
+    this.flows.push(flow);
 
     // Create connections
     for (const connection of flow.connections) {

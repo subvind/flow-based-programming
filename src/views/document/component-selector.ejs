@@ -1,0 +1,15 @@
+<div class="component-selector">
+  <h3>Select a Component</h3>
+  <ul>
+    <% components.forEach(function(component) { %>
+      <li>
+        <a href="/document/<%= flowId %>/<%= component.componentId %>"
+           hx-get="/document/<%= flowId %>/<%= component.componentId %>"
+           hx-target="body"
+           hx-push-url="true">
+          <%= component.componentId %> (<%= component.componentRef %>)
+        </a>
+      </li>
+    <% }); %>
+  </ul>
+</div>

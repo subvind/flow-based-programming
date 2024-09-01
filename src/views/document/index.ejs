@@ -10,7 +10,17 @@
   <%- include('style') %>
 </head>
 <body>
-  <div>hello world</div>
+  <div class="container">
+    <div class="sidebar">
+      <%- include('component-selector', { flowId: flowId, components: components }) %>
+    </div>
+    <div class="main-content">
+      <h1>Flow Components</h1>
+      <div id="component-details">
+        <p>Select a component to view its details.</p>
+      </div>
+    </div>
+  </div>
 
   <script>
     const socket = io();
@@ -21,6 +31,8 @@
       console.log(targetId, event.content);
       if (targetElement) {
         targetElement.outerHTML = event.content;
+        // Reinitialize HTMX on the new content
+        htmx.process(document.getElementById(targetId));
       }
     });
 

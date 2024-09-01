@@ -78,4 +78,44 @@
     flex: 1;
     margin: 0 2px;
   }
+
+  .container {
+    display: flex;
+    height: 100vh;
+  }
+
+  .sidebar {
+    width: 250px;
+    background-color: #fff;
+    padding: 2em;
+    overflow-y: auto;
+    border-right: 1px solid #111;
+  }
+
+  .main-content {
+    flex-grow: 1;
+    overflow-y: auto;
+  }
+
+  .component-selector h3 {
+    margin-top: 0;
+  }
+
+  .component-selector ul {
+    list-style-type: none;
+    padding: 0;
+  }
+
+  .component-selector li {
+    margin-bottom: 10px;
+  }
+
+  .component-selector a {
+    text-decoration: none;
+    color: #333;
+  }
+
+  .component-selector a:hover {
+    text-decoration: underline;
+  }
 </style>

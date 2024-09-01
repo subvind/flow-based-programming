@@ -5,6 +5,7 @@ import { EventTriggerComponent } from '../components/event-trigger/event-trigger
 import { ComponentRegistry } from 'src/services/component-registry.service';
 import { Connection } from 'src/interfaces/connection.interface';
 import { Port } from 'src/interfaces/port.interface';
+import { FlowExecutorService } from 'src/services/flow-executor.service';
 
 @Controller()
 export class AppController {
@@ -12,7 +13,8 @@ export class AppController {
   
   constructor(
     private eventTriggerComponent: EventTriggerComponent,
-    private componentRegistry: ComponentRegistry
+    private componentRegistry: ComponentRegistry,
+    private flowExecutorService: FlowExecutorService
   ) {}
 
   @Get()
@@ -31,8 +33,17 @@ export class AppController {
   async documentIndex(
     @Req() req: Request
   ) {
+    const flows = await this.flowExecutorService.getFlows();
+    const firstFlow = flows[0]; // Assuming we're working with the first flow
+    const components = firstFlow.components.map(c => ({
+      componentId: c.componentId,
+      componentRef: c.componentRef
+    }));
+
     return {
-      message: 'document - steam engine // FBP' 
+      message: 'document - steam engine // FBP',
+      flowId: firstFlow.id,
+      components
     };
   }
 
@@ -43,11 +54,18 @@ export class AppController {
     @Param('componentId') componentId: string,
     @Req() req: Request
   ) {
+    const flow = await this.flowExecutorService.getFlow(flowId);
+    const components = flow.components.map(c => ({
+      componentId: c.componentId,
+      componentRef: c.componentRef
+    }));
+
     return {
       selected: {
         flowId,
         componentId
       },
+      components,
       message: `${flowId}.${componentId} - document - steam engine // FBP`
     };
   }
