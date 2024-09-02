@@ -12,12 +12,17 @@
         <br />
       <% }) %>
     </div>
-    <div id="number-generator" class="component">
+    <div class="component">
       <h2 style="margin: 0;"><%- component.componentId %> (<%- component.slug %>)</h2>
       <p style="margin: 0 0 0.5em;"><%- component.description %> </p>
       <div style="border: 1px solid #111;">
-        <br>
-        <!-- TODO: if componentRef is button-trigger then load the related flow-component-template button-trigger here -->
+        <div id="init.<%- component.flowId %>.<%- component.componentId %>.<%- component.slug %>"
+              hx-get="/template/<%- component.flowId %>/<%- component.componentId %>/<%- component.slug %>"
+              hx-trigger="load"
+              hx-target="this"
+              hx-swap="outerHTML">
+          Loading button trigger...
+        </div>
       </div>
     </div>
     <div class="event-anchor output-anchors">

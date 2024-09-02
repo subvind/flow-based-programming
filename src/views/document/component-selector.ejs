@@ -3,10 +3,7 @@
   <ul>
     <% components.forEach(function(component) { %>
       <li>
-        <a href="/document/<%= flowId %>/<%= component.componentId %>"
-           hx-get="/document/<%= flowId %>/<%= component.componentId %>"
-           hx-target="body"
-           hx-push-url="true">
+        <a href="/document/<%= flowId %>/<%= component.componentId %>">
           <%= component.componentId %> (<%= component.componentRef %>)
         </a>
         <% if (componentId === component.componentId) { %>
