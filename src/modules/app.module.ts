@@ -17,7 +17,7 @@ const metadata = {
           type: 'topic',
         },
       ],
-      uri: 'amqp://localhost:5672',
+      uri: process.env.RABBITMQ || 'amqp://localhost:5672',
       connectionInitOptions: { wait: false },
     }),
   ],
