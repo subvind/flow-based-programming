@@ -8,6 +8,9 @@ import { TemplateCacheService } from 'src/services/template-cache.service';
 
 import { initializeAppModule, components } from '../initializers/app.initialize';
 
+const rabbitmqUri = process.env.RABBITMQ || 'amqp://localhost:5672';
+console.log(`[AppModule] RabbitMQ URI: ${rabbitmqUri}`);
+
 const metadata = {
   imports: [
     RabbitMQModule.forRoot(RabbitMQModule, {
@@ -17,7 +20,7 @@ const metadata = {
           type: 'topic',
         },
       ],
-      uri: process.env.RABBITMQ || 'amqp://localhost:5672',
+      uri: rabbitmqUri,
       connectionInitOptions: { wait: false },
     }),
   ],

@@ -21,4 +21,4 @@ spec:
             - containerPort: 3000
           env:
           - name: RABBITMQ
-            value: "amqp://localhost:4103"
+            value: "amqp://136.62.252.13:41003"
