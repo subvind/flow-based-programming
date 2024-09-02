@@ -32,7 +32,7 @@
     socket.on('display-flow-component-template-content', function(event) {
       const targetId = `${event.flowId}.${event.componentId}.${event.templateId}`;
       const targetElement = document.getElementById(targetId);
-      console.log(targetId, event.content);
+      console.log('display-flow-component-template-content', targetId);
       if (targetElement) {
         targetElement.outerHTML = event.content;
         // Reinitialize HTMX on the new content

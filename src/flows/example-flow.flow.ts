@@ -105,7 +105,7 @@ let flow = {
       to: 'components.gen1.numberGenerator.ports.inputs.start'
     },
     {
-      from: 'components.jsm1.jobStateMachine.ports.outputs.get-stop',
+      from: 'components.jsm1.jobStateMachine.ports.outputs.get-finish',
       to: 'components.gen1.numberGenerator.ports.inputs.stop'
     },
     {
@@ -113,7 +113,7 @@ let flow = {
       to: 'components.gen2.numberGenerator.ports.inputs.start'
     },
     {
-      from: 'components.jsm1.jobStateMachine.ports.outputs.get-stop',
+      from: 'components.jsm1.jobStateMachine.ports.outputs.get-finish',
       to: 'components.gen2.numberGenerator.ports.inputs.stop'
     },
     {

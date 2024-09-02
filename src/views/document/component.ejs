@@ -13,24 +13,12 @@
       <% }) %>
     </div>
     <div id="number-generator" class="component">
-      <h2><%- component.componentId %> (<%- component.slug %>)</h2>
-      <p><%- component.description %> </p>
-      <button hx-post="/trigger-event/<%- component.flowId %>.<%- component.componentId %>.start"
-        hx-swap="none" 
-        hx-ext='json-enc'
-        hx-headers='{"Content-Type": "application/json"}'
-        hx-vals='{}'
-      >
-        Start Generating
-      </button>
-      <button hx-post="/trigger-event/<%- component.flowId %>.<%- component.componentId %>.stop"
-        hx-swap="none" 
-        hx-ext='json-enc'
-        hx-headers='{"Content-Type": "application/json"}'
-        hx-vals='{}'
-      >
-        Stop Generating
-      </button>
+      <h2 style="margin: 0;"><%- component.componentId %> (<%- component.slug %>)</h2>
+      <p style="margin: 0 0 0.5em;"><%- component.description %> </p>
+      <div style="border: 1px solid #111;">
+        <br>
+        <!-- TODO: if componentRef is button-trigger then load the related flow-component-template button-trigger here -->
+      </div>
     </div>
     <div class="event-anchor output-anchors">
       <% component.ports.outputs.forEach((output, index) => { %>

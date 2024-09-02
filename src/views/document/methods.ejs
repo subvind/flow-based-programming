@@ -23,15 +23,17 @@
     const mainSwimlane = document.getElementById(swimlaneId);
     let next = getNextSwimlane(direction, mainSwimlane);
 
+    const key = `${flowId}.${componentId}.${port}`;
     const eventElement = document.createElement('div');
-    eventElement.setAttribute("id", `${flowId}.${componentId}.${port}`);
+    eventElement.setAttribute("id", key);
     next.targetSwimlane.innerHTML = '';
     next.targetSwimlane.appendChild(eventElement);
     
     htmx.ajax('GET', `/documentConnections/${flowId}/${componentId}/${port}/${next.targetSwimlane.id}`, {
       swap: 'none',
       handler: (dom, event) => {
-        document.getElementById(`${flowId}.${componentId}.${port}`).outerHTML = event.xhr.response;
+        document.getElementById(key).outerHTML = event.xhr.response;
+        htmx.process(document.getElementById(key));
       }
     });
   }

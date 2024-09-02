@@ -137,14 +137,18 @@ export class AppController {
             connections,
             swimlaneId
           };
-        } else {
-          let displayHtmxId = `${flowId}.${componentId}.${port.eventId}`
+        } else if (port.dataMethod === 'display') {
+          let displayHtmxId = `${flowId}.${componentId}.${port.eventId}`;
+          const cacheKey = `${flowId}.${componentId}.${port.eventId}`;
+          const cachedTemplate = this.templateCacheService.getTemplate(cacheKey);
+          
           return {
             ...params,
             port,
             displayHtmxId,
-            swimlaneId
-          }
+            swimlaneId,
+            templateContent: cachedTemplate || 'Template not found'
+          };
         }
       }
     }
