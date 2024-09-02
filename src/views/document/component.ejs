@@ -1,15 +1,14 @@
 <% if (component) { %>
-  <div id="<%- component.flowId %>.<%- component.componentId %>">
+  <div id="<%- component.flowId %>.<%- component.componentId %>" class="component-wrapper">
     <div class="event-anchor input-anchors">
       <% component.ports.inputs.forEach((input, index) => { %>
         <% if (index !== 0) { %>
          <hr>
         <% } %>
-        <button onclick="loadConnectedComponents('input', '<%- component.flowId %>', '<%- component.componentId %>', '<%- input %>', '<%- swimlaneId %>')">input</button>
-        <div style="float: right;">
-          <%- input %>
+        <div class="input-port" data-port="<%- input %>">
+          <button onclick="loadConnectedComponents('input', '<%- component.flowId %>', '<%- component.componentId %>', '<%- input %>', '<%- swimlaneId %>')">input</button>
+          <div class="port-name"><%- input %></div>
         </div>
-        <br />
       <% }) %>
     </div>
     <div class="component">
@@ -30,11 +29,19 @@
         <% if (index !== 0) { %>
          <hr>
         <% } %>
-        <button onclick="loadConnectedComponents('output', '<%- component.flowId %>', '<%- component.componentId %>', '<%- output %>', '<%- swimlaneId %>')" style="float: right;">output</button>
-        <%- output %> <br />
+        <div class="output-port" data-port="<%- output %>">
+          <div class="port-name"><%- output %></div>
+          <button onclick="loadConnectedComponents('output', '<%- component.flowId %>', '<%- component.componentId %>', '<%- output %>', '<%- swimlaneId %>')">output</button>
+        </div>
       <% }) %>
     </div>
   </div>
 <% } else { %>
   <p>no component found</p>  
 <% } %>
+
+<script>
+  document.addEventListener('htmx:afterSettle', function() {
+    drawConnectionLines();
+  });
+</script>

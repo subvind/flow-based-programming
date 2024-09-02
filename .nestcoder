@@ -272,123 +272,369 @@ export function dot(a: V3, b: V3): number {
 
 You will now be given the actual INPUT you must work with.
 
-<FILE path="/home/travis/Projects/flow-based-programming/src/logger/custom-logger.ts">
-import { ConsoleLogger, Injectable, Inject } from '@nestjs/common';
+<FILE path="/home/travis/Projects/flow-based-programming/src/views/document/connections.ejs">
+<div id="<%- flowId %>.<%- componentId %>.<%- portId %>" class="swimlane-content" data-swimlane-id="<%- swimlaneId %>">
+  <% if (port && port.dataMethod) { %>
+    <% if (port.dataMethod === 'publish') { %>
+      <% if (connections.length) { %>
+        <% connections.forEach(connection => { %>
+          <%- include('component', { component: connection.next, swimlaneId }); %> 
+        <% }) %>
+      <% } else { %>
+        <br />
+        <div class="component">no connections found</div>  
+      <% } %>
+    <% } %>
+  
+    <% if (port.dataMethod === 'display') { %>
+      <div id="<%- flowId %>.<%- componentId %>">
+        <div class="event-anchor input-anchors">
+          <button onclick="loadMainComponent('input', '<%- flowId %>', '<%- componentId %>', '<%- swimlaneId %>')">input</button>
+          <div style="float: right;">
+            <%- portId %> 
+          </div>
+          <br>
+        </div>
+        <div class="template">
+          <%- templateContent %>
+        </div>
+      </div>
+    <% } %>
+  <% } else { %>
+    <div>component not found</div>  
+  <% } %>
+</div>
+
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/views/document/style.ejs">
+<style>
+  h2 { margin-top: 0; }
+  
+  body {
+    font-family: Arial, sans-serif; 
+    margin: 0; 
+    padding: 0;
+    background: #eee; 
+  }
+  .swimlane-container {
+    display: flex;
+    overflow-x: auto;
+    width: 100%;
+    height: 100vh;
+  }
+  .swimlane {
+    flex: 0 0 33.33%;
+    min-width: 300px;
+    padding: 0 2em;
+    border-right: 4px dashed #ccc;
+    overflow-y: auto;
+  }
+  .input-swimlane, .output-swimlane {
+    width: 33.33%; 
+    width: calc(100%/3);
+    height: 100%;
+    padding: 0 1em;
+
+  }
+  .input-swimlane {
+    border-right: 5px dashed #ccc;
+  }
+  .output-swimlane {
+    border-left: 5px dashed #ccc;
+  }
+  .main-swimlane {
+    width: 33.33%; 
+    width: calc(100%/3);
+    padding: 0 1em;
+    height: 100%;
+    overflow-y: auto;
+  }
+  .component {
+    background: #fff; 
+    border: 1px solid #111; 
+    padding: 10px; 
+    margin-bottom: 10px; 
+    position: relative;
+  }
+  .template {
+    background: #fff; 
+    border: 1px solid #111; 
+    margin-bottom: 10px; 
+    position: relative;
+  }
+  .input-anchors { 
+    margin-top: 1em;
+    background: #fff; 
+    border: 1px solid #111;
+    padding: 0.5em; 
+    margin-bottom: 10px; 
+  }
+  .input-anchor-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+  }
+  .input-anchor-row button {
+    flex: 1;
+    margin: 0 2px;
+  }
+  .output-anchors { 
+    margin-bottom: 1em;
+    background: #fff; 
+    border: 1px solid #111; 
+    padding: 0.5em; 
+  }
+  .output-anchor-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+  }
+  .output-anchor-row button {
+    flex: 1;
+    margin: 0 2px;
+  }
+
+  .container {
+    display: flex;
+    height: 100vh;
+  }
+
+  .sidebar {
+    min-width: 300px;
+    background-color: #fff;
+    padding: 0.5em;
+    overflow-y: auto;
+    border-right: 1px solid #111;
+  }
+
+  .main-content {
+    flex-grow: 1;
+    overflow-y: auto;
+  }
+
+  .sidebar-selector h3 {
+    margin-top: 0;
+    margin: 0 0 0.4em;
+  }
+
+  .sidebar-selector ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .sidebar-selector li {
+    border-top: 1px solid #eee;
+    padding: 0.3em 0;
+  }
+
+  .sidebar-selector a {
+    text-decoration: none;
+    color: #333;
+  }
+
+  .sidebar-selector a:hover {
+    text-decoration: underline;
+  }
+</style>
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/views/style.ejs">
+
+<style>
+  body { 
+    font-family: Arial, sans-serif; 
+    margin: 0; 
+    padding: 20px;
+    background: #eee; 
+  }
+  main {
+    border: 1px solid #111;
+    margin: 0 auto;
+    max-width: 600px;
+    padding: 1em;
+    background: #fff;
+  }
+  h1 {
+    margin: 0;
+  }
+  .navigation {
+    margin: 0;
+    padding: 0;
+    list-style: none outside none;
+    position: relative;
+  }
+  .navigation li {
+    margin: 0 0.5em 0.5em 0;
+    list-style-type: none;
+    float: left;
+  }
+  .navigation li button {
+    font-size: 1.2em;
+  }
+</style>
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/views/main.ejs">
+<main>
+  <h1>FBP Steam Engine</h1>
+  <p>The complete Flow-based Programming solution:</p>
+  <div style="overflow: hidden;">
+    <ul class="navigation">
+      <li><a href="/flows"><button>flows</button></a></li>
+      <li><a href="/components"><button>components</button></a></li>
+      <li><a href="/events"><button>events</button></a></li>
+      <li><a href="/stateMachines"><button>state machines</button></a></li>
+      <li><a href="/templates"><button>templates</button></a></li>
+      <li><a href="/logs"><button>logs</button></a></li>
+    </ul>
+  </div>
+  <p>
+    > Works best with multiple screens! (chart, document, logger)<br />
+    > *ideal for domain specific languages*
+  </p>
+  <hr>
+  <p>
+    What is FBP? Is it time for a new Steam Engine?<br />
+    <a href="https://www.youtube.com/watch?v=up2yhNTsaDs" target="_blank">https://www.youtube.com/watch?v=up2yhNTsaDs</a>
+  </p>  
+  <p>
+    Fork this FBP Steam Engine repository for each application.<br />
+    <a href="https://github.com/subvind/flow-based-programming" target="_blank">https://github.com/subvind/flow-based-programming</a>
+  </p>
+  <span>~made with &hearts; by <a href="https://istrav.com">isTrav</a> & <a href="https://subvind.com">subVind</a> + ai :)</span>
+</main>
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/services/flow-executor.service.ts">
+import { Injectable, Logger } from '@nestjs/common';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import * as fs from 'fs';
-import * as path from 'path';
+import { ComponentRegistry } from './component-registry.service';
+import { Flow } from '../interfaces/flow.interface';
+import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { Server } from 'socket.io';
+import { initializeComponent } from '../initializers/component.initialize';
+import { Component } from 'src/interfaces/component.interface';
+import { TemplateCacheService } from './template-cache.service';
 
+@WebSocketGateway()
 @Injectable()
-export class CustomLogger extends ConsoleLogger {
+export class FlowExecutorService {
+  @WebSocketServer() server: Server;
+  private readonly logger = new Logger(FlowExecutorService.name);
+  private flows: Flow[] = [];
+  
   constructor(
-    private logId: string,
-    @Inject(AmqpConnection) private amqpConnection: AmqpConnection
+    private amqpConnection: AmqpConnection,
+    private componentRegistry: ComponentRegistry,
+    private templateCacheService: TemplateCacheService
   ) {
-    super(logId);
-    this.setLogLevels(['log', 'error', 'warn', 'debug', 'verbose']);
   }
 
-  log(message: string, context?: string) {
-    this.printMessage(message, 'log', context);
-    // this.emitLogEvent('log', message);
+  async getFlows(): Promise<Flow[]> {
+    return this.flows;
   }
 
-  warn(message: string, context?: string) {
-    this.printMessage(message, 'warn', context);
-    // this.emitLogEvent('warn', message);
+  async getFlow(flowId: string): Promise<Flow | undefined> {
+    return this.flows.find(flow => flow.id === flowId);
   }
 
-  error(message: string, trace?: string, context?: string) {
-    this.printMessage(message, 'error', context);
-    // this.emitLogEvent('error', message);
-    if (trace) {
-      this.printMessage(trace, 'error', context);
-    }
-  }
+  async executeFlow(flow: Flow) {
+    this.logger.log(`Executing flow: ${flow.id}`);
 
-  debug(message: string, context?: string) {
-    this.printMessage(message, 'debug', context);
-  }
-
-  verbose(message: string, context?: string) {
-    this.printMessage(message, 'verbose', context);
-  }
-
-  private printMessage(message: string, logLevel: string, context?: string) {
-    const output = context ? `[${context}] ${message}` : message;
-    console.log(`[${this.getNow()}] [${logLevel.toUpperCase()}] [${this.logId}] ${output}`);
-  }
-
-  private getNow(): string {
-    return new Date().toISOString();
-  }
-
-  static write_to_file(message: string) {
-    const logFile = path.join(process.cwd(), 'start:dev.stdout.txt');
-    fs.appendFile(logFile, message, (err) => {
-      if (err) {
-        console.error('Failed to write to log file:', err);
-      }
+    // Remove old flow and add new flow
+    var filteredFlows = this.flows.filter(function(f: Flow) { 
+      return f.id != flow.id; 
     });
-  }
+    this.flows = filteredFlows;
+    this.flows.push(flow);
 
-  static clearSTDOUT() {
-    const logFile = path.join(process.cwd(), 'start:dev.stdout.txt');
-    try {
-      fs.writeFileSync(logFile, '');
-      console.log(`Log file cleared at ${logFile}`);
-    } catch (error) {
-      console.error('Failed to clear log file:', error);
+    // Create connections
+    for (const connection of flow.connections) {
+      this.logger.log(`Creating connection: ${connection.fromComponent}.${connection.fromEvent} -> ${connection.toComponent}.${connection.toEvent}`);
+      await this.amqpConnection.publish('flow_exchange', 'createConnection', { ...connection, flowId: flow.id });
+    }
+
+    // Construct components
+    let instances = [];
+    for (const component of flow.components) {
+      this.logger.log(`Constructing component: ${component.componentId} (${component.componentRef}) for flow: ${flow.id}`);
+      
+      // initialize a new component instance
+      let componentInstance: Component = initializeComponent(flow, component, this.amqpConnection, this.server, this.templateCacheService);
+
+      // register new instance with component registery
+      this.componentRegistry.registerComponent(componentInstance);
+      instances.push(componentInstance);
+    }
+
+    // Sync connections for component
+    for (const instance of instances) {
+      this.logger.log(`Sync connections for component: ${instance.componentId} (${instance.componentRef}) for flow: ${instance.flowId}`);
+      instance.syncConnections(flow.connections, this.componentRegistry);
+    }
+    
+    // Init component
+    for (const component of flow.components) {
+      this.logger.log(`Initializing component: ${component.componentId} (${component.componentRef}) for flow: ${flow.id}`);
+
+      try {
+        await this.amqpConnection.publish('flow_exchange', 'componentEvent', {
+          flowId: flow.id,
+          componentId: component.componentId, // dynamically defined
+          componentRef: component.componentRef, // hard code defined
+          eventId: 'init', // flow executor defined
+          data: component.init, // dynamically defined
+        });
+      } catch (error) {
+        this.logger.error(`Error initializing component ${component.componentId} for flow ${flow.id}:`, error);
+      }
     }
   }
 }
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/initializers/app.initialize.ts">
-import { Module, OnModuleInit } from '@nestjs/common';
-import { ComponentRegistry } from '../services/component-registry.service';
+<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/connection.interface.ts">
+import { Component } from "./component.interface";
 
-import { NumberGeneratorComponent } from '../components/number-generator/number-generator.handler';
-import { NumberMultiplierComponent } from '../components/number-multiplier/number-multiplier.handler';
-import { EventTriggerComponent } from '../components/event-trigger/event-trigger.handler';
-import { StateMachineComponent } from '../components/state-machine/state-machine.handler';
-import { JobStateMachineComponent } from '../components/job-state-machine/job-state-machine.handler';
-import { ButtonTriggerComponent } from 'src/components/button-trigger/button-trigger.handler';
-
-export function initializeAppModule(metadata): any {
-  @Module(metadata)
-  class AppModule implements OnModuleInit {
-    constructor(
-      private componentRegistry: ComponentRegistry,
-      private eventTriggerComponent: EventTriggerComponent,
-      private numberGeneratorComponent: NumberGeneratorComponent,
-      private numberMultiplierComponent: NumberMultiplierComponent,
-      private stateMachineComponent: StateMachineComponent,
-      private jobStateMachineComponent: JobStateMachineComponent,
-      private buttonTriggerComponent: ButtonTriggerComponent,
-    ) {}
-
-    onModuleInit() {
-      // Register components
-      this.componentRegistry.registerComponent(this.eventTriggerComponent);
-      this.componentRegistry.registerComponent(this.numberGeneratorComponent);
-      this.componentRegistry.registerComponent(this.numberMultiplierComponent);
-      this.componentRegistry.registerComponent(this.stateMachineComponent);
-      this.componentRegistry.registerComponent(this.jobStateMachineComponent);
-      this.componentRegistry.registerComponent(this.buttonTriggerComponent);
-    }
-  }
-
-  return AppModule;
+export interface Connection {
+  toFlow: string;
+  toComponent: string;
+  toEvent: string;
+  connectedTo: Component | undefined;
+  fromFlow: string;
+  fromComponent: string;
+  fromEvent: string;
+  connectedFrom: Component | undefined;
+  next: Component | undefined;
 }
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/component.interface.ts">
+import { Connection } from "./connection.interface";
+import { Port } from "./port.interface";
 
-export const components = [
-  EventTriggerComponent,
-  NumberGeneratorComponent,
-  NumberMultiplierComponent,
-  StateMachineComponent,
-  JobStateMachineComponent,
-  ButtonTriggerComponent,
-]
+export interface Component {
+  ports: { inputs: string[]; outputs: string[]; };
+  componentRef: string;
+  slug: string;
+  description?: string;
+  flowId: string;
+  componentId: string;
+  handleEvent: (eventId: string, data: any) => Promise<void>;
+  publish: (flowId: string, componentId: string, eventId: string, data: any) => Promise<void>;
+  getPorts: () => Promise<{ inputs: Port[], outputs: Port[] }>;
+  findPort: (portId: string) => Promise<Port>;
+  findConnections: (port: Port) => Promise<Connection[]>
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/flow.interface.ts">
+import { Connection } from "./connection.interface";
+
+export interface Flow {
+  id: string;
+  components: {
+    componentId: string;
+    componentRef: string;
+    init: any | undefined;
+  }[];
+  connections: Connection[];
+}
 </FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/controllers/app.controller.ts">
 import { Logger, Controller, Get, Post, Render, Body, Param, Res, Req } from '@nestjs/common';
@@ -595,336 +841,228 @@ export class AppController {
   }
 }
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/processors/event.processor.ts">
-import { Injectable, Logger } from '@nestjs/common';
-import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
-import { ComponentRegistry } from '../services/component-registry.service';
+<FILE path="/home/travis/Projects/flow-based-programming/src/views/flow/index.ejs">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%- message %></title>
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/json-enc.js"></script>
+  <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
+  <%- include('../document/style') %>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <%- include('component-selector', { flowId: flowId, components: components }) %>
+    </div>
+    <div class="main-content">
+      <div style="padding: 1em 3em;">
+        <h1>Select a Component</h1>
+        <div id="component-details">
+          <p>Select a component to view its details.</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
-@Injectable()
-export class EventProcessor {
-  private readonly logger = new Logger(EventProcessor.name);
-  private connections: Map<string, { toFlow: string; toComponent: string; toEvent: string }> = new Map();
+  <script>
+    const socket = io();
 
-  constructor(private componentRegistry: ComponentRegistry) {}
-
-  @RabbitSubscribe({
-    exchange: 'flow_exchange',
-    routingKey: 'componentEvent',
-    queue: 'component_event_queue',
-  })
-  async handleComponentEvent(msg: {flowId: string, componentId: string, eventId: string, data: any}): Promise<void> {
-    const { flowId, componentId, eventId, data: eventData } = msg;
-    this.logger.log(`[handleComponentEvent] [${flowId}.${componentId}.${eventId}] data: ${JSON.stringify(eventData)}`);
-    
-    const component = this.componentRegistry.getComponent(flowId, componentId);
-    if (component) {
-      this.logger.log(`Passing event to component: ${componentId}`);
-      await component.handleEvent(eventId, eventData);
-
-      // Check if there's a connection for this event
-      const connectionKey = `${flowId}.${componentId}.${eventId}`;
-      const connection = this.connections.get(connectionKey);
-      if (connection) {
-        const { toFlow, toComponent, toEvent } = connection;
-        this.logger.log(`[forwardingComponentEvent] [${toFlow}.${toComponent}.${toEvent}]`);
-        
-        const targetComponent = this.componentRegistry.getComponent(toFlow, toComponent);
-        if (targetComponent) {
-          this.logger.log(`Forwarding event to component: ${targetComponent.componentId}`);
-          await targetComponent.handleEvent(toEvent, eventData);
-        } else {
-          this.logger.warn(`Target component not found: ${toComponent} in flow: ${toFlow}`);
-        }
+    socket.on('display-flow-component-template-content', function(event) {
+      const targetId = `${event.flowId}.${event.componentId}.${event.templateId}`;
+      const targetElement = document.getElementById(targetId);
+      console.log(targetId, event.content);
+      if (targetElement) {
+        targetElement.outerHTML = event.content;
+        // Reinitialize HTMX on the new content
+        htmx.process(document.getElementById(targetId));
       }
-    } else {
-      this.logger.warn(`Component not found: ${flowId}.${componentId}`);
-    }
-  }
-
-  @RabbitSubscribe({
-    exchange: 'flow_exchange',
-    routingKey: 'createConnection',
-    queue: 'create_connection_queue',
-  })
-  async createConnection(msg: {flowId: string, fromComponent: string, fromEvent: string, toComponent: string, toEvent: string}): Promise<void>  {
-    const { flowId, fromComponent, fromEvent, toComponent, toEvent } = msg;
-    this.logger.log(`Received createConnection: ${flowId}.${fromComponent}.${fromEvent} -> ${toComponent}.${toEvent}`);
-    
-    const connectionKey = `${flowId}.${fromComponent}.${fromEvent}`;
-    this.connections.set(connectionKey, { toFlow: flowId, toComponent, toEvent });
-    this.logger.log(`Connection created: ${connectionKey} -> ${toComponent}.${toEvent}`);
-  }
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/services/component-registry.service.ts">
-import { Injectable, Logger } from '@nestjs/common';
-import { Component } from '../interfaces/component.interface';
-
-@Injectable()
-export class ComponentRegistry {
-  private components: Map<string, Component> = new Map();
-  private readonly logger = new Logger(ComponentRegistry.name);
-
-  registerComponent(component: Component) {
-    const key = `${component.flowId}.${component.componentId}`;
-    this.logger.log(`Registering component: ${key}`);
-    this.components.set(key, component);
-  }
-
-  getComponent(flowId: string, componentId: string): Component | undefined {
-    const key = `${flowId}.${componentId}`;
-    const component = this.components.get(key);
-    if (!component) {
-      this.logger.warn(`Component not found: ${key}`);
-    }
-    return component;
-  }
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/services/flow-executor.service.ts">
-import { Injectable, Logger } from '@nestjs/common';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import { ComponentRegistry } from './component-registry.service';
-import { Flow } from '../interfaces/flow.interface';
-import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { Server } from 'socket.io';
-import { initializeComponent } from '../initializers/component.initialize';
-import { Component } from 'src/interfaces/component.interface';
-import { TemplateCacheService } from './template-cache.service';
-
-@WebSocketGateway()
-@Injectable()
-export class FlowExecutorService {
-  @WebSocketServer() server: Server;
-  private readonly logger = new Logger(FlowExecutorService.name);
-  private flows: Flow[] = [];
-  
-  constructor(
-    private amqpConnection: AmqpConnection,
-    private componentRegistry: ComponentRegistry,
-    private templateCacheService: TemplateCacheService
-  ) {
-  }
-
-  async getFlows(): Promise<Flow[]> {
-    return this.flows;
-  }
-
-  async getFlow(flowId: string): Promise<Flow | undefined> {
-    return this.flows.find(flow => flow.id === flowId);
-  }
-
-  async executeFlow(flow: Flow) {
-    this.logger.log(`Executing flow: ${flow.id}`);
-
-    // Remove old flow and add new flow
-    var filteredFlows = this.flows.filter(function(f: Flow) { 
-      return f.id != flow.id; 
     });
-    this.flows = filteredFlows;
-    this.flows.push(flow);
 
-    // Create connections
-    for (const connection of flow.connections) {
-      this.logger.log(`Creating connection: ${connection.fromComponent}.${connection.fromEvent} -> ${connection.toComponent}.${connection.toEvent}`);
-      await this.amqpConnection.publish('flow_exchange', 'createConnection', { ...connection, flowId: flow.id });
-    }
+    htmx.on("htmx:configRequest", (event) => {
+      event.detail.headers['Content-Type'] = 'application/json';
+    });
+  </script>
+  <%- include('../document/methods') %> 
+</body>
+</html>
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/views/document/view.ejs">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%- message %></title>
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/json-enc.js"></script>
+  <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
+  <%- include('style') %>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <%- include('component-selector', { flowId: selected.flowId, componentId: selected.componentId, components: components }) %>
+    </div>
+    <div class="main-content">
+      <div id="swimlane-container" class="swimlane-container">
+        <div id="main-swimlane" class="swimlane" data-index="0"
+             hx-get="/documentComponent/<%= selected.flowId %>/<%= selected.componentId %>/main-swimlane"
+             hx-trigger="load"
+             hx-target="#main-swimlane">
+          <!-- Main component will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </div>
 
-    // Construct components
-    let instances = [];
-    for (const component of flow.components) {
-      this.logger.log(`Constructing component: ${component.componentId} (${component.componentRef}) for flow: ${flow.id}`);
-      
-      // initialize a new component instance
-      let componentInstance: Component = initializeComponent(flow, component, this.amqpConnection, this.server, this.templateCacheService);
+  <script>
+    const socket = io();
 
-      // register new instance with component registery
-      this.componentRegistry.registerComponent(componentInstance);
-      instances.push(componentInstance);
-    }
+    socket.on('display-flow-component-template-content', function(event) {
+      const targetId = `${event.flowId}.${event.componentId}.${event.templateId}`;
+      const targetElement = document.getElementById(targetId);
+      console.log('display-flow-component-template-content', targetId);
+      if (targetElement) {
+        targetElement.outerHTML = event.content;
+        // Reinitialize HTMX on the new content
+        htmx.process(document.getElementById(targetId));
+      }
+    });
 
-    // Sync connections for component
-    for (const instance of instances) {
-      this.logger.log(`Sync connections for component: ${instance.componentId} (${instance.componentRef}) for flow: ${instance.flowId}`);
-      instance.syncConnections(flow.connections, this.componentRegistry);
-    }
+    htmx.on("htmx:configRequest", (event) => {
+      event.detail.headers['Content-Type'] = 'application/json';
+    });
+  </script>
+  <%- include('methods') %> 
+</body>
+</html>
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/views/document/methods.ejs">
+<script>
+  function getNextSwimlane(direction, mainSwimlane) {
+    const mainIndex = parseInt(mainSwimlane.getAttribute('data-index'));
     
-    // Init component
-    for (const component of flow.components) {
-      this.logger.log(`Initializing component: ${component.componentId} (${component.componentRef}) for flow: ${flow.id}`);
-
-      try {
-        await this.amqpConnection.publish('flow_exchange', 'componentEvent', {
-          flowId: flow.id,
-          componentId: component.componentId, // dynamically defined
-          componentRef: component.componentRef, // hard code defined
-          eventId: 'init', // flow executor defined
-          data: component.init, // dynamically defined
-        });
-      } catch (error) {
-        this.logger.error(`Error initializing component ${component.componentId} for flow ${flow.id}:`, error);
-      }
-    }
-  }
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/services/template-cache.service.ts">
-import { Injectable } from '@nestjs/common';
-
-@Injectable()
-export class TemplateCacheService {
-  private cache: Map<string, string> = new Map();
-
-  setTemplate(key: string, content: string): void {
-    this.cache.set(key, content);
-  }
-
-  getTemplate(key: string): string | undefined {
-    return this.cache.get(key);
-  }
-
-  hasTemplate(key: string): boolean {
-    return this.cache.has(key);
-  }
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/component.interface.ts">
-import { Connection } from "./connection.interface";
-import { Port } from "./port.interface";
-
-export interface Component {
-  ports: { inputs: string[]; outputs: string[]; };
-  componentRef: string;
-  slug: string;
-  description?: string;
-  flowId: string;
-  componentId: string;
-  handleEvent: (eventId: string, data: any) => Promise<void>;
-  publish: (flowId: string, componentId: string, eventId: string, data: any) => Promise<void>;
-  getPorts: () => Promise<{ inputs: Port[], outputs: Port[] }>;
-  findPort: (portId: string) => Promise<Port>;
-  findConnections: (port: Port) => Promise<Connection[]>
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/flow.interface.ts">
-import { Connection } from "./connection.interface";
-
-export interface Flow {
-  id: string;
-  components: {
-    componentId: string;
-    componentRef: string;
-    init: any | undefined;
-  }[];
-  connections: Connection[];
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/schema/flow.schema.ts">
-import { Flow } from "../interfaces/flow.interface";
-
-export function schema(flow: any): Flow {
-  const components = Object.entries(flow.components).map(([componentId, component]) => {
-    const [componentRef] = Object.keys(component);
-    let init;
-    let ports = { inputs: [], outputs: [] };
-
-    if (component[componentRef].init) {
-      init = component[componentRef].init;
+    let targetIndex, targetSwimlane;
+    if (direction === 'input') {
+      targetIndex = mainIndex - 1;
+      targetSwimlane = getOrCreateSwimlane(targetIndex);
+    } else {
+      targetIndex = mainIndex + 1;
+      targetSwimlane = getOrCreateSwimlane(targetIndex);
     }
 
-    if (component[componentRef].ports) {
-      if (component[componentRef].ports.inputs) {
-        ports.inputs = Object.keys(component[componentRef].ports.inputs);
-      }
-      if (component[componentRef].ports.outputs) {
-        ports.outputs = Object.keys(component[componentRef].ports.outputs);
-      }
-    }
-
-    return { componentId, componentRef, init, ports };
-  });
-
-  const connections = flow.connections.map((connection) => {
-    const fromParts = connection.from.split('.');
-    const toParts = connection.to.split('.');
-
-    // parts format: components.<componentId>.<componentRef>.ports.inputs.<eventId>
-    
     return {
-      fromFlow: flow.id,
-      fromComponent: fromParts[1],
-      fromEvent: fromParts[5],
-      toFlow: flow.id,
-      toComponent: toParts[1],
-      toEvent: toParts[5],
-    };
-  });
+      mainIndex,
+      targetIndex,
+      targetSwimlane
+    }
+  }
 
-  let code = {
-    id: flow.id,
-    components,
-    connections,
-  };
+  function loadConnectedComponents(direction, flowId, componentId, port, swimlaneId) {
+    console.log('swimload load connected', swimlaneId, direction);
+    const mainSwimlane = document.getElementById(swimlaneId);
+    let next = getNextSwimlane(direction, mainSwimlane);
 
-  // console.log('code', code);
+    const key = `${flowId}.${componentId}.${port}`;
+    const eventElement = document.createElement('div');
+    eventElement.setAttribute("id", key);
+    next.targetSwimlane.innerHTML = '';
+    next.targetSwimlane.appendChild(eventElement);
+    
+    htmx.ajax('GET', `/documentConnections/${flowId}/${componentId}/${port}/${next.targetSwimlane.id}`, {
+      swap: 'none',
+      handler: (dom, event) => {
+        document.getElementById(key).outerHTML = event.xhr.response;
+        htmx.process(document.getElementById(key));
+      }
+    });
+  }
 
-  return code;
-}
+  function loadMainComponent(direction, flowId, componentId, swimlaneId) {
+    console.log('swimload load main', swimlaneId, direction);
+    // Update the main swimlane
+    const mainSwimlane = document.getElementById(swimlaneId);
+    let next = getNextSwimlane(direction, mainSwimlane);
+    next.targetSwimlane.innerHTML = '';
+    
+    htmx.ajax('GET', `/documentComponent/${flowId}/${componentId}/${next.targetSwimlane.id}`, {
+      swap: 'none',
+      handler: (dom, event) => {
+        next.targetSwimlane.innerHTML = event.xhr.response;
+      }
+    });
+  }
+
+  function getOrCreateSwimlane(index) {
+    let swimlane = document.querySelector(`.swimlane[data-index="${index}"]`);
+    if (swimlane) {
+      console.log('swimlane found', index, swimlane)
+    } else {
+      console.log('swimlane not found', index)
+    }
+    if (!swimlane) {
+      swimlane = document.createElement('div');
+      swimlane.className = 'swimlane';
+      swimlane.setAttribute('data-index', index);
+      swimlane.id = `swimlane-${index}`;
+      
+      const container = document.getElementById('swimlane-container');
+      if (index < 0) {
+        container.insertBefore(swimlane, container.firstChild);
+      } else {
+        container.appendChild(swimlane);
+      }
+    }
+    return swimlane;
+  }
+</script>
 </FILE>
-<FILE path="src/modules/app.module.ts" TARGET>
-import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
-import { ComponentRegistry } from '../services/component-registry.service';
-import { FlowExecutorService } from '../services/flow-executor.service';
-import { EventProcessor } from '../processors/event.processor';
-import { CustomLogger } from '../logger/custom-logger';
-import { AppController } from '../controllers/app.controller';
-import { TemplateCacheService } from 'src/services/template-cache.service';
-
-import { initializeAppModule, components } from '../initializers/app.initialize';
-
-const metadata = {
-  imports: [
-    RabbitMQModule.forRoot(RabbitMQModule, {
-      exchanges: [
-        {
-          name: 'flow_exchange',
-          type: 'topic',
-        },
-      ],
-      uri: process.env.RABBITMQ || 'amqp://localhost:5672',
-      connectionInitOptions: { wait: false },
-    }),
-  ],
-  controllers: [AppController],
-  providers: [
-    EventProcessor,
-    ComponentRegistry,
-    FlowExecutorService,
-    TemplateCacheService,
-    {
-      provide: 'FLOW_ID',
-      useValue: 'example-flow', // Use a default flow ID
-    },
-    {
-      provide: 'COMPONENT_ID',
-      useFactory: () => `component-${Date.now()}`, // Generate a unique component ID
-    },
-    {
-      provide: 'WEB_SOCKET_SERVER',
-      useValue: null, // This will be set later in the FlowExecutorService
-    },
-    {
-      provide: 'TEMPLATES',
-      useValue: null, // 
-    },
-    ...components,
-    CustomLogger
-  ],
-  exports: [EventProcessor],
-}
-
-export const AppModule = initializeAppModule(metadata)
+<FILE path="src/views/document/component.ejs" TARGET>
+<% if (component) { %>
+  <div id="<%- component.flowId %>.<%- component.componentId %>">
+    <div class="event-anchor input-anchors">
+      <% component.ports.inputs.forEach((input, index) => { %>
+        <% if (index !== 0) { %>
+         <hr>
+        <% } %>
+        <button onclick="loadConnectedComponents('input', '<%- component.flowId %>', '<%- component.componentId %>', '<%- input %>', '<%- swimlaneId %>')">input</button>
+        <div style="float: right;">
+          <%- input %>
+        </div>
+        <br />
+      <% }) %>
+    </div>
+    <div class="component">
+      <h2 style="margin: 0;"><%- component.componentId %> (<%- component.slug %>)</h2>
+      <p style="margin: 0 0 0.5em;"><%- component.description %> </p>
+      <div style="border: 1px solid #111;">
+        <div id="init.<%- component.flowId %>.<%- component.componentId %>.<%- component.slug %>"
+              hx-get="/template/<%- component.flowId %>/<%- component.componentId %>/<%- component.slug %>"
+              hx-trigger="load"
+              hx-target="this"
+              hx-swap="outerHTML">
+          <br /><!-- loading -->
+        </div>
+      </div>
+    </div>
+    <div class="event-anchor output-anchors">
+      <% component.ports.outputs.forEach((output, index) => { %>
+        <% if (index !== 0) { %>
+         <hr>
+        <% } %>
+        <button onclick="loadConnectedComponents('output', '<%- component.flowId %>', '<%- component.componentId %>', '<%- output %>', '<%- swimlaneId %>')" style="float: right;">output</button>
+        <%- output %> <br />
+      <% }) %>
+    </div>
+  </div>
+<% } else { %>
+  <p>no component found</p>  
+<% } %>
 </FILE>
 <REQUEST>
-log rabbitmq uri for debugging
+i want to draw lines between the input and output of 2 connected components
 </REQUEST>

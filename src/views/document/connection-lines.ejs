@@ -1,0 +1,50 @@
+<script>
+  function drawConnectionLines() {
+    const svg = document.getElementById('connection-lines');
+    if (!svg) {
+      const newSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      newSvg.id = 'connection-lines';
+      document.body.appendChild(newSvg);
+    }
+    
+    const components = document.querySelectorAll('.component-wrapper');
+    components.forEach(component => {
+      const outputPorts = component.querySelectorAll('.output-port');
+      outputPorts.forEach(outputPort => {
+        const outputPortName = outputPort.dataset.port;
+        const connectedInputs = document.querySelectorAll(`.input-port[data-port="${outputPortName}"]`);
+        console.log('drawConnectionLines', outputPortName, connectedInputs)
+        
+        connectedInputs.forEach(inputPort => {
+          if (inputPort.closest('.component-wrapper') !== component) {
+            drawLine(outputPort, inputPort);
+          }
+        });
+      });
+    });
+  }
+
+  function drawLine(start, end) {
+    const svg = document.getElementById('connection-lines');
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    
+    const startRect = start.getBoundingClientRect();
+    const endRect = end.getBoundingClientRect();
+    
+    const startX = startRect.right;
+    const startY = startRect.top + startRect.height / 2;
+    const endX = endRect.left;
+    const endY = endRect.top + endRect.height / 2;
+    
+    line.setAttribute('x1', startX);
+    line.setAttribute('y1', startY);
+    line.setAttribute('x2', endX);
+    line.setAttribute('y2', endY);
+    line.setAttribute('stroke', 'black');
+    line.setAttribute('stroke-width', '1');
+    
+    svg.appendChild(line);
+  }
+
+  window.addEventListener('resize', drawConnectionLines);
+</script>

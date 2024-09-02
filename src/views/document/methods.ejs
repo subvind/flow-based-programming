@@ -34,6 +34,8 @@
       handler: (dom, event) => {
         document.getElementById(key).outerHTML = event.xhr.response;
         htmx.process(document.getElementById(key));
+
+        drawConnectionLines();
       }
     });
   }

@@ -12,13 +12,15 @@
     <% } %>
   
     <% if (port.dataMethod === 'display') { %>
-      <div id="<%- flowId %>.<%- componentId %>">
+      <div id="<%- flowId %>.<%- componentId %>" class="component-wrapper">
         <div class="event-anchor input-anchors">
-          <button onclick="loadMainComponent('input', '<%- flowId %>', '<%- componentId %>', '<%- swimlaneId %>')">input</button>
-          <div style="float: right;">
-            <%- portId %> 
+          <div class="input-port" data-port="<%- portId %>">
+            <button onclick="loadMainComponent('input', '<%- flowId %>', '<%- componentId %>', '<%- swimlaneId %>')">input</button>
+            <div class="port-name">
+              <%- portId %> 
+            </div>
+            <br>
           </div>
-          <br>
         </div>
         <div class="template">
           <%- templateContent %>
