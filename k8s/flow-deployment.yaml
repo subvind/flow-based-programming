@@ -16,9 +16,9 @@ spec:
       containers:
         - name: flow
           image: travy504/flow-based-programming:latest
+          env:
+          - name: RABBITMQ
+            value: amqp://travis:burandt@192.168.1.90:4103
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
-          env:
-          - name: RABBITMQ
-            value: "amqp://136.62.252.13:41003"
