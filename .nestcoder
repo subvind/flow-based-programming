@@ -272,236 +272,83 @@ export function dot(a: V3, b: V3): number {
 
 You will now be given the actual INPUT you must work with.
 
-<FILE path="/home/travis/Projects/flow-based-programming/src/views/document/connections.ejs">
-<div id="<%- flowId %>.<%- componentId %>.<%- portId %>" class="swimlane-content" data-swimlane-id="<%- swimlaneId %>">
-  <% if (port && port.dataMethod) { %>
-    <% if (port.dataMethod === 'publish') { %>
-      <% if (connections.length) { %>
-        <% connections.forEach(connection => { %>
-          <%- include('component', { component: connection.next, swimlaneId }); %> 
-        <% }) %>
-      <% } else { %>
-        <br />
-        <div class="component">no connections found</div>  
-      <% } %>
-    <% } %>
-  
-    <% if (port.dataMethod === 'display') { %>
-      <div id="<%- flowId %>.<%- componentId %>">
-        <div class="event-anchor input-anchors">
-          <button onclick="loadMainComponent('input', '<%- flowId %>', '<%- componentId %>', '<%- swimlaneId %>')">input</button>
-          <div style="float: right;">
-            <%- portId %> 
-          </div>
-          <br>
-        </div>
-        <div class="template">
-          <%- templateContent %>
-        </div>
-      </div>
-    <% } %>
-  <% } else { %>
-    <div>component not found</div>  
-  <% } %>
-</div>
+<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/connection.interface.ts">
+import { Component } from "./component.interface";
 
+export interface Connection {
+  toFlow: string;
+  toComponent: string;
+  toEvent: string;
+  connectedTo: Component | undefined;
+  fromFlow: string;
+  fromComponent: string;
+  fromEvent: string;
+  connectedFrom: Component | undefined;
+  next: Component | undefined;
+}
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/views/document/style.ejs">
-<style>
-  h2 { margin-top: 0; }
-  
-  body {
-    font-family: Arial, sans-serif; 
-    margin: 0; 
-    padding: 0;
-    background: #eee; 
-  }
-  .swimlane-container {
-    display: flex;
-    overflow-x: auto;
-    width: 100%;
-    height: 100vh;
-  }
-  .swimlane {
-    flex: 0 0 33.33%;
-    min-width: 300px;
-    padding: 0 2em;
-    border-right: 4px dashed #ccc;
-    overflow-y: auto;
-  }
-  .input-swimlane, .output-swimlane {
-    width: 33.33%; 
-    width: calc(100%/3);
-    height: 100%;
-    padding: 0 1em;
+<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/component.interface.ts">
+import { Connection } from "./connection.interface";
+import { Port } from "./port.interface";
 
-  }
-  .input-swimlane {
-    border-right: 5px dashed #ccc;
-  }
-  .output-swimlane {
-    border-left: 5px dashed #ccc;
-  }
-  .main-swimlane {
-    width: 33.33%; 
-    width: calc(100%/3);
-    padding: 0 1em;
-    height: 100%;
-    overflow-y: auto;
-  }
-  .component {
-    background: #fff; 
-    border: 1px solid #111; 
-    padding: 10px; 
-    margin-bottom: 10px; 
-    position: relative;
-  }
-  .template {
-    background: #fff; 
-    border: 1px solid #111; 
-    margin-bottom: 10px; 
-    position: relative;
-  }
-  .input-anchors { 
-    margin-top: 1em;
-    background: #fff; 
-    border: 1px solid #111;
-    padding: 0.5em; 
-    margin-bottom: 10px; 
-  }
-  .input-anchor-row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 5px;
-  }
-  .input-anchor-row button {
-    flex: 1;
-    margin: 0 2px;
-  }
-  .output-anchors { 
-    margin-bottom: 1em;
-    background: #fff; 
-    border: 1px solid #111; 
-    padding: 0.5em; 
-  }
-  .output-anchor-row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 5px;
-  }
-  .output-anchor-row button {
-    flex: 1;
-    margin: 0 2px;
-  }
-
-  .container {
-    display: flex;
-    height: 100vh;
-  }
-
-  .sidebar {
-    min-width: 300px;
-    background-color: #fff;
-    padding: 0.5em;
-    overflow-y: auto;
-    border-right: 1px solid #111;
-  }
-
-  .main-content {
-    flex-grow: 1;
-    overflow-y: auto;
-  }
-
-  .sidebar-selector h3 {
-    margin-top: 0;
-    margin: 0 0 0.4em;
-  }
-
-  .sidebar-selector ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .sidebar-selector li {
-    border-top: 1px solid #eee;
-    padding: 0.3em 0;
-  }
-
-  .sidebar-selector a {
-    text-decoration: none;
-    color: #333;
-  }
-
-  .sidebar-selector a:hover {
-    text-decoration: underline;
-  }
-</style>
+export interface Component {
+  ports: { inputs: string[]; outputs: string[]; };
+  componentRef: string;
+  slug: string;
+  description?: string;
+  flowId: string;
+  componentId: string;
+  handleEvent: (eventId: string, data: any) => Promise<void>;
+  publish: (flowId: string, componentId: string, eventId: string, data: any) => Promise<void>;
+  getPorts: () => Promise<{ inputs: Port[], outputs: Port[] }>;
+  findPort: (portId: string) => Promise<Port>;
+  findConnections: (port: Port) => Promise<Connection[]>
+}
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/views/style.ejs">
+<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/flow.interface.ts">
+import { Connection } from "./connection.interface";
 
-<style>
-  body { 
-    font-family: Arial, sans-serif; 
-    margin: 0; 
-    padding: 20px;
-    background: #eee; 
-  }
-  main {
-    border: 1px solid #111;
-    margin: 0 auto;
-    max-width: 600px;
-    padding: 1em;
-    background: #fff;
-  }
-  h1 {
-    margin: 0;
-  }
-  .navigation {
-    margin: 0;
-    padding: 0;
-    list-style: none outside none;
-    position: relative;
-  }
-  .navigation li {
-    margin: 0 0.5em 0.5em 0;
-    list-style-type: none;
-    float: left;
-  }
-  .navigation li button {
-    font-size: 1.2em;
-  }
-</style>
+export interface Flow {
+  id: string;
+  components: {
+    componentId: string;
+    componentRef: string;
+    init: any | undefined;
+  }[];
+  connections: Connection[];
+}
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/views/main.ejs">
-<main>
-  <h1>FBP Steam Engine</h1>
-  <p>The complete Flow-based Programming solution:</p>
-  <div style="overflow: hidden;">
-    <ul class="navigation">
-      <li><a href="/flows"><button>flows</button></a></li>
-      <li><a href="/components"><button>components</button></a></li>
-      <li><a href="/events"><button>events</button></a></li>
-      <li><a href="/stateMachines"><button>state machines</button></a></li>
-      <li><a href="/templates"><button>templates</button></a></li>
-      <li><a href="/logs"><button>logs</button></a></li>
-    </ul>
-  </div>
-  <p>
-    > Works best with multiple screens! (chart, document, logger)<br />
-    > *ideal for domain specific languages*
-  </p>
-  <hr>
-  <p>
-    What is FBP? Is it time for a new Steam Engine?<br />
-    <a href="https://www.youtube.com/watch?v=up2yhNTsaDs" target="_blank">https://www.youtube.com/watch?v=up2yhNTsaDs</a>
-  </p>  
-  <p>
-    Fork this FBP Steam Engine repository for each application.<br />
-    <a href="https://github.com/subvind/flow-based-programming" target="_blank">https://github.com/subvind/flow-based-programming</a>
-  </p>
-  <span>~made with &hearts; by <a href="https://istrav.com">isTrav</a> & <a href="https://subvind.com">subVind</a> + ai :)</span>
-</main>
+<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/port.interface.ts">
+import { Connection } from "./connection.interface";
+
+// portId format: <dataType>.<dataMethod>.<eventId>
+export interface Port {
+  direction: 'input' | 'output'
+  dataType: string;
+  dataMethod: 'display' | 'publish';
+  eventId: string;
+  connections: Connection[];
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/services/template-cache.service.ts">
+import { Injectable } from '@nestjs/common';
+
+@Injectable()
+export class TemplateCacheService {
+  private cache: Map<string, string> = new Map();
+
+  setTemplate(key: string, content: string): void {
+    this.cache.set(key, content);
+  }
+
+  getTemplate(key: string): string | undefined {
+    return this.cache.get(key);
+  }
+
+  hasTemplate(key: string): boolean {
+    return this.cache.has(key);
+  }
+}
 </FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/services/flow-executor.service.ts">
 import { Injectable, Logger } from '@nestjs/common';
@@ -590,305 +437,213 @@ export class FlowExecutorService {
   }
 }
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/connection.interface.ts">
-import { Component } from "./component.interface";
-
-export interface Connection {
-  toFlow: string;
-  toComponent: string;
-  toEvent: string;
-  connectedTo: Component | undefined;
-  fromFlow: string;
-  fromComponent: string;
-  fromEvent: string;
-  connectedFrom: Component | undefined;
-  next: Component | undefined;
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/component.interface.ts">
-import { Connection } from "./connection.interface";
-import { Port } from "./port.interface";
-
-export interface Component {
-  ports: { inputs: string[]; outputs: string[]; };
-  componentRef: string;
-  slug: string;
-  description?: string;
-  flowId: string;
-  componentId: string;
-  handleEvent: (eventId: string, data: any) => Promise<void>;
-  publish: (flowId: string, componentId: string, eventId: string, data: any) => Promise<void>;
-  getPorts: () => Promise<{ inputs: Port[], outputs: Port[] }>;
-  findPort: (portId: string) => Promise<Port>;
-  findConnections: (port: Port) => Promise<Connection[]>
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/flow.interface.ts">
-import { Connection } from "./connection.interface";
-
-export interface Flow {
-  id: string;
-  components: {
-    componentId: string;
-    componentRef: string;
-    init: any | undefined;
-  }[];
-  connections: Connection[];
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/controllers/app.controller.ts">
-import { Logger, Controller, Get, Post, Render, Body, Param, Res, Req } from '@nestjs/common';
-import { Response, Request } from 'express';
-import { EventTriggerComponent } from '../components/event-trigger/event-trigger.handler';
-
-import { ComponentRegistry } from 'src/services/component-registry.service';
-import { Connection } from 'src/interfaces/connection.interface';
-import { Port } from 'src/interfaces/port.interface';
-import { FlowExecutorService } from 'src/services/flow-executor.service';
+<FILE path="/home/travis/Projects/flow-based-programming/src/components/number-generator/number-generator.handler.ts">
+import { CustomLogger } from '../../logger/custom-logger';
+import { Injectable, Inject } from '@nestjs/common';
+import { ComponentBase } from '../../bases/component.base';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { Server } from 'socket.io';
 import { TemplateCacheService } from 'src/services/template-cache.service';
 
-@Controller()
-export class AppController {
-  private readonly logger = new Logger('AppController');
-  
+import { startGenerating } from './start-generating.event';
+import { stopGenerating } from './stop-generating.event';
+
+@Injectable()
+export class NumberGeneratorComponent extends ComponentBase {
+  public logger;
+  public interval: NodeJS.Timeout | null = null;
+  public ports = { // io format: <dataType>.<dataMethod>.<eventId>
+    inputs: [
+      'any.publish.start',
+      'any.publish.stop'
+    ],
+    outputs: [
+      'number.publish.numberGenerated',
+      'htmx.display.number-generator'
+    ]
+  }
+
   constructor(
-    private eventTriggerComponent: EventTriggerComponent,
-    private componentRegistry: ComponentRegistry,
-    private flowExecutorService: FlowExecutorService,
-    private templateCacheService: TemplateCacheService
-  ) {}
-
-  @Get()
-  @Render('index')
-  async root(@Req() req: Request) {
-    return { message: 'steam engine = chart + document + logger // FBP' };
+    @Inject('FLOW_ID') flowId: string,
+    @Inject('COMPONENT_ID') componentId: string,
+    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
+    @Inject('WEB_SOCKET_SERVER') protected server: Server,
+    @Inject('TEMPLATES') templates: TemplateCacheService
+  ) {
+    super('numberGenerator', 'number-generator', 'Generates random numbers periodically', flowId, componentId, amqpConnection, server, templates);
+    this.flowId = flowId;
+    this.componentId = componentId;
+    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
   }
 
-  /**
-   * svelte app generated in:
-   * ./src/public/chart/*
-   */
-
-  @Get('flows')
-  @Render('flows/index')
-  async flowsIndex(
-    @Req() req: Request
-  ) {
-    const flows = await this.flowExecutorService.getFlows();
-    return {
-      message: 'flows - steam engine // FBP',
-      flows
-    };
-  }
-
-  @Get('flow/:flowId')
-  @Render('flow/index')
-  async flowComponents(
-    @Param('flowId') flowId: string,
-    @Req() req: Request
-  ) {
-    const flow = await this.flowExecutorService.getFlow(flowId);
-    const components = flow.components.map(c => ({
-      componentId: c.componentId,
-      componentRef: c.componentRef
-    }));
-
-    return {
-      message: 'flow - steam engine // FBP',
-      flowId,
-      components
-    };
-  }
-
-  @Get('document/:flowId/:componentId')
-  @Render('document/view')
-  async documentView(
-    @Param('flowId') flowId: string,
-    @Param('componentId') componentId: string,
-    @Req() req: Request
-  ) {
-    const flow = await this.flowExecutorService.getFlow(flowId);
-    const components = flow.components.map(c => ({
-      componentId: c.componentId,
-      componentRef: c.componentRef
-    }));
-
-    return {
-      selected: {
-        flowId,
-        componentId
-      },
-      components,
-      message: `${flowId}.${componentId} - document - steam engine // FBP`
-    };
-  }
-
-  @Get('documentComponent/:flowId/:componentId/:swimlaneId')
-  @Render('document/component')
-  async documentComponent(
-    @Param('flowId') flowId: string,
-    @Param('componentId') componentId: string,
-    @Param('swimlaneId') swimlaneId: string,
-  ) {
-    const component = this.componentRegistry.getComponent(flowId, componentId);
-  
-    if (component) {
-      return {
-        component,
-        swimlaneId
-      };
-    }
-    return {
-      component: null,
-      swimlaneId
-    };
-  }
-
-  @Get('documentConnections/:flowId/:componentId/:portId/:swimlaneId')
-  @Render('document/connections')
-  async documentConnections( 
-    @Param('flowId') flowId: string, 
-    @Param('componentId') componentId: string,
-    @Param('portId') portId: string,
-    @Param('swimlaneId') swimlaneId: string,
-  ) {
-    const params = { flowId, componentId, portId };
-    const component = this.componentRegistry.getComponent(flowId, componentId);
-    
-    if (component) {
-      let port: Port = await component.findPort(portId);
-
-      let connections: Connection[] = await component.findConnections(port);
-
-      connections.forEach((connection) => {
-        if (port.direction === 'input') {
-          connection.next = connection.connectedFrom;
-        } else {
-          connection.next = connection.connectedTo;
-        }
-      });
-
-      if (port) {
-        if (port.dataMethod === 'publish') {
-          return {
-            ...params,
-            port,
-            connections,
-            swimlaneId
-          };
-        } else if (port.dataMethod === 'display') {
-          let displayHtmxId = `${flowId}.${componentId}.${port.eventId}`;
-          const cacheKey = `${flowId}.${componentId}.${port.eventId}`;
-          const cachedTemplate = this.templateCacheService.getTemplate(cacheKey);
-          
-          return {
-            ...params,
-            port,
-            displayHtmxId,
-            swimlaneId,
-            templateContent: cachedTemplate || 'Template not found'
-          };
-        }
+  async handleEvent(eventId: string, data: any): Promise<void> {
+    this.logger.log(`NumberGenerator (${this.flowId}) handling event: ${eventId}`);
+    switch (eventId) {
+      case "start": {
+        this.logger.log(`NumberGenerator (${this.flowId}) starting number generation`);
+        this.startGenerating(data);
+        break;
+      }
+      case "stop": {
+        this.logger.log(`NumberGenerator (${this.flowId}) stopping number generation`);
+        this.stopGenerating(data);
+        break;
       }
     }
-    return {
-      ...params,
-      port: null,
-      swimlaneId
-    };
   }
 
-  @Get('logger')
-  @Render('logger/index')
-  async loggerIndex(@Req() req: Request) {
-    return { message: 'logger - steam engine // FBP' };
+  private startGenerating(data): void {
+    return startGenerating(this, data);
   }
 
-  @Post('trigger-event/:flowComponentEvent')
-  async triggerEvent(
-    @Param('flowComponentEvent') flowComponentEvent: string,
-    @Body() data: any,
-    @Res() res: Response
-  ) {
-    const fceArray = flowComponentEvent.split('.');
-    const flowId = fceArray[0];
-    const componentId = fceArray[1];
-    const eventId = fceArray[2];
-    
-    this.logger.log(`[trigger-event] [${flowId}] [${componentId}] [${eventId}]`);
-    data._flowId = flowId;
-    data._componentId = componentId;
-    data._eventId = eventId;
-    await this.eventTriggerComponent.handleEvent('triggerEvent', data);
-    res.sendStatus(200);
-  }
-
-  @Get('template/:flowId/:componentId/:templateId')
-  async getTemplate(
-    @Param('flowId') flowId: string,
-    @Param('componentId') componentId: string,
-    @Param('templateId') templateId: string,
-    @Res() res: Response
-  ) {
-    const cacheKey = `${flowId}.${componentId}.${templateId}`;
-    const cachedTemplate = this.templateCacheService.getTemplate(cacheKey);
-
-    if (cachedTemplate) {
-      res.send(cachedTemplate);
-    } else {
-      res.status(404).send('Template not found');
-    }
+  private stopGenerating(data): void {
+    return stopGenerating(this, data);
   }
 }
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/views/flow/index.ejs">
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%- message %></title>
-  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
-  <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/json-enc.js"></script>
-  <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
-  <%- include('../document/style') %>
-</head>
-<body>
-  <div class="container">
-    <div class="sidebar">
-      <%- include('component-selector', { flowId: flowId, components: components }) %>
+<FILE path="/home/travis/Projects/flow-based-programming/src/components/number-multiplier/number-multiplier.handler.ts">
+import { CustomLogger } from '../../logger/custom-logger';
+import { Injectable, Inject } from '@nestjs/common';
+import { ComponentBase } from '../../bases/component.base';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { Server } from 'socket.io';
+import { TemplateCacheService } from 'src/services/template-cache.service';
+
+import { numberReceived } from './number-received.event';
+
+@Injectable()
+export class NumberMultiplierComponent extends ComponentBase {
+  public logger;
+  public ports = { // io format: <dataType>.<dataMethod>.<eventId>
+    inputs: [
+      'number.publish.firstNumberReceived',
+      'number.publish.secondNumberReceived',
+    ],
+    outputs: [
+      'number.publish.numberMultiplied',
+      'htmx.display.number-multiplier',
+    ]
+  }
+
+  public firstNumber: number | null = null;
+  public secondNumber: number | null = null;
+
+  constructor(
+    @Inject('FLOW_ID') flowId: string,
+    @Inject('COMPONENT_ID') componentId: string,
+    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
+    @Inject('WEB_SOCKET_SERVER') protected server: Server,
+    @Inject('TEMPLATES') templates: TemplateCacheService
+  ) {
+    super('numberMultiplier', 'number-multiplier', 'Multiplies two received numbers', flowId, componentId, amqpConnection, server, templates);
+    this.flowId = flowId;
+    this.componentId = componentId;
+    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
+  }
+
+  async handleEvent(eventId: string, data: any): Promise<void> {
+    this.logger.log(`NumberMultiplier handling event: ${eventId} ${JSON.stringify(data, null, 2)}`);
+    switch (eventId) {
+      case 'firstNumberReceived':
+        await this.numberReceived(data, 'first');
+        break;
+      case 'secondNumberReceived':
+        await this.numberReceived(data, 'second');
+        break;
+      default:
+        break;
+    }
+  }
+
+  private numberReceived(data: any, which: 'first' | 'second'): Promise<void> {
+    return numberReceived(this, data, which);
+  }
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/views/document/component.ejs">
+<% if (component) { %>
+  <div id="<%- component.flowId %>.<%- component.componentId %>" class="component-wrapper">
+    <div class="event-anchor input-anchors">
+      <% component.ports.inputs.forEach((input, index) => { %>
+        <% if (index !== 0) { %>
+         <hr>
+        <% } %>
+        <div class="input-port" data-port="<%- input %>">
+          <button onclick="loadConnectedComponents('input', '<%- component.flowId %>', '<%- component.componentId %>', '<%- input %>', '<%- swimlaneId %>')">input</button>
+          <div class="port-name"><%- input %></div>
+        </div>
+      <% }) %>
     </div>
-    <div class="main-content">
-      <div style="padding: 1em 3em;">
-        <h1>Select a Component</h1>
-        <div id="component-details">
-          <p>Select a component to view its details.</p>
+    <div class="component">
+      <h2 style="margin: 0;"><%- component.componentId %> (<%- component.slug %>)</h2>
+      <p style="margin: 0 0 0.5em;"><%- component.description %> </p>
+      <div style="border: 1px solid #111;">
+        <div id="init.<%- component.flowId %>.<%- component.componentId %>.<%- component.slug %>"
+              hx-get="/template/<%- component.flowId %>/<%- component.componentId %>/<%- component.slug %>"
+              hx-trigger="load"
+              hx-target="this"
+              hx-swap="outerHTML">
+          <br /><!-- loading -->
         </div>
       </div>
     </div>
+    <div class="event-anchor output-anchors">
+      <% component.ports.outputs.forEach((output, index) => { %>
+        <% if (index !== 0) { %>
+         <hr>
+        <% } %>
+        <div class="output-port" data-port="<%- output %>">
+          <div class="port-name"><%- output %></div>
+          <button onclick="loadConnectedComponents('output', '<%- component.flowId %>', '<%- component.componentId %>', '<%- output %>', '<%- swimlaneId %>')">output</button>
+        </div>
+      <% }) %>
+    </div>
   </div>
+<% } else { %>
+  <p>no component found</p>  
+<% } %>
 
-  <script>
-    const socket = io();
+<script>
+  document.addEventListener('htmx:afterSettle', function() {
+    drawConnectionLines();
+  });
+</script>
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/views/document/connections.ejs">
+<div id="<%- flowId %>.<%- componentId %>.<%- portId %>" class="swimlane-content" data-swimlane-id="<%- swimlaneId %>">
+  <% if (port && port.dataMethod) { %>
+    <% if (port.dataMethod === 'publish') { %>
+      <% if (connections.length) { %>
+        <% connections.forEach(connection => { %>
+          <%- include('component', { component: connection.next, swimlaneId }); %> 
+        <% }) %>
+      <% } else { %>
+        <br />
+        <div class="component">no connections found</div>  
+      <% } %>
+    <% } %>
+  
+    <% if (port.dataMethod === 'display') { %>
+      <div id="<%- flowId %>.<%- componentId %>" class="component-wrapper">
+        <div class="event-anchor input-anchors">
+          <div class="input-port" data-port="<%- portId %>">
+            <button onclick="loadMainComponent('input', '<%- flowId %>', '<%- componentId %>', '<%- swimlaneId %>')">input</button>
+            <div class="port-name">
+              <%- portId %> 
+            </div>
+            <br>
+          </div>
+        </div>
+        <div class="template">
+          <%- templateContent %>
+        </div>
+      </div>
+    <% } %>
+  <% } else { %>
+    <div>component not found</div>  
+  <% } %>
+</div>
 
-    socket.on('display-flow-component-template-content', function(event) {
-      const targetId = `${event.flowId}.${event.componentId}.${event.templateId}`;
-      const targetElement = document.getElementById(targetId);
-      console.log(targetId, event.content);
-      if (targetElement) {
-        targetElement.outerHTML = event.content;
-        // Reinitialize HTMX on the new content
-        htmx.process(document.getElementById(targetId));
-      }
-    });
-
-    htmx.on("htmx:configRequest", (event) => {
-      event.detail.headers['Content-Type'] = 'application/json';
-    });
-  </script>
-  <%- include('../document/methods') %> 
-</body>
-</html>
 </FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/views/document/view.ejs">
 <!DOCTYPE html>
@@ -937,132 +692,115 @@ export class AppController {
       event.detail.headers['Content-Type'] = 'application/json';
     });
   </script>
-  <%- include('methods') %> 
+  <%- include('methods') %>
+  <%- include('connection-lines') %>
 </body>
 </html>
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/views/document/methods.ejs">
-<script>
-  function getNextSwimlane(direction, mainSwimlane) {
-    const mainIndex = parseInt(mainSwimlane.getAttribute('data-index'));
-    
-    let targetIndex, targetSwimlane;
-    if (direction === 'input') {
-      targetIndex = mainIndex - 1;
-      targetSwimlane = getOrCreateSwimlane(targetIndex);
-    } else {
-      targetIndex = mainIndex + 1;
-      targetSwimlane = getOrCreateSwimlane(targetIndex);
+<FILE path="/home/travis/Projects/flow-based-programming/src/schema/flow.schema.ts">
+import { Flow } from "../interfaces/flow.interface";
+
+export function schema(flow: any): Flow {
+  const components = Object.entries(flow.components).map(([componentId, component]) => {
+    const [componentRef] = Object.keys(component);
+    let init;
+    let ports = { inputs: [], outputs: [] };
+
+    if (component[componentRef].init) {
+      init = component[componentRef].init;
     }
 
+    if (component[componentRef].ports) {
+      if (component[componentRef].ports.inputs) {
+        ports.inputs = Object.keys(component[componentRef].ports.inputs);
+      }
+      if (component[componentRef].ports.outputs) {
+        ports.outputs = Object.keys(component[componentRef].ports.outputs);
+      }
+    }
+
+    return { componentId, componentRef, init, ports };
+  });
+
+  const connections = flow.connections.map((connection) => {
+    const fromParts = connection.from.split('.');
+    const toParts = connection.to.split('.');
+
+    // parts format: components.<componentId>.<componentRef>.ports.inputs.<eventId>
+    
     return {
-      mainIndex,
-      targetIndex,
-      targetSwimlane
+      fromFlow: flow.id,
+      fromComponent: fromParts[1],
+      fromEvent: fromParts[5],
+      toFlow: flow.id,
+      toComponent: toParts[1],
+      toEvent: toParts[5],
+    };
+  });
+
+  let code = {
+    id: flow.id,
+    components,
+    connections,
+  };
+
+  // console.log('code', code);
+
+  return code;
+}
+</FILE>
+<FILE path="src/views/document/connection-lines.ejs" TARGET>
+<script>
+  function drawConnectionLines() {
+    const svg = document.getElementById('connection-lines');
+    if (!svg) {
+      const newSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      newSvg.id = 'connection-lines';
+      document.body.appendChild(newSvg);
     }
-  }
-
-  function loadConnectedComponents(direction, flowId, componentId, port, swimlaneId) {
-    console.log('swimload load connected', swimlaneId, direction);
-    const mainSwimlane = document.getElementById(swimlaneId);
-    let next = getNextSwimlane(direction, mainSwimlane);
-
-    const key = `${flowId}.${componentId}.${port}`;
-    const eventElement = document.createElement('div');
-    eventElement.setAttribute("id", key);
-    next.targetSwimlane.innerHTML = '';
-    next.targetSwimlane.appendChild(eventElement);
     
-    htmx.ajax('GET', `/documentConnections/${flowId}/${componentId}/${port}/${next.targetSwimlane.id}`, {
-      swap: 'none',
-      handler: (dom, event) => {
-        document.getElementById(key).outerHTML = event.xhr.response;
-        htmx.process(document.getElementById(key));
-      }
+    const components = document.querySelectorAll('.component-wrapper');
+    components.forEach(component => {
+      const outputPorts = component.querySelectorAll('.output-port');
+      outputPorts.forEach(outputPort => {
+        const outputPortName = outputPort.dataset.port;
+        const connectedInputs = document.querySelectorAll(`.input-port[data-port="${outputPortName}"]`);
+        console.log('drawConnectionLines', outputPortName, connectedInputs)
+        
+        connectedInputs.forEach(inputPort => {
+          if (inputPort.closest('.component-wrapper') !== component) {
+            drawLine(outputPort, inputPort);
+          }
+        });
+      });
     });
   }
 
-  function loadMainComponent(direction, flowId, componentId, swimlaneId) {
-    console.log('swimload load main', swimlaneId, direction);
-    // Update the main swimlane
-    const mainSwimlane = document.getElementById(swimlaneId);
-    let next = getNextSwimlane(direction, mainSwimlane);
-    next.targetSwimlane.innerHTML = '';
+  function drawLine(start, end) {
+    const svg = document.getElementById('connection-lines');
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
     
-    htmx.ajax('GET', `/documentComponent/${flowId}/${componentId}/${next.targetSwimlane.id}`, {
-      swap: 'none',
-      handler: (dom, event) => {
-        next.targetSwimlane.innerHTML = event.xhr.response;
-      }
-    });
+    const startRect = start.getBoundingClientRect();
+    const endRect = end.getBoundingClientRect();
+    
+    const startX = startRect.right;
+    const startY = startRect.top + startRect.height / 2;
+    const endX = endRect.left;
+    const endY = endRect.top + endRect.height / 2;
+    
+    line.setAttribute('x1', startX);
+    line.setAttribute('y1', startY);
+    line.setAttribute('x2', endX);
+    line.setAttribute('y2', endY);
+    line.setAttribute('stroke', 'black');
+    line.setAttribute('stroke-width', '1');
+    
+    svg.appendChild(line);
   }
 
-  function getOrCreateSwimlane(index) {
-    let swimlane = document.querySelector(`.swimlane[data-index="${index}"]`);
-    if (swimlane) {
-      console.log('swimlane found', index, swimlane)
-    } else {
-      console.log('swimlane not found', index)
-    }
-    if (!swimlane) {
-      swimlane = document.createElement('div');
-      swimlane.className = 'swimlane';
-      swimlane.setAttribute('data-index', index);
-      swimlane.id = `swimlane-${index}`;
-      
-      const container = document.getElementById('swimlane-container');
-      if (index < 0) {
-        container.insertBefore(swimlane, container.firstChild);
-      } else {
-        container.appendChild(swimlane);
-      }
-    }
-    return swimlane;
-  }
+  window.addEventListener('resize', drawConnectionLines);
 </script>
 </FILE>
-<FILE path="src/views/document/component.ejs" TARGET>
-<% if (component) { %>
-  <div id="<%- component.flowId %>.<%- component.componentId %>">
-    <div class="event-anchor input-anchors">
-      <% component.ports.inputs.forEach((input, index) => { %>
-        <% if (index !== 0) { %>
-         <hr>
-        <% } %>
-        <button onclick="loadConnectedComponents('input', '<%- component.flowId %>', '<%- component.componentId %>', '<%- input %>', '<%- swimlaneId %>')">input</button>
-        <div style="float: right;">
-          <%- input %>
-        </div>
-        <br />
-      <% }) %>
-    </div>
-    <div class="component">
-      <h2 style="margin: 0;"><%- component.componentId %> (<%- component.slug %>)</h2>
-      <p style="margin: 0 0 0.5em;"><%- component.description %> </p>
-      <div style="border: 1px solid #111;">
-        <div id="init.<%- component.flowId %>.<%- component.componentId %>.<%- component.slug %>"
-              hx-get="/template/<%- component.flowId %>/<%- component.componentId %>/<%- component.slug %>"
-              hx-trigger="load"
-              hx-target="this"
-              hx-swap="outerHTML">
-          <br /><!-- loading -->
-        </div>
-      </div>
-    </div>
-    <div class="event-anchor output-anchors">
-      <% component.ports.outputs.forEach((output, index) => { %>
-        <% if (index !== 0) { %>
-         <hr>
-        <% } %>
-        <button onclick="loadConnectedComponents('output', '<%- component.flowId %>', '<%- component.componentId %>', '<%- output %>', '<%- swimlaneId %>')" style="float: right;">output</button>
-        <%- output %> <br />
-      <% }) %>
-    </div>
-  </div>
-<% } else { %>
-  <p>no component found</p>  
-<% } %>
-</FILE>
 <REQUEST>
-i want to draw lines between the input and output of 2 connected components
+input port name and output put name could be different so connect them together using the connection interface
 </REQUEST>

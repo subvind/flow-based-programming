@@ -74,13 +74,26 @@ export class AppController {
       componentRef: c.componentRef
     }));
 
+    let connections = []
+    flow.connections.forEach((connection: Connection) => {
+      connections.push({
+        fromFlow: connection.fromFlow,
+        fromComponent: connection.fromComponent,
+        fromEvent: connection.fromEvent,
+        toFlow: connection.toFlow,
+        toComponent: connection.toComponent,
+        toEvent: connection.toEvent,
+      })
+    })
+
     return {
       selected: {
         flowId,
         componentId
       },
       components,
-      message: `${flowId}.${componentId} - document - steam engine // FBP`
+      message: `${flowId}.${componentId} - document - steam engine // FBP`,
+      connections
     };
   }
 

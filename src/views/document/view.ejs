@@ -43,6 +43,9 @@
     htmx.on("htmx:configRequest", (event) => {
       event.detail.headers['Content-Type'] = 'application/json';
     });
+  
+    const flowConnections = JSON.parse(`<%- JSON.stringify(connections, null, 2); %>`);
+    window.addEventListener('load', () => initializeFlowConnections(flowConnections));
   </script>
   <%- include('methods') %>
   <%- include('connection-lines') %>

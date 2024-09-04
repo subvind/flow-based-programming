@@ -7,17 +7,32 @@
       document.body.appendChild(newSvg);
     }
     
+    // Clear existing lines
+    document.getElementById('connection-lines').innerHTML = '';
+    
     const components = document.querySelectorAll('.component-wrapper');
-    components.forEach(component => {
-      const outputPorts = component.querySelectorAll('.output-port');
+    components.forEach(fromComponent => {
+      const fromComponentId = fromComponent.id;
+      const outputPorts = fromComponent.querySelectorAll('.output-port');
+      
       outputPorts.forEach(outputPort => {
-        const outputPortName = outputPort.dataset.port;
-        const connectedInputs = document.querySelectorAll(`.input-port[data-port="${outputPortName}"]`);
-        console.log('drawConnectionLines', outputPortName, connectedInputs)
+        const fromEvent = outputPort.dataset.port;
         
-        connectedInputs.forEach(inputPort => {
-          if (inputPort.closest('.component-wrapper') !== component) {
-            drawLine(outputPort, inputPort);
+        // Find connections for this output port
+        const connections = window.flowConnections.filter(conn => 
+          conn.fromComponent === fromComponentId.split('.')[1] && 
+          conn.fromEvent === fromEvent.split('.')[2]
+        );
+        
+        connections.forEach(connection => {
+          const toComponentId = `${connection.toFlow}.${connection.toComponent}`;
+          const toComponent = document.getElementById(toComponentId);
+          
+          if (toComponent) {
+            const inputPort = toComponent.querySelector(`.input-port[data-port$=".${connection.toEvent}"]`);
+            if (inputPort) {
+              drawLine(outputPort, inputPort);
+            }
           }
         });
       });
@@ -47,4 +62,10 @@
   }
 
   window.addEventListener('resize', drawConnectionLines);
+
+  // This function should be called when the flow data is loaded
+  function initializeFlowConnections(flowConnections) {
+    window.flowConnections = flowConnections;
+    drawConnectionLines();
+  }
 </script>
