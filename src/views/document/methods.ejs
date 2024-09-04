@@ -75,6 +75,7 @@
       } else {
         container.appendChild(swimlane);
       }
+      swimlane.addEventListener('scroll', drawConnectionLines);
     }
     return swimlane;
   }

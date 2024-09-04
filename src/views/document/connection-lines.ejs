@@ -1,9 +1,17 @@
 <script>
+  let resizeObserver;
+
   function drawConnectionLines() {
     const svg = document.getElementById('connection-lines');
     if (!svg) {
       const newSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       newSvg.id = 'connection-lines';
+      newSvg.style.position = 'absolute';
+      newSvg.style.top = '0';
+      newSvg.style.left = '0';
+      newSvg.style.width = '100%';
+      newSvg.style.height = '100%';
+      newSvg.style.pointerEvents = 'none';
       document.body.appendChild(newSvg);
     }
     
@@ -61,11 +69,39 @@
     svg.appendChild(line);
   }
 
-  window.addEventListener('resize', drawConnectionLines);
+  function setupResizeObserver() {
+    if (resizeObserver) {
+      resizeObserver.disconnect();
+    }
 
-  // This function should be called when the flow data is loaded
+    resizeObserver = new ResizeObserver(drawConnectionLines);
+    const swimlanes = document.querySelectorAll('.swimlane');
+    swimlanes.forEach(swimlane => resizeObserver.observe(swimlane));
+  }
+
   function initializeFlowConnections(flowConnections) {
     window.flowConnections = flowConnections;
     drawConnectionLines();
+    setupResizeObserver();
   }
+
+  window.addEventListener('resize', drawConnectionLines);
+  window.addEventListener('scroll', drawConnectionLines);
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const swimlaneContainer = document.getElementById('swimlane-container');
+    if (swimlaneContainer) {
+      swimlaneContainer.addEventListener('scroll', drawConnectionLines);
+    }
+    const mainSwimlane = document.getElementById('main-swimlane');
+    if (mainSwimlane) {
+      mainSwimlane.addEventListener('scroll', drawConnectionLines);
+    }
+  });
+
+  // Call drawConnectionLines after any HTMX content updates
+  document.body.addEventListener('htmx:afterSettle', () => {
+    drawConnectionLines();
+    setupResizeObserver();
+  });
 </script>

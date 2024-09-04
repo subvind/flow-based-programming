@@ -1,716 +1,185 @@
-c[[90m4:19:45 PM[0m] Starting compilation in watch mode...
+c[[90m5:30:06 PM[0m] Starting compilation in watch mode...
 
-[[90m4:19:46 PM[0m] Found 0 errors. Watching for file changes.
+[[90m5:30:07 PM[0m] Found 0 errors. Watching for file changes.
 
 [AppModule] RabbitMQ URI: amqp://localhost:5672
-[32m[Nest] 450029  - [39m09/04/2024, 4:19:46 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
-[32m[Nest] 450029  - [39m09/04/2024, 4:19:46 PM [32m    LOG[39m [38;5;3m[AmqpConnection] [39m[32mTrying to connect to RabbitMQ broker (default)[39m
-[32m[Nest] 450029  - [39m09/04/2024, 4:19:46 PM [32m    LOG[39m [38;5;3m[RabbitMQModule] [39m[32mSuccessfully connected to RabbitMQ[39m
-[32m[Nest] 450029  - [39m09/04/2024, 4:19:46 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDiscoveryModule dependencies initialized[39m[38;5;3m +7ms[39m
-[32m[Nest] 450029  - [39m09/04/2024, 4:19:46 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRabbitMQModule dependencies initialized[39m[38;5;3m +1ms[39m
-[32m[Nest] 450029  - [39m09/04/2024, 4:19:46 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +0ms[39m
-[2024-09-04T21:19:46.587Z] [LOG] [Bootstrap] Starting main application...
-[2024-09-04T21:19:46.588Z] [LOG] [Bootstrap] [NestFactory] Starting Nest application...
-[2024-09-04T21:19:46.590Z] [LOG] [Bootstrap] [AmqpConnection] Trying to connect to RabbitMQ broker (default)
-[2024-09-04T21:19:46.590Z] [LOG] [Bootstrap] [RabbitMQModule] Successfully connected to RabbitMQ
-[2024-09-04T21:19:46.591Z] [LOG] [Bootstrap] [InstanceLoader] DiscoveryModule dependencies initialized
-[2024-09-04T21:19:46.591Z] [LOG] [Bootstrap] [InstanceLoader] RabbitMQModule dependencies initialized
-[2024-09-04T21:19:46.591Z] [LOG] [Bootstrap] [InstanceLoader] AppModule dependencies initialized
-[2024-09-04T21:19:46.598Z] [LOG] [Bootstrap] [WebSocketsController] EventTriggerComponent subscribed to the "client-event" message
-[2024-09-04T21:19:46.599Z] [LOG] [Bootstrap] [WebSocketsController] NumberGeneratorComponent subscribed to the "client-event" message
-[2024-09-04T21:19:46.599Z] [LOG] [Bootstrap] [WebSocketsController] NumberMultiplierComponent subscribed to the "client-event" message
-[2024-09-04T21:19:46.599Z] [LOG] [Bootstrap] [WebSocketsController] StateMachineComponent subscribed to the "client-event" message
-[2024-09-04T21:19:46.599Z] [LOG] [Bootstrap] [WebSocketsController] JobStateMachineComponent subscribed to the "client-event" message
-[2024-09-04T21:19:46.600Z] [LOG] [Bootstrap] [WebSocketsController] ButtonTriggerComponent subscribed to the "client-event" message
-[2024-09-04T21:19:46.601Z] [LOG] [Bootstrap] [RoutesResolver] AppController {/}:
-[2024-09-04T21:19:46.602Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/, GET} route
-[2024-09-04T21:19:46.602Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/flows, GET} route
-[2024-09-04T21:19:46.603Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/flow/:flowId, GET} route
-[2024-09-04T21:19:46.603Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/document/:flowId/:componentId, GET} route
-[2024-09-04T21:19:46.603Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentComponent/:flowId/:componentId/:swimlaneId, GET} route
-[2024-09-04T21:19:46.603Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentConnections/:flowId/:componentId/:portId/:swimlaneId, GET} route
-[2024-09-04T21:19:46.603Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/logger, GET} route
-[2024-09-04T21:19:46.603Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/trigger-event/:flowComponentEvent, POST} route
-[2024-09-04T21:19:46.604Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/template/:flowId/:componentId/:templateId, GET} route
-[2024-09-04T21:19:46.604Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1725484786590
-[2024-09-04T21:19:46.604Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1725484786590
-[2024-09-04T21:19:46.604Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1725484786590
-[2024-09-04T21:19:46.604Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1725484786590
-[2024-09-04T21:19:46.604Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1725484786590
-[2024-09-04T21:19:46.604Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1725484786590
-[2024-09-04T21:19:46.605Z] [LOG] [Bootstrap] [RabbitMQModule] Initializing RabbitMQ Handlers
-[2024-09-04T21:19:46.607Z] [LOG] [Bootstrap] [RabbitMQModule] Registering rabbitmq handlers from EventProcessor
-[2024-09-04T21:19:46.607Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.handleComponentEvent {subscribe} -> flow_exchange::componentEvent::component_event_queue
-[2024-09-04T21:19:46.607Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.createConnection {subscribe} -> flow_exchange::createConnection::create_connection_queue
-[2024-09-04T21:19:46.607Z] [LOG] [Bootstrap] [RabbitMQModule] Initializing RabbitMQ Handlers
-[2024-09-04T21:19:46.607Z] [LOG] [Bootstrap] [RabbitMQModule] Registering rabbitmq handlers from EventProcessor
-[2024-09-04T21:19:46.608Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.handleComponentEvent {subscribe} -> flow_exchange::componentEvent::component_event_queue
-[2024-09-04T21:19:46.608Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.createConnection {subscribe} -> flow_exchange::createConnection::create_connection_queue
-[2024-09-04T21:19:46.608Z] [LOG] [Bootstrap] [NestApplication] Nest application successfully started
-[2024-09-04T21:19:46.608Z] [LOG] [Bootstrap] Starting flow execution...
-[2024-09-04T21:19:46.608Z] [LOG] [Bootstrap] [FlowExecutorService] Executing flow: example-flow
-[2024-09-04T21:19:46.608Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: sm1.initProxyMachine -> jsm1.initProxyMachine
-[2024-09-04T21:19:46.610Z] [LOG] [Bootstrap] Application is running on: http://localhost:3000
-[2024-09-04T21:19:46.662Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
-[2024-09-04T21:19:46.663Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
-[2024-09-04T21:19:46.669Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected a RabbitMQ channel "AmqpConnection"
-[2024-09-04T21:19:46.669Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected a RabbitMQ channel "AmqpConnection"
-[2024-09-04T21:19:46.670Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.sm1.initProxyMachine -> jsm1.initProxyMachine
-[2024-09-04T21:19:46.670Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.sm1.initProxyMachine -> jsm1.initProxyMachine
-[2024-09-04T21:19:46.670Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-start -> gen1.start
-[2024-09-04T21:19:46.671Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-finish -> gen1.stop
-[2024-09-04T21:19:46.671Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-start -> gen1.start
-[2024-09-04T21:19:46.671Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-start -> gen1.start
-[2024-09-04T21:19:46.714Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-finish -> gen1.stop
-[2024-09-04T21:19:46.714Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-finish -> gen1.stop
-[2024-09-04T21:19:46.715Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-start -> gen2.start
-[2024-09-04T21:19:46.715Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-finish -> gen2.stop
-[2024-09-04T21:19:46.715Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-start -> gen2.start
-[2024-09-04T21:19:46.715Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-start -> gen2.start
-[2024-09-04T21:19:46.761Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-finish -> gen2.stop
-[2024-09-04T21:19:46.761Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-finish -> gen2.stop
-[2024-09-04T21:19:46.761Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: gen1.numberGenerated -> multi.firstNumberReceived
-[2024-09-04T21:19:46.762Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: gen2.numberGenerated -> multi.secondNumberReceived
-[2024-09-04T21:19:46.762Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.gen1.numberGenerated -> multi.firstNumberReceived
-[2024-09-04T21:19:46.762Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.gen1.numberGenerated -> multi.firstNumberReceived
-[2024-09-04T21:19:46.804Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.gen2.numberGenerated -> multi.secondNumberReceived
-[2024-09-04T21:19:46.804Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.gen2.numberGenerated -> multi.secondNumberReceived
-[2024-09-04T21:19:46.804Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn1.buttonPressed -> jsm1.set-start
-[2024-09-04T21:19:46.805Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn2.buttonPressed -> jsm1.set-pause
-[2024-09-04T21:19:46.805Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn1.buttonPressed -> jsm1.set-start
-[2024-09-04T21:19:46.805Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn1.buttonPressed -> jsm1.set-start
-[2024-09-04T21:19:46.851Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn2.buttonPressed -> jsm1.set-pause
-[2024-09-04T21:19:46.851Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn2.buttonPressed -> jsm1.set-pause
-[2024-09-04T21:19:46.851Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn3.buttonPressed -> jsm1.set-resume
-[2024-09-04T21:19:46.852Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn4.buttonPressed -> jsm1.set-finish
-[2024-09-04T21:19:46.852Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn3.buttonPressed -> jsm1.set-resume
-[2024-09-04T21:19:46.852Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn3.buttonPressed -> jsm1.set-resume
-[2024-09-04T21:19:46.898Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn4.buttonPressed -> jsm1.set-finish
-[2024-09-04T21:19:46.898Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn4.buttonPressed -> jsm1.set-finish
-[2024-09-04T21:19:46.898Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn5.buttonPressed -> jsm1.set-reset
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: main (eventTrigger) for flow: example-flow
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.main
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn1 (buttonTrigger) for flow: example-flow
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn1
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn2 (buttonTrigger) for flow: example-flow
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn2
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn3 (buttonTrigger) for flow: example-flow
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn3
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn4 (buttonTrigger) for flow: example-flow
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn4
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn5 (buttonTrigger) for flow: example-flow
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn5
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: sm1 (stateMachine) for flow: example-flow
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.sm1
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: jsm1 (jobStateMachine) for flow: example-flow
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.jsm1
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: gen1 (numberGenerator) for flow: example-flow
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.gen1
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: gen2 (numberGenerator) for flow: example-flow
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.gen2
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: multi (numberMultiplier) for flow: example-flow
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.multi
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: main (main) for flow: example-flow
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn1 (btn1) for flow: example-flow
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn2 (btn2) for flow: example-flow
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn3 (btn3) for flow: example-flow
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn4 (btn4) for flow: example-flow
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn5 (btn5) for flow: example-flow
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: sm1 (sm1) for flow: example-flow
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: jsm1 (jsm1) for flow: example-flow
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: gen1 (gen1) for flow: example-flow
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: gen2 (gen2) for flow: example-flow
-[2024-09-04T21:19:46.899Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: multi (multi) for flow: example-flow
-[2024-09-04T21:19:46.900Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: main (eventTrigger) for flow: example-flow
-[2024-09-04T21:19:46.900Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn5.buttonPressed -> jsm1.set-reset
-[2024-09-04T21:19:46.900Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn5.buttonPressed -> jsm1.set-reset
-[2024-09-04T21:19:46.941Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.main.init] data: undefined
-[2024-09-04T21:19:46.942Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: main
-[2024-09-04T21:19:46.942Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn1 (buttonTrigger) for flow: example-flow
-[2024-09-04T21:19:46.942Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn2 (buttonTrigger) for flow: example-flow
-[2024-09-04T21:19:46.942Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn1.init] data: undefined
-[2024-09-04T21:19:46.942Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn1
-[2024-09-04T21:19:46.942Z] [LOG] [example-flow.btn1] Handling event: init
-[2024-09-04T21:19:46.942Z] [LOG] [example-flow.btn1] Initializing ButtonTriggerComponent with message: undefined
-[2024-09-04T21:19:46.984Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn2.init] data: undefined
-[2024-09-04T21:19:46.984Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn2
-[2024-09-04T21:19:46.985Z] [LOG] [example-flow.btn2] Handling event: init
-[2024-09-04T21:19:46.985Z] [LOG] [example-flow.btn2] Initializing ButtonTriggerComponent with message: undefined
-[2024-09-04T21:19:46.985Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn3 (buttonTrigger) for flow: example-flow
-[2024-09-04T21:19:46.985Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn4 (buttonTrigger) for flow: example-flow
-[2024-09-04T21:19:46.986Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn3.init] data: undefined
-[2024-09-04T21:19:46.986Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn3
-[2024-09-04T21:19:46.986Z] [LOG] [example-flow.btn3] Handling event: init
-[2024-09-04T21:19:46.986Z] [LOG] [example-flow.btn3] Initializing ButtonTriggerComponent with message: undefined
-[2024-09-04T21:19:47.028Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn4.init] data: undefined
-[2024-09-04T21:19:47.028Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn4
-[2024-09-04T21:19:47.028Z] [LOG] [example-flow.btn4] Handling event: init
-[2024-09-04T21:19:47.028Z] [LOG] [example-flow.btn4] Initializing ButtonTriggerComponent with message: undefined
-[2024-09-04T21:19:47.028Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn5 (buttonTrigger) for flow: example-flow
-[2024-09-04T21:19:47.029Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: sm1 (stateMachine) for flow: example-flow
-[2024-09-04T21:19:47.029Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn5.init] data: undefined
-[2024-09-04T21:19:47.029Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn5
-[2024-09-04T21:19:47.029Z] [LOG] [example-flow.btn5] Handling event: init
-[2024-09-04T21:19:47.029Z] [LOG] [example-flow.btn5] Initializing ButtonTriggerComponent with message: undefined
-[2024-09-04T21:19:47.071Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.sm1.init] data: {"initialState":"idle","states":["idle","running","paused","finished"],"transitions":{"idle":{"start":"running"},"running":{"pause":"paused","finish":"finished"},"paused":{"resume":"running","finish":"finished"},"finished":{"reset":"idle"}}}
-[2024-09-04T21:19:47.071Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: sm1
-[2024-09-04T21:19:47.071Z] [LOG] [example-flow.sm1] Handling event: init
-[2024-09-04T21:19:47.072Z] [LOG] [example-flow.sm1] State machine initialized with initial state: idle
-[2024-09-04T21:19:47.072Z] [LOG] [example-flow.sm1] Publishing: example-flow.sm1.stateChanged -> [object Object]
-[2024-09-04T21:19:47.072Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: jsm1 (jobStateMachine) for flow: example-flow
-[2024-09-04T21:19:47.076Z] [LOG] [example-flow.sm1] Sending initProxyMachine event to the connected x state machine: jsm1
-[2024-09-04T21:19:47.076Z] [LOG] [example-flow.sm1] Publishing: example-flow.jsm1.initProxyMachine -> [object Object]
-[2024-09-04T21:19:47.076Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.sm1.stateChanged] data: {"currentState":"idle"}
-[2024-09-04T21:19:47.076Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: sm1
-[2024-09-04T21:19:47.076Z] [LOG] [example-flow.sm1] Handling event: stateChanged
-[2024-09-04T21:19:47.076Z] [WARN] [example-flow.sm1] Unknown event: stateChanged
-[2024-09-04T21:19:47.077Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.jsm1.init] data: undefined
-[2024-09-04T21:19:47.077Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: jsm1
-[2024-09-04T21:19:47.077Z] [LOG] [example-flow.jsm1] Handling event: init
-[2024-09-04T21:19:47.077Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: gen1 (numberGenerator) for flow: example-flow
-[2024-09-04T21:19:47.077Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.jsm1.initProxyMachine] data: {"initialState":"idle","states":["idle","running","paused","finished"],"transitions":{"idle":{},"running":{},"paused":{},"finished":{}}}
-[2024-09-04T21:19:47.077Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: jsm1
-[2024-09-04T21:19:47.077Z] [LOG] [example-flow.jsm1] Handling event: initProxyMachine
+[32m[Nest] 488304  - [39m09/04/2024, 5:30:07 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 488304  - [39m09/04/2024, 5:30:07 PM [32m    LOG[39m [38;5;3m[AmqpConnection] [39m[32mTrying to connect to RabbitMQ broker (default)[39m
+[32m[Nest] 488304  - [39m09/04/2024, 5:30:07 PM [32m    LOG[39m [38;5;3m[RabbitMQModule] [39m[32mSuccessfully connected to RabbitMQ[39m
+[32m[Nest] 488304  - [39m09/04/2024, 5:30:07 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDiscoveryModule dependencies initialized[39m[38;5;3m +7ms[39m
+[32m[Nest] 488304  - [39m09/04/2024, 5:30:07 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRabbitMQModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 488304  - [39m09/04/2024, 5:30:07 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +1ms[39m
+[2024-09-04T22:30:07.742Z] [LOG] [Bootstrap] Starting main application...
+[2024-09-04T22:30:07.742Z] [LOG] [Bootstrap] [NestFactory] Starting Nest application...
+[2024-09-04T22:30:07.745Z] [LOG] [Bootstrap] [AmqpConnection] Trying to connect to RabbitMQ broker (default)
+[2024-09-04T22:30:07.746Z] [LOG] [Bootstrap] [RabbitMQModule] Successfully connected to RabbitMQ
+[2024-09-04T22:30:07.747Z] [LOG] [Bootstrap] [InstanceLoader] DiscoveryModule dependencies initialized
+[2024-09-04T22:30:07.747Z] [LOG] [Bootstrap] [InstanceLoader] RabbitMQModule dependencies initialized
+[2024-09-04T22:30:07.747Z] [LOG] [Bootstrap] [InstanceLoader] AppModule dependencies initialized
+[2024-09-04T22:30:07.754Z] [LOG] [Bootstrap] [WebSocketsController] EventTriggerComponent subscribed to the "client-event" message
+[2024-09-04T22:30:07.754Z] [LOG] [Bootstrap] [WebSocketsController] NumberGeneratorComponent subscribed to the "client-event" message
+[2024-09-04T22:30:07.755Z] [LOG] [Bootstrap] [WebSocketsController] NumberMultiplierComponent subscribed to the "client-event" message
+[2024-09-04T22:30:07.755Z] [LOG] [Bootstrap] [WebSocketsController] StateMachineComponent subscribed to the "client-event" message
+[2024-09-04T22:30:07.755Z] [LOG] [Bootstrap] [WebSocketsController] JobStateMachineComponent subscribed to the "client-event" message
+[2024-09-04T22:30:07.755Z] [LOG] [Bootstrap] [WebSocketsController] ButtonTriggerComponent subscribed to the "client-event" message
+[2024-09-04T22:30:07.756Z] [LOG] [Bootstrap] [RoutesResolver] AppController {/}:
+[2024-09-04T22:30:07.758Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/, GET} route
+[2024-09-04T22:30:07.758Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/flows, GET} route
+[2024-09-04T22:30:07.758Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/flow/:flowId, GET} route
+[2024-09-04T22:30:07.758Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/document/:flowId/:componentId, GET} route
+[2024-09-04T22:30:07.759Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentComponent/:flowId/:componentId/:swimlaneId, GET} route
+[2024-09-04T22:30:07.759Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentConnections/:flowId/:componentId/:portId/:swimlaneId, GET} route
+[2024-09-04T22:30:07.759Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/logger, GET} route
+[2024-09-04T22:30:07.759Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/trigger-event/:flowComponentEvent, POST} route
+[2024-09-04T22:30:07.759Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/template/:flowId/:componentId/:templateId, GET} route
+[2024-09-04T22:30:07.760Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1725489007745
+[2024-09-04T22:30:07.760Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1725489007745
+[2024-09-04T22:30:07.760Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1725489007745
+[2024-09-04T22:30:07.760Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1725489007745
+[2024-09-04T22:30:07.760Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1725489007745
+[2024-09-04T22:30:07.760Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1725489007745
+[2024-09-04T22:30:07.760Z] [LOG] [Bootstrap] [RabbitMQModule] Initializing RabbitMQ Handlers
+[2024-09-04T22:30:07.762Z] [LOG] [Bootstrap] [RabbitMQModule] Registering rabbitmq handlers from EventProcessor
+[2024-09-04T22:30:07.763Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.handleComponentEvent {subscribe} -> flow_exchange::componentEvent::component_event_queue
+[2024-09-04T22:30:07.763Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.createConnection {subscribe} -> flow_exchange::createConnection::create_connection_queue
+[2024-09-04T22:30:07.763Z] [LOG] [Bootstrap] [RabbitMQModule] Initializing RabbitMQ Handlers
+[2024-09-04T22:30:07.763Z] [LOG] [Bootstrap] [RabbitMQModule] Registering rabbitmq handlers from EventProcessor
+[2024-09-04T22:30:07.763Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.handleComponentEvent {subscribe} -> flow_exchange::componentEvent::component_event_queue
+[2024-09-04T22:30:07.763Z] [LOG] [Bootstrap] [RabbitMQModule] EventProcessor.createConnection {subscribe} -> flow_exchange::createConnection::create_connection_queue
+[2024-09-04T22:30:07.763Z] [LOG] [Bootstrap] [NestApplication] Nest application successfully started
+[2024-09-04T22:30:07.763Z] [LOG] [Bootstrap] Starting flow execution...
+[2024-09-04T22:30:07.764Z] [LOG] [Bootstrap] [FlowExecutorService] Executing flow: example-flow
+[2024-09-04T22:30:07.764Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: sm1.initProxyMachine -> jsm1.initProxyMachine
+[2024-09-04T22:30:07.766Z] [LOG] [Bootstrap] Application is running on: http://localhost:3000
+[2024-09-04T22:30:07.815Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
+[2024-09-04T22:30:07.817Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
+[2024-09-04T22:30:07.826Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected a RabbitMQ channel "AmqpConnection"
+[2024-09-04T22:30:07.826Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected a RabbitMQ channel "AmqpConnection"
+[2024-09-04T22:30:07.827Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-start -> gen1.start
+[2024-09-04T22:30:07.828Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.sm1.initProxyMachine -> jsm1.initProxyMachine
+[2024-09-04T22:30:07.828Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.sm1.initProxyMachine -> jsm1.initProxyMachine
+[2024-09-04T22:30:07.828Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-start -> gen1.start
+[2024-09-04T22:30:07.828Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-start -> gen1.start
+[2024-09-04T22:30:07.828Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-finish -> gen1.stop
+[2024-09-04T22:30:07.829Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-start -> gen2.start
+[2024-09-04T22:30:07.829Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-finish -> gen1.stop
+[2024-09-04T22:30:07.829Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-finish -> gen1.stop
+[2024-09-04T22:30:07.871Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-start -> gen2.start
+[2024-09-04T22:30:07.871Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-start -> gen2.start
+[2024-09-04T22:30:07.871Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-finish -> gen2.stop
+[2024-09-04T22:30:07.871Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: gen1.numberGenerated -> multi.firstNumberReceived
+[2024-09-04T22:30:07.872Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-finish -> gen2.stop
+[2024-09-04T22:30:07.872Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-finish -> gen2.stop
+[2024-09-04T22:30:07.914Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.gen1.numberGenerated -> multi.firstNumberReceived
+[2024-09-04T22:30:07.914Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.gen1.numberGenerated -> multi.firstNumberReceived
+[2024-09-04T22:30:07.914Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: gen2.numberGenerated -> multi.secondNumberReceived
+[2024-09-04T22:30:07.915Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn1.buttonPressed -> jsm1.set-start
+[2024-09-04T22:30:07.915Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.gen2.numberGenerated -> multi.secondNumberReceived
+[2024-09-04T22:30:07.915Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.gen2.numberGenerated -> multi.secondNumberReceived
+[2024-09-04T22:30:07.957Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn1.buttonPressed -> jsm1.set-start
+[2024-09-04T22:30:07.957Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn1.buttonPressed -> jsm1.set-start
+[2024-09-04T22:30:07.958Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn2.buttonPressed -> jsm1.set-pause
+[2024-09-04T22:30:07.958Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn3.buttonPressed -> jsm1.set-resume
+[2024-09-04T22:30:07.959Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn2.buttonPressed -> jsm1.set-pause
+[2024-09-04T22:30:07.959Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn2.buttonPressed -> jsm1.set-pause
+[2024-09-04T22:30:08.004Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn3.buttonPressed -> jsm1.set-resume
+[2024-09-04T22:30:08.004Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn3.buttonPressed -> jsm1.set-resume
+[2024-09-04T22:30:08.004Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn4.buttonPressed -> jsm1.set-finish
+[2024-09-04T22:30:08.005Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn5.buttonPressed -> jsm1.set-reset
+[2024-09-04T22:30:08.006Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn4.buttonPressed -> jsm1.set-finish
+[2024-09-04T22:30:08.006Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn4.buttonPressed -> jsm1.set-finish
+[2024-09-04T22:30:08.048Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn5.buttonPressed -> jsm1.set-reset
+[2024-09-04T22:30:08.048Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn5.buttonPressed -> jsm1.set-reset
+[2024-09-04T22:30:08.048Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: main (eventTrigger) for flow: example-flow
+[2024-09-04T22:30:08.048Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.main
+[2024-09-04T22:30:08.048Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn1 (buttonTrigger) for flow: example-flow
+[2024-09-04T22:30:08.048Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn1
+[2024-09-04T22:30:08.048Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn2 (buttonTrigger) for flow: example-flow
+[2024-09-04T22:30:08.048Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn2
+[2024-09-04T22:30:08.048Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn3 (buttonTrigger) for flow: example-flow
+[2024-09-04T22:30:08.048Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn3
+[2024-09-04T22:30:08.048Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn4 (buttonTrigger) for flow: example-flow
+[2024-09-04T22:30:08.048Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn4
+[2024-09-04T22:30:08.048Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn5 (buttonTrigger) for flow: example-flow
+[2024-09-04T22:30:08.048Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn5
+[2024-09-04T22:30:08.048Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: sm1 (stateMachine) for flow: example-flow
+[2024-09-04T22:30:08.048Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.sm1
+[2024-09-04T22:30:08.048Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: jsm1 (jobStateMachine) for flow: example-flow
+[2024-09-04T22:30:08.048Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.jsm1
+[2024-09-04T22:30:08.048Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: gen1 (numberGenerator) for flow: example-flow
+[2024-09-04T22:30:08.049Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.gen1
+[2024-09-04T22:30:08.049Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: gen2 (numberGenerator) for flow: example-flow
+[2024-09-04T22:30:08.049Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.gen2
+[2024-09-04T22:30:08.049Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: multi (numberMultiplier) for flow: example-flow
+[2024-09-04T22:30:08.049Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.multi
+[2024-09-04T22:30:08.049Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: main (main) for flow: example-flow
+[2024-09-04T22:30:08.049Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn1 (btn1) for flow: example-flow
+[2024-09-04T22:30:08.049Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn2 (btn2) for flow: example-flow
+[2024-09-04T22:30:08.049Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn3 (btn3) for flow: example-flow
+[2024-09-04T22:30:08.049Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn4 (btn4) for flow: example-flow
+[2024-09-04T22:30:08.049Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn5 (btn5) for flow: example-flow
+[2024-09-04T22:30:08.049Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: sm1 (sm1) for flow: example-flow
+[2024-09-04T22:30:08.049Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: jsm1 (jsm1) for flow: example-flow
+[2024-09-04T22:30:08.049Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: gen1 (gen1) for flow: example-flow
+[2024-09-04T22:30:08.049Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: gen2 (gen2) for flow: example-flow
+[2024-09-04T22:30:08.049Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: multi (multi) for flow: example-flow
+[2024-09-04T22:30:08.049Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: main (eventTrigger) for flow: example-flow
+[2024-09-04T22:30:08.050Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn1 (buttonTrigger) for flow: example-flow
+[2024-09-04T22:30:08.050Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.main.init] data: undefined
+[2024-09-04T22:30:08.050Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: main
+[2024-09-04T22:30:08.094Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn1.init] data: undefined
+[2024-09-04T22:30:08.094Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn1
+[2024-09-04T22:30:08.094Z] [LOG] [example-flow.btn1] Handling event: init
+[2024-09-04T22:30:08.095Z] [LOG] [example-flow.btn1] Initializing ButtonTriggerComponent with message: undefined
+[2024-09-04T22:30:08.095Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn2 (buttonTrigger) for flow: example-flow
+[2024-09-04T22:30:08.096Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn3 (buttonTrigger) for flow: example-flow
+[2024-09-04T22:30:08.096Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn2.init] data: undefined
+[2024-09-04T22:30:08.096Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn2
+[2024-09-04T22:30:08.096Z] [LOG] [example-flow.btn2] Handling event: init
+[2024-09-04T22:30:08.096Z] [LOG] [example-flow.btn2] Initializing ButtonTriggerComponent with message: undefined
+[2024-09-04T22:30:08.137Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn3.init] data: undefined
+[2024-09-04T22:30:08.137Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn3
+[2024-09-04T22:30:08.137Z] [LOG] [example-flow.btn3] Handling event: init
+[2024-09-04T22:30:08.137Z] [LOG] [example-flow.btn3] Initializing ButtonTriggerComponent with message: undefined
+[2024-09-04T22:30:08.137Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn4 (buttonTrigger) for flow: example-flow
+[2024-09-04T22:30:08.138Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn5 (buttonTrigger) for flow: example-flow
+[2024-09-04T22:30:08.138Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn4.init] data: undefined
+[2024-09-04T22:30:08.138Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn4
+[2024-09-04T22:30:08.139Z] [LOG] [example-flow.btn4] Handling event: init
+[2024-09-04T22:30:08.139Z] [LOG] [example-flow.btn4] Initializing ButtonTriggerComponent with message: undefined
+[2024-09-04T22:30:08.181Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn5.init] data: undefined
+[2024-09-04T22:30:08.181Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn5
+[2024-09-04T22:30:08.181Z] [LOG] [example-flow.btn5] Handling event: init
+[2024-09-04T22:30:08.181Z] [LOG] [example-flow.btn5] Initializing ButtonTriggerComponent with message: undefined
+[2024-09-04T22:30:08.181Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: sm1 (stateMachine) for flow: example-flow
+[2024-09-04T22:30:08.182Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: jsm1 (jobStateMachine) for flow: example-flow
+[2024-09-04T22:30:08.183Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.sm1.init] data: {"initialState":"idle","states":["idle","running","paused","finished"],"transitions":{"idle":{"start":"running"},"running":{"pause":"paused","finish":"finished"},"paused":{"resume":"running","finish":"finished"},"finished":{"reset":"idle"}}}
+[2024-09-04T22:30:08.183Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: sm1
+[2024-09-04T22:30:08.183Z] [LOG] [example-flow.sm1] Handling event: init
+[2024-09-04T22:30:08.183Z] [LOG] [example-flow.sm1] State machine initialized with initial state: idle
+[2024-09-04T22:30:08.183Z] [LOG] [example-flow.sm1] Publishing: example-flow.sm1.stateChanged -> [object Object]
+[2024-09-04T22:30:08.224Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.jsm1.init] data: undefined
+[2024-09-04T22:30:08.224Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: jsm1
+[2024-09-04T22:30:08.225Z] [LOG] [example-flow.jsm1] Handling event: init
+[2024-09-04T22:30:08.225Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: gen1 (numberGenerator) for flow: example-flow
+[2024-09-04T22:30:08.228Z] [LOG] [example-flow.sm1] Sending initProxyMachine event to the connected x state machine: jsm1
+[2024-09-04T22:30:08.228Z] [LOG] [example-flow.sm1] Publishing: example-flow.jsm1.initProxyMachine -> [object Object]
+[2024-09-04T22:30:08.228Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.sm1.stateChanged] data: {"currentState":"idle"}
+[2024-09-04T22:30:08.228Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: sm1
+[2024-09-04T22:30:08.228Z] [LOG] [example-flow.sm1] Handling event: stateChanged
+[2024-09-04T22:30:08.228Z] [WARN] [example-flow.sm1] Unknown event: stateChanged
+[2024-09-04T22:30:08.229Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.init] data: undefined
+[2024-09-04T22:30:08.229Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
+[2024-09-04T22:30:08.229Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: init
+[2024-09-04T22:30:08.229Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: gen2 (numberGenerator) for flow: example-flow
+[2024-09-04T22:30:08.229Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.jsm1.initProxyMachine] data: {"initialState":"idle","states":["idle","running","paused","finished"],"transitions":{"idle":{},"running":{},"paused":{},"finished":{}}}
+[2024-09-04T22:30:08.229Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: jsm1
+[2024-09-04T22:30:08.229Z] [LOG] [example-flow.jsm1] Handling event: initProxyMachine
 sm1
-[2024-09-04T21:19:47.077Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.init] data: undefined
-[2024-09-04T21:19:47.077Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
-[2024-09-04T21:19:47.077Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: init
-[2024-09-04T21:19:47.078Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: gen2 (numberGenerator) for flow: example-flow
-[2024-09-04T21:19:47.118Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: multi (numberMultiplier) for flow: example-flow
-[2024-09-04T21:19:47.118Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.init] data: undefined
-[2024-09-04T21:19:47.118Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:19:47.118Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: init
-[2024-09-04T21:19:47.119Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.multi.init] data: undefined
-[2024-09-04T21:19:47.119Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: multi
-[2024-09-04T21:19:47.119Z] [LOG] [example-flow.multi] NumberMultiplier handling event: init undefined
-[2024-09-04T21:20:37.982Z] [LOG] [Bootstrap] [AppController] [trigger-event] [example-flow] [btn1] [triggerButton]
-[2024-09-04T21:20:37.983Z] [LOG] [example-flow.component-1725484786590] Publishing: example-flow.btn1.triggerButton -> [object Object]
-[2024-09-04T21:20:37.984Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn1.triggerButton] data: {"targetFlow":"example-flow","targetComponent":"jsm1","targetEvent":"set-start","_flowId":"example-flow","_componentId":"btn1","_eventId":"triggerButton"}
-[2024-09-04T21:20:37.984Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn1
-[2024-09-04T21:20:37.984Z] [LOG] [example-flow.btn1] Handling event: triggerButton
-[2024-09-04T21:20:37.984Z] [LOG] [example-flow.btn1] Button pressed: example-flow.btn1.triggerButton
-[2024-09-04T21:20:37.984Z] [LOG] [example-flow.btn1] Publishing: example-flow.btn1.buttonPressed -> [object Object]
-[2024-09-04T21:20:37.985Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn1.buttonPressed] data: {"pressedAt":"2024-09-04T21:20:37.984Z","targetFlow":"example-flow","targetComponent":"jsm1","targetEvent":"set-start"}
-[2024-09-04T21:20:37.985Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn1
-[2024-09-04T21:20:37.985Z] [LOG] [example-flow.btn1] Handling event: buttonPressed
-[2024-09-04T21:20:37.985Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.jsm1.set-start]
-[2024-09-04T21:20:37.985Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: jsm1
-[2024-09-04T21:20:37.985Z] [LOG] [example-flow.jsm1] Handling event: set-start
-[2024-09-04T21:20:37.985Z] [LOG] [example-flow.sm1] Transitioned from 'idle' to 'running' on event 'start'
-[2024-09-04T21:20:37.985Z] [LOG] [example-flow.sm1] Publishing: example-flow.sm1.stateChanged -> [object Object]
-[2024-09-04T21:20:37.985Z] [LOG] [example-flow.btn1] Publishing: example-flow.jsm1.set-start -> [object Object]
-[2024-09-04T21:20:37.987Z] [LOG] [example-flow.jsm1] Publishing: example-flow.jsm1.get-start -> [object Object]
-[2024-09-04T21:20:37.987Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.jsm1.set-start] data: {"source":"example-flow.btn1","pressedAt":"2024-09-04T21:20:37.985Z"}
-[2024-09-04T21:20:37.988Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: jsm1
-[2024-09-04T21:20:37.988Z] [LOG] [example-flow.jsm1] Handling event: set-start
-[2024-09-04T21:20:37.988Z] [WARN] [example-flow.sm1] No transition defined for event 'start' in state 'running'
-[2024-09-04T21:20:37.989Z] [LOG] [example-flow.jsm1] Publishing: example-flow.jsm1.get-start -> [object Object]
-[2024-09-04T21:20:37.989Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.sm1.stateChanged] data: {"previousState":"idle","currentState":"running","event":"start"}
-[2024-09-04T21:20:37.989Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: sm1
-[2024-09-04T21:20:37.989Z] [LOG] [example-flow.sm1] Handling event: stateChanged
-[2024-09-04T21:20:37.989Z] [WARN] [example-flow.sm1] Unknown event: stateChanged
-[2024-09-04T21:20:37.989Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.jsm1.get-start] data: {"previousState":"idle","currentState":"running"}
-[2024-09-04T21:20:37.989Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: jsm1
-[2024-09-04T21:20:37.989Z] [LOG] [example-flow.jsm1] Handling event: get-start
-[2024-09-04T21:20:37.989Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.gen2.start]
-[2024-09-04T21:20:37.989Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: gen2
-[2024-09-04T21:20:37.989Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: start
-[2024-09-04T21:20:37.989Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) starting number generation
-[2024-09-04T21:20:37.989Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) startGenerating method called
-[2024-09-04T21:20:37.990Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.jsm1.get-start] data: {"previousState":"running","currentState":"running"}
-[2024-09-04T21:20:37.990Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: jsm1
-[2024-09-04T21:20:37.990Z] [LOG] [example-flow.jsm1] Handling event: get-start
-[2024-09-04T21:20:37.990Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.gen2.start]
-[2024-09-04T21:20:37.990Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: gen2
-[2024-09-04T21:20:37.990Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: start
-[2024-09-04T21:20:37.990Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) starting number generation
-[2024-09-04T21:20:37.990Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) startGenerating method called
-[2024-09-04T21:20:37.990Z] [LOG] [example-flow.jsm1] Publishing: example-flow.jsm1.stateChanged -> [object Object]
-[2024-09-04T21:20:37.990Z] [LOG] [example-flow.jsm1] Publishing: example-flow.jsm1.stateChanged -> [object Object]
-[2024-09-04T21:20:37.990Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.jsm1.stateChanged] data: {"previousState":"running","currentState":"running","message":"start"}
-[2024-09-04T21:20:37.990Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: jsm1
-[2024-09-04T21:20:37.990Z] [LOG] [example-flow.jsm1] Handling event: stateChanged
-[2024-09-04T21:20:37.991Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.jsm1.stateChanged] data: {"previousState":"idle","currentState":"running","message":"start"}
-[2024-09-04T21:20:37.991Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: jsm1
-[2024-09-04T21:20:37.991Z] [LOG] [example-flow.jsm1] Handling event: stateChanged
-[2024-09-04T21:20:38.991Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.28202579100323977
-[2024-09-04T21:20:38.991Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.28202579100323977
-[2024-09-04T21:20:38.993Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.28202579100323977
-[2024-09-04T21:20:38.993Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:20:38.993Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:20:38.993Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:20:38.993Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:20:38.993Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.28202579100323977
-[2024-09-04T21:20:38.993Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.28202579100323977
-[2024-09-04T21:20:39.991Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.5541523673435991
-[2024-09-04T21:20:39.991Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.5541523673435991
-[2024-09-04T21:20:39.992Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.5541523673435991
-[2024-09-04T21:20:39.992Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:20:39.992Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:20:39.992Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:20:39.992Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:20:39.993Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.5541523673435991
-[2024-09-04T21:20:39.993Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.5541523673435991
-[2024-09-04T21:20:40.992Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.28950113800766264
-[2024-09-04T21:20:40.993Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.28950113800766264
-[2024-09-04T21:20:40.995Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.28950113800766264
-[2024-09-04T21:20:40.995Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:20:40.995Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:20:40.995Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:20:40.995Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:20:40.995Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.28950113800766264
-[2024-09-04T21:20:40.995Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.28950113800766264
-[2024-09-04T21:20:41.993Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.5516008487712123
-[2024-09-04T21:20:41.993Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.5516008487712123
-[2024-09-04T21:20:41.994Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.5516008487712123
-[2024-09-04T21:20:41.994Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:20:41.994Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:20:41.994Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:20:41.994Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:20:41.994Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.5516008487712123
-[2024-09-04T21:20:41.994Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.5516008487712123
-[2024-09-04T21:20:42.992Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.10039447182880323
-[2024-09-04T21:20:42.993Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.10039447182880323
-[2024-09-04T21:20:42.995Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.10039447182880323
-[2024-09-04T21:20:42.995Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:20:42.995Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:20:42.995Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:20:42.995Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:20:42.995Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.10039447182880323
-[2024-09-04T21:20:42.995Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.10039447182880323
-[2024-09-04T21:20:43.994Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.6262533910715646
-[2024-09-04T21:20:43.994Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.6262533910715646
-[2024-09-04T21:20:43.995Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.6262533910715646
-[2024-09-04T21:20:43.995Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:20:43.995Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:20:43.995Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:20:43.995Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:20:43.995Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.6262533910715646
-[2024-09-04T21:20:43.995Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.6262533910715646
-[2024-09-04T21:20:44.994Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.7294806257672592
-[2024-09-04T21:20:44.994Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.7294806257672592
-[2024-09-04T21:20:44.996Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.7294806257672592
-[2024-09-04T21:20:44.996Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:20:44.996Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:20:44.996Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:20:44.996Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:20:44.996Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.7294806257672592
-[2024-09-04T21:20:44.996Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.7294806257672592
-[2024-09-04T21:20:45.994Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.5010663991141939
-[2024-09-04T21:20:45.995Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.5010663991141939
-[2024-09-04T21:20:45.996Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.5010663991141939
-[2024-09-04T21:20:45.996Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:20:45.996Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:20:45.996Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:20:45.996Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:20:45.996Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.5010663991141939
-[2024-09-04T21:20:45.996Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.5010663991141939
-[2024-09-04T21:20:46.995Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.4104065093754825
-[2024-09-04T21:20:46.995Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.4104065093754825
-[2024-09-04T21:20:46.997Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.4104065093754825
-[2024-09-04T21:20:46.997Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:20:46.997Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:20:46.997Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:20:46.997Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:20:46.997Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.4104065093754825
-[2024-09-04T21:20:46.997Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.4104065093754825
-[2024-09-04T21:20:47.996Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.19002769605201708
-[2024-09-04T21:20:47.997Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.19002769605201708
-[2024-09-04T21:20:47.998Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.19002769605201708
-[2024-09-04T21:20:47.998Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:20:47.998Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:20:47.998Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:20:47.998Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:20:47.998Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.19002769605201708
-[2024-09-04T21:20:47.998Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.19002769605201708
-[2024-09-04T21:20:48.997Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.6991478108369908
-[2024-09-04T21:20:48.998Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.6991478108369908
-[2024-09-04T21:20:48.999Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.6991478108369908
-[2024-09-04T21:20:48.999Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:20:48.999Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:20:48.999Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:20:48.999Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:20:48.999Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.6991478108369908
-[2024-09-04T21:20:48.999Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.6991478108369908
-[2024-09-04T21:20:49.997Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.23918053479485546
-[2024-09-04T21:20:49.997Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.23918053479485546
-[2024-09-04T21:20:49.998Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.23918053479485546
-[2024-09-04T21:20:49.998Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:20:49.998Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:20:49.999Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:20:49.999Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:20:49.999Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.23918053479485546
-[2024-09-04T21:20:49.999Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.23918053479485546
-[2024-09-04T21:20:50.998Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.13170012015126598
-[2024-09-04T21:20:50.998Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.13170012015126598
-[2024-09-04T21:20:51.000Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.13170012015126598
-[2024-09-04T21:20:51.000Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:20:51.000Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:20:51.000Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:20:51.000Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:20:51.000Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.13170012015126598
-[2024-09-04T21:20:51.000Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.13170012015126598
-[2024-09-04T21:20:51.999Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.1568064934863287
-[2024-09-04T21:20:51.999Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.1568064934863287
-[2024-09-04T21:20:52.000Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.1568064934863287
-[2024-09-04T21:20:52.000Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:20:52.000Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:20:52.000Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:20:52.000Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:20:52.000Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.1568064934863287
-[2024-09-04T21:20:52.000Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.1568064934863287
-[2024-09-04T21:20:53.001Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.7337455387566547
-[2024-09-04T21:20:53.001Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.7337455387566547
-[2024-09-04T21:20:53.003Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.7337455387566547
-[2024-09-04T21:20:53.003Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:20:53.003Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:20:53.003Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:20:53.003Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:20:53.003Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.7337455387566547
-[2024-09-04T21:20:53.003Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.7337455387566547
-[2024-09-04T21:20:54.002Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.0564797658152818
-[2024-09-04T21:20:54.003Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.0564797658152818
-[2024-09-04T21:20:54.003Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.0564797658152818
-[2024-09-04T21:20:54.004Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:20:54.004Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:20:54.004Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:20:54.004Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:20:54.004Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.0564797658152818
-[2024-09-04T21:20:54.004Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.0564797658152818
-[2024-09-04T21:20:55.003Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.6372907266612389
-[2024-09-04T21:20:55.003Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.6372907266612389
-[2024-09-04T21:20:55.004Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.6372907266612389
-[2024-09-04T21:20:55.005Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:20:55.005Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:20:55.005Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:20:55.005Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:20:55.005Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.6372907266612389
-[2024-09-04T21:20:55.005Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.6372907266612389
-[2024-09-04T21:20:56.003Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.8465730500927113
-[2024-09-04T21:20:56.003Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.8465730500927113
-[2024-09-04T21:20:56.004Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.8465730500927113
-[2024-09-04T21:20:56.004Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:20:56.004Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:20:56.004Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:20:56.004Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:20:56.004Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.8465730500927113
-[2024-09-04T21:20:56.004Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.8465730500927113
-[2024-09-04T21:20:57.004Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.9948099279856577
-[2024-09-04T21:20:57.004Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.9948099279856577
-[2024-09-04T21:20:57.006Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.9948099279856577
-[2024-09-04T21:20:57.006Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:20:57.006Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:20:57.006Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:20:57.006Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:20:57.006Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.9948099279856577
-[2024-09-04T21:20:57.006Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.9948099279856577
-[2024-09-04T21:20:58.004Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.843429678108444
-[2024-09-04T21:20:58.004Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.843429678108444
-[2024-09-04T21:20:58.005Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.843429678108444
-[2024-09-04T21:20:58.005Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:20:58.005Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:20:58.005Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:20:58.005Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:20:58.005Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.843429678108444
-[2024-09-04T21:20:58.005Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.843429678108444
-[2024-09-04T21:20:59.006Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.03581835349118179
-[2024-09-04T21:20:59.006Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.03581835349118179
-[2024-09-04T21:20:59.008Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.03581835349118179
-[2024-09-04T21:20:59.008Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:20:59.008Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:20:59.008Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:20:59.008Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:20:59.008Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.03581835349118179
-[2024-09-04T21:20:59.008Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.03581835349118179
-[2024-09-04T21:21:00.007Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.3251413768093545
-[2024-09-04T21:21:00.007Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.3251413768093545
-[2024-09-04T21:21:00.008Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.3251413768093545
-[2024-09-04T21:21:00.008Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:21:00.008Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:21:00.008Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:21:00.008Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:21:00.008Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.3251413768093545
-[2024-09-04T21:21:00.008Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.3251413768093545
-[2024-09-04T21:21:01.008Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.45812513647352726
-[2024-09-04T21:21:01.008Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.45812513647352726
-[2024-09-04T21:21:01.009Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.45812513647352726
-[2024-09-04T21:21:01.009Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:21:01.009Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:21:01.009Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:21:01.009Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:21:01.009Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.45812513647352726
-[2024-09-04T21:21:01.009Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.45812513647352726
-[2024-09-04T21:21:02.008Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.3008008503722741
-[2024-09-04T21:21:02.008Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.3008008503722741
-[2024-09-04T21:21:02.009Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.3008008503722741
-[2024-09-04T21:21:02.009Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:21:02.009Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:21:02.009Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:21:02.009Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:21:02.010Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.3008008503722741
-[2024-09-04T21:21:02.010Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.3008008503722741
-[2024-09-04T21:21:03.008Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.6923094436021249
-[2024-09-04T21:21:03.008Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.6923094436021249
-[2024-09-04T21:21:03.010Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.6923094436021249
-[2024-09-04T21:21:03.010Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:21:03.010Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:21:03.010Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:21:03.010Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:21:03.010Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.6923094436021249
-[2024-09-04T21:21:03.010Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.6923094436021249
-[2024-09-04T21:21:04.010Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.19930396194026234
-[2024-09-04T21:21:04.010Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.19930396194026234
-[2024-09-04T21:21:04.011Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.19930396194026234
-[2024-09-04T21:21:04.011Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:21:04.011Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:21:04.011Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:21:04.011Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:21:04.011Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.19930396194026234
-[2024-09-04T21:21:04.011Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.19930396194026234
-[2024-09-04T21:21:05.010Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.07212395234150448
-[2024-09-04T21:21:05.010Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.07212395234150448
-[2024-09-04T21:21:05.012Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.07212395234150448
-[2024-09-04T21:21:05.012Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:21:05.012Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:21:05.012Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:21:05.012Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:21:05.012Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.07212395234150448
-[2024-09-04T21:21:05.012Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.07212395234150448
-[2024-09-04T21:21:06.011Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.2720892898880065
-[2024-09-04T21:21:06.011Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.2720892898880065
-[2024-09-04T21:21:06.012Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.2720892898880065
-[2024-09-04T21:21:06.012Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:21:06.012Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:21:06.012Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:21:06.012Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:21:06.012Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.2720892898880065
-[2024-09-04T21:21:06.012Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.2720892898880065
-[2024-09-04T21:21:07.012Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.18875579885835836
-[2024-09-04T21:21:07.012Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.18875579885835836
-[2024-09-04T21:21:07.014Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.18875579885835836
-[2024-09-04T21:21:07.014Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:21:07.014Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:21:07.014Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:21:07.014Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:21:07.014Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.18875579885835836
-[2024-09-04T21:21:07.014Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.18875579885835836
-[2024-09-04T21:21:08.012Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.7565463429070263
-[2024-09-04T21:21:08.012Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.7565463429070263
-[2024-09-04T21:21:08.013Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.7565463429070263
-[2024-09-04T21:21:08.014Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:21:08.014Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:21:08.014Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:21:08.014Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:21:08.014Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.7565463429070263
-[2024-09-04T21:21:08.014Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.7565463429070263
-[2024-09-04T21:21:09.013Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.7200417861669874
-[2024-09-04T21:21:09.013Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.7200417861669874
-[2024-09-04T21:21:09.015Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.7200417861669874
-[2024-09-04T21:21:09.015Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:21:09.015Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:21:09.015Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:21:09.015Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:21:09.015Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.7200417861669874
-[2024-09-04T21:21:09.015Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.7200417861669874
-[2024-09-04T21:21:10.014Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.44844055697570595
-[2024-09-04T21:21:10.014Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.44844055697570595
-[2024-09-04T21:21:10.015Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.44844055697570595
-[2024-09-04T21:21:10.015Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:21:10.015Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:21:10.015Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:21:10.015Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:21:10.015Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.44844055697570595
-[2024-09-04T21:21:10.015Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.44844055697570595
-[2024-09-04T21:21:11.015Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.9301309755626164
-[2024-09-04T21:21:11.015Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.9301309755626164
-[2024-09-04T21:21:11.017Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.9301309755626164
-[2024-09-04T21:21:11.017Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:21:11.017Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:21:11.017Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:21:11.017Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:21:11.017Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.9301309755626164
-[2024-09-04T21:21:11.017Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.9301309755626164
-[2024-09-04T21:21:12.016Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.3385002363787464
-[2024-09-04T21:21:12.016Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.3385002363787464
-[2024-09-04T21:21:12.017Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.3385002363787464
-[2024-09-04T21:21:12.017Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:21:12.017Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:21:12.017Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:21:12.017Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:21:12.017Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.3385002363787464
-[2024-09-04T21:21:12.017Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.3385002363787464
-[2024-09-04T21:21:13.016Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.919007578862272
-[2024-09-04T21:21:13.017Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.919007578862272
-[2024-09-04T21:21:13.018Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.919007578862272
-[2024-09-04T21:21:13.018Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:21:13.018Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:21:13.018Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:21:13.018Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:21:13.018Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.919007578862272
-[2024-09-04T21:21:13.018Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.919007578862272
-[2024-09-04T21:21:14.016Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.3634035442587036
-[2024-09-04T21:21:14.016Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.3634035442587036
-[2024-09-04T21:21:14.017Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.3634035442587036
-[2024-09-04T21:21:14.017Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:21:14.017Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:21:14.017Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:21:14.017Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:21:14.017Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.3634035442587036
-[2024-09-04T21:21:14.017Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.3634035442587036
-[2024-09-04T21:21:14.722Z] [LOG] [Bootstrap] [AppController] [trigger-event] [example-flow] [btn5] [triggerButton]
-[2024-09-04T21:21:14.722Z] [LOG] [example-flow.component-1725484786590] Publishing: example-flow.btn5.triggerButton -> [object Object]
-[2024-09-04T21:21:14.723Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn5.triggerButton] data: {"targetFlow":"example-flow","targetComponent":"jsm1","targetEvent":"set-reset","_flowId":"example-flow","_componentId":"btn5","_eventId":"triggerButton"}
-[2024-09-04T21:21:14.723Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn5
-[2024-09-04T21:21:14.723Z] [LOG] [example-flow.btn5] Handling event: triggerButton
-[2024-09-04T21:21:14.723Z] [LOG] [example-flow.btn5] Button pressed: example-flow.btn5.triggerButton
-[2024-09-04T21:21:14.724Z] [LOG] [example-flow.btn5] Publishing: example-flow.btn5.buttonPressed -> [object Object]
-[2024-09-04T21:21:14.724Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn5.buttonPressed] data: {"pressedAt":"2024-09-04T21:21:14.724Z","targetFlow":"example-flow","targetComponent":"jsm1","targetEvent":"set-reset"}
-[2024-09-04T21:21:14.724Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn5
-[2024-09-04T21:21:14.724Z] [LOG] [example-flow.btn5] Handling event: buttonPressed
-[2024-09-04T21:21:14.724Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.jsm1.set-reset]
-[2024-09-04T21:21:14.724Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: jsm1
-[2024-09-04T21:21:14.724Z] [LOG] [example-flow.jsm1] Handling event: set-reset
-[2024-09-04T21:21:14.724Z] [WARN] [example-flow.sm1] No transition defined for event 'reset' in state 'running'
-[2024-09-04T21:21:14.724Z] [LOG] [example-flow.btn5] Publishing: example-flow.jsm1.set-reset -> [object Object]
-[2024-09-04T21:21:14.725Z] [LOG] [example-flow.jsm1] Publishing: example-flow.jsm1.get-reset -> [object Object]
-[2024-09-04T21:21:14.726Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.jsm1.get-reset] data: {"previousState":"running","currentState":"running"}
-[2024-09-04T21:21:14.726Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: jsm1
-[2024-09-04T21:21:14.726Z] [LOG] [example-flow.jsm1] Handling event: get-reset
-[2024-09-04T21:21:14.726Z] [LOG] [example-flow.jsm1] Publishing: example-flow.jsm1.stateChanged -> [object Object]
-[2024-09-04T21:21:14.726Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.jsm1.set-reset] data: {"source":"example-flow.btn5","pressedAt":"2024-09-04T21:21:14.724Z"}
-[2024-09-04T21:21:14.726Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: jsm1
-[2024-09-04T21:21:14.726Z] [LOG] [example-flow.jsm1] Handling event: set-reset
-[2024-09-04T21:21:14.726Z] [WARN] [example-flow.sm1] No transition defined for event 'reset' in state 'running'
-[2024-09-04T21:21:14.726Z] [LOG] [example-flow.jsm1] Publishing: example-flow.jsm1.get-reset -> [object Object]
-[2024-09-04T21:21:14.727Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.jsm1.stateChanged] data: {"previousState":"running","currentState":"running","message":"reset"}
-[2024-09-04T21:21:14.727Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: jsm1
-[2024-09-04T21:21:14.727Z] [LOG] [example-flow.jsm1] Handling event: stateChanged
-[2024-09-04T21:21:14.727Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.jsm1.get-reset] data: {"previousState":"running","currentState":"running"}
-[2024-09-04T21:21:14.727Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: jsm1
-[2024-09-04T21:21:14.727Z] [LOG] [example-flow.jsm1] Handling event: get-reset
-[2024-09-04T21:21:14.727Z] [LOG] [example-flow.jsm1] Publishing: example-flow.jsm1.stateChanged -> [object Object]
-[2024-09-04T21:21:14.768Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.jsm1.stateChanged] data: {"previousState":"running","currentState":"running","message":"reset"}
-[2024-09-04T21:21:14.768Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: jsm1
-[2024-09-04T21:21:14.768Z] [LOG] [example-flow.jsm1] Handling event: stateChanged
-[2024-09-04T21:21:15.016Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.8033071141285619
-[2024-09-04T21:21:15.016Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.8033071141285619
-[2024-09-04T21:21:15.017Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.8033071141285619
-[2024-09-04T21:21:15.018Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:21:15.018Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:21:15.018Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:21:15.018Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:21:15.018Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.8033071141285619
-[2024-09-04T21:21:15.018Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.8033071141285619
-[2024-09-04T21:21:16.017Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.5438628325198023
-[2024-09-04T21:21:16.017Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.5438628325198023
-[2024-09-04T21:21:16.019Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.5438628325198023
-[2024-09-04T21:21:16.020Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:21:16.020Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:21:16.020Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:21:16.020Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:21:16.020Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.5438628325198023
-[2024-09-04T21:21:16.020Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.5438628325198023
-[2024-09-04T21:21:17.017Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.26731228965519205
-[2024-09-04T21:21:17.017Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.26731228965519205
-[2024-09-04T21:21:17.018Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.26731228965519205
-[2024-09-04T21:21:17.019Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:21:17.019Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:21:17.019Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:21:17.019Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:21:17.019Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.26731228965519205
-[2024-09-04T21:21:17.019Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.26731228965519205
-[2024-09-04T21:21:18.019Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.07027290699088118
-[2024-09-04T21:21:18.019Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.07027290699088118
-[2024-09-04T21:21:18.021Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.07027290699088118
-[2024-09-04T21:21:18.021Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:21:18.021Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:21:18.021Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:21:18.021Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:21:18.021Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.07027290699088118
-[2024-09-04T21:21:18.021Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.07027290699088118
-[2024-09-04T21:21:19.019Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.9960519873686318
-[2024-09-04T21:21:19.019Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.9960519873686318
-[2024-09-04T21:21:19.020Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.9960519873686318
-[2024-09-04T21:21:19.021Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:21:19.021Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:21:19.021Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:21:19.021Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:21:19.021Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.9960519873686318
-[2024-09-04T21:21:19.021Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.9960519873686318
-[2024-09-04T21:21:20.020Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.9726061932686567
-[2024-09-04T21:21:20.020Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.9726061932686567
-[2024-09-04T21:21:20.022Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.9726061932686567
-[2024-09-04T21:21:20.022Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:21:20.022Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:21:20.022Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:21:20.022Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:21:20.022Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.9726061932686567
-[2024-09-04T21:21:20.022Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.9726061932686567
-[2024-09-04T21:21:21.020Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.9687433177577391
-[2024-09-04T21:21:21.021Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.9687433177577391
-[2024-09-04T21:21:21.022Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.9687433177577391
-[2024-09-04T21:21:21.022Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:21:21.022Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:21:21.022Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:21:21.022Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:21:21.022Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.9687433177577391
-[2024-09-04T21:21:21.022Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.9687433177577391
-[2024-09-04T21:21:22.021Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.6666909035692556
-[2024-09-04T21:21:22.021Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.6666909035692556
-[2024-09-04T21:21:22.023Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.6666909035692556
-[2024-09-04T21:21:22.023Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
-[2024-09-04T21:21:22.023Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
-[2024-09-04T21:21:22.023Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
-[2024-09-04T21:21:22.023Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
-[2024-09-04T21:21:22.023Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.6666909035692556
-[2024-09-04T21:21:22.023Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.6666909035692556
-[2024-09-04T21:21:22.810Z] [LOG] [Bootstrap] [AppController] [trigger-event] [example-flow] [btn4] [triggerButton]
-[2024-09-04T21:21:22.810Z] [LOG] [example-flow.component-1725484786590] Publishing: example-flow.btn4.triggerButton -> [object Object]
-[2024-09-04T21:21:22.811Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn4.triggerButton] data: {"targetFlow":"example-flow","targetComponent":"jsm1","targetEvent":"set-finish","_flowId":"example-flow","_componentId":"btn4","_eventId":"triggerButton"}
-[2024-09-04T21:21:22.811Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn4
-[2024-09-04T21:21:22.811Z] [LOG] [example-flow.btn4] Handling event: triggerButton
-[2024-09-04T21:21:22.811Z] [LOG] [example-flow.btn4] Button pressed: example-flow.btn4.triggerButton
-[2024-09-04T21:21:22.811Z] [LOG] [example-flow.btn4] Publishing: example-flow.btn4.buttonPressed -> [object Object]
-[2024-09-04T21:21:22.812Z] [LOG] [example-flow.btn4] Publishing: example-flow.jsm1.set-finish -> [object Object]
-[2024-09-04T21:21:22.812Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn4.buttonPressed] data: {"pressedAt":"2024-09-04T21:21:22.811Z","targetFlow":"example-flow","targetComponent":"jsm1","targetEvent":"set-finish"}
-[2024-09-04T21:21:22.812Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn4
-[2024-09-04T21:21:22.812Z] [LOG] [example-flow.btn4] Handling event: buttonPressed
-[2024-09-04T21:21:22.812Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.jsm1.set-finish]
-[2024-09-04T21:21:22.812Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: jsm1
-[2024-09-04T21:21:22.812Z] [LOG] [example-flow.jsm1] Handling event: set-finish
-[2024-09-04T21:21:22.812Z] [LOG] [example-flow.sm1] Transitioned from 'running' to 'finished' on event 'finish'
-[2024-09-04T21:21:22.812Z] [LOG] [example-flow.sm1] Publishing: example-flow.sm1.stateChanged -> [object Object]
-[2024-09-04T21:21:22.812Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.jsm1.set-finish] data: {"source":"example-flow.btn4","pressedAt":"2024-09-04T21:21:22.812Z"}
-[2024-09-04T21:21:22.812Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: jsm1
-[2024-09-04T21:21:22.812Z] [LOG] [example-flow.jsm1] Handling event: set-finish
-[2024-09-04T21:21:22.812Z] [WARN] [example-flow.sm1] No transition defined for event 'finish' in state 'finished'
-[2024-09-04T21:21:22.813Z] [LOG] [example-flow.jsm1] Publishing: example-flow.jsm1.get-finish -> [object Object]
-[2024-09-04T21:21:22.814Z] [LOG] [example-flow.jsm1] Publishing: example-flow.jsm1.get-finish -> [object Object]
-[2024-09-04T21:21:22.814Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.sm1.stateChanged] data: {"previousState":"running","currentState":"finished","event":"finish"}
-[2024-09-04T21:21:22.814Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: sm1
-[2024-09-04T21:21:22.814Z] [LOG] [example-flow.sm1] Handling event: stateChanged
-[2024-09-04T21:21:22.814Z] [WARN] [example-flow.sm1] Unknown event: stateChanged
-[2024-09-04T21:21:22.814Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.jsm1.get-finish] data: {"previousState":"finished","currentState":"finished"}
-[2024-09-04T21:21:22.814Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: jsm1
-[2024-09-04T21:21:22.814Z] [LOG] [example-flow.jsm1] Handling event: get-finish
-[2024-09-04T21:21:22.814Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.gen2.stop]
-[2024-09-04T21:21:22.814Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: gen2
-[2024-09-04T21:21:22.814Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: stop
-[2024-09-04T21:21:22.814Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) stopping number generation
-[2024-09-04T21:21:22.814Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) stopGenerating method called
-[2024-09-04T21:21:22.814Z] [LOG] [example-flow.jsm1] Publishing: example-flow.jsm1.stateChanged -> [object Object]
-[2024-09-04T21:21:22.858Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.jsm1.get-finish] data: {"previousState":"running","currentState":"finished"}
-[2024-09-04T21:21:22.858Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: jsm1
-[2024-09-04T21:21:22.858Z] [LOG] [example-flow.jsm1] Handling event: get-finish
-[2024-09-04T21:21:22.858Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.gen2.stop]
-[2024-09-04T21:21:22.858Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: gen2
-[2024-09-04T21:21:22.858Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: stop
-[2024-09-04T21:21:22.859Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) stopping number generation
-[2024-09-04T21:21:22.859Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) stopGenerating method called
-[2024-09-04T21:21:22.859Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.jsm1.stateChanged] data: {"previousState":"finished","currentState":"finished","message":"finish"}
-[2024-09-04T21:21:22.859Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: jsm1
-[2024-09-04T21:21:22.859Z] [LOG] [example-flow.jsm1] Handling event: stateChanged
-[2024-09-04T21:21:22.859Z] [LOG] [example-flow.jsm1] Publishing: example-flow.jsm1.stateChanged -> [object Object]
-[2024-09-04T21:21:22.860Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.jsm1.stateChanged] data: {"previousState":"running","currentState":"finished","message":"finish"}
-[2024-09-04T21:21:22.860Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: jsm1
-[2024-09-04T21:21:22.860Z] [LOG] [example-flow.jsm1] Handling event: stateChanged
+[2024-09-04T22:30:08.230Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.init] data: undefined
+[2024-09-04T22:30:08.230Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
+[2024-09-04T22:30:08.230Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: init
+[2024-09-04T22:30:08.230Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: multi (numberMultiplier) for flow: example-flow
+[2024-09-04T22:30:08.271Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.multi.init] data: undefined
+[2024-09-04T22:30:08.271Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: multi
+[2024-09-04T22:30:08.271Z] [LOG] [example-flow.multi] NumberMultiplier handling event: init undefined
