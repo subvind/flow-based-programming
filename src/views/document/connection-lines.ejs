@@ -23,13 +23,14 @@
       const fromComponentId = fromComponent.id;
       const outputPorts = fromComponent.querySelectorAll('.output-port');
       
+      // Handle all component ports that are publish dataMethod
       outputPorts.forEach(outputPort => {
-        const fromEvent = outputPort.dataset.port;
+        const fromEvent = outputPort.dataset.port; // io format: <dataType>.<dataMethod>.<eventId>
         
         // Find connections for this output port
         const connections = window.flowConnections.filter(conn => 
           conn.fromComponent === fromComponentId.split('.')[1] && 
-          conn.fromEvent === fromEvent.split('.')[2]
+          conn.fromEvent === fromEvent.split('.')[2] 
         );
         
         connections.forEach(connection => {
@@ -43,6 +44,21 @@
             }
           }
         });
+      });
+
+      // Handle all input ports that are display dataMethod
+      const inputPorts = fromComponent.querySelectorAll('.output-port');
+      inputPorts.forEach(inputPort => {
+        const fromEvent = inputPort.dataset.port; // io format: <dataType>.<dataMethod>.<eventId>
+
+        if (fromEvent) {
+          if (fromEvent.split('.')[1] === 'display') {
+            const outputPort = document.querySelector(`.input-port[data-port="${fromEvent}"]`);
+            if (outputPort) {
+              drawLine(inputPort, outputPort);
+            }
+          }
+        }
       });
     });
   }

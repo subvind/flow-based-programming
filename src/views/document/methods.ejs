@@ -51,7 +51,9 @@
       swap: 'none',
       handler: (dom, event) => {
         next.targetSwimlane.innerHTML = event.xhr.response;
-        htmx.process(document.getElementById(next.targetSwimlane.id))
+        htmx.process(document.getElementById(next.targetSwimlane.id));
+
+        drawConnectionLines();
       }
     });
   }

@@ -272,6 +272,52 @@ export function dot(a: V3, b: V3): number {
 
 You will now be given the actual INPUT you must work with.
 
+<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/connection.interface.ts">
+import { Component } from "./component.interface";
+
+export interface Connection {
+  toFlow: string;
+  toComponent: string;
+  toEvent: string;
+  connectedTo: Component | undefined;
+  fromFlow: string;
+  fromComponent: string;
+  fromEvent: string;
+  connectedFrom: Component | undefined;
+  next: Component | undefined;
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/component.interface.ts">
+import { Connection } from "./connection.interface";
+import { Port } from "./port.interface";
+
+export interface Component {
+  ports: { inputs: string[]; outputs: string[]; };
+  componentRef: string;
+  slug: string;
+  description?: string;
+  flowId: string;
+  componentId: string;
+  handleEvent: (eventId: string, data: any) => Promise<void>;
+  publish: (flowId: string, componentId: string, eventId: string, data: any) => Promise<void>;
+  getPorts: () => Promise<{ inputs: Port[], outputs: Port[] }>;
+  findPort: (portId: string) => Promise<Port>;
+  findConnections: (port: Port) => Promise<Connection[]>
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/flow.interface.ts">
+import { Connection } from "./connection.interface";
+
+export interface Flow {
+  id: string;
+  components: {
+    componentId: string;
+    componentRef: string;
+    init: any | undefined;
+  }[];
+  connections: Connection[];
+}
+</FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/views/document/component.ejs">
 <% if (component) { %>
   <div id="<%- component.flowId %>.<%- component.componentId %>" class="component-wrapper">
@@ -321,60 +367,41 @@ You will now be given the actual INPUT you must work with.
   });
 </script>
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/views/document/view.ejs">
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%- message %></title>
-  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
-  <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/json-enc.js"></script>
-  <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
-  <%- include('style') %>
-</head>
-<body>
-  <div class="container">
-    <div class="sidebar">
-      <%- include('component-selector', { flowId: selected.flowId, componentId: selected.componentId, components: components }) %>
-    </div>
-    <div class="main-content">
-      <div id="swimlane-container" class="swimlane-container">
-        <div id="main-swimlane" class="swimlane" data-index="0"
-             hx-get="/documentComponent/<%= selected.flowId %>/<%= selected.componentId %>/main-swimlane"
-             hx-trigger="load"
-             hx-target="#main-swimlane">
-          <!-- Main component will be loaded here -->
+<FILE path="/home/travis/Projects/flow-based-programming/src/views/document/connections.ejs">
+<div id="<%- flowId %>.<%- componentId %>.<%- portId %>" class="swimlane-content" data-swimlane-id="<%- swimlaneId %>">
+  <% if (port && port.dataMethod) { %>
+    <% if (port.dataMethod === 'publish') { %>
+      <% if (connections.length) { %>
+        <% connections.forEach(connection => { %>
+          <%- include('component', { component: connection.next, swimlaneId }); %> 
+        <% }) %>
+      <% } else { %>
+        <br />
+        <div class="component">no connections found</div>  
+      <% } %>
+    <% } %>
+  
+    <% if (port.dataMethod === 'display') { %>
+      <div id="<%- flowId %>.<%- componentId %>" class="component-wrapper">
+        <div class="event-anchor input-anchors">
+          <div class="input-port" data-port="<%- portId %>">
+            <button onclick="loadMainComponent('input', '<%- flowId %>', '<%- componentId %>', '<%- swimlaneId %>')">input</button>
+            <div class="port-name">
+              <%- portId %> 
+            </div>
+            <br>
+          </div>
+        </div>
+        <div class="template">
+          <%- templateContent %>
         </div>
       </div>
-    </div>
-  </div>
+    <% } %>
+  <% } else { %>
+    <div>component not found</div>  
+  <% } %>
+</div>
 
-  <script>
-    const socket = io();
-
-    socket.on('display-flow-component-template-content', function(event) {
-      const targetId = `${event.flowId}.${event.componentId}.${event.templateId}`;
-      const targetElement = document.getElementById(targetId);
-      console.log('display-flow-component-template-content', targetId);
-      if (targetElement) {
-        targetElement.outerHTML = event.content;
-        // Reinitialize HTMX on the new content
-        htmx.process(document.getElementById(targetId));
-      }
-    });
-
-    htmx.on("htmx:configRequest", (event) => {
-      event.detail.headers['Content-Type'] = 'application/json';
-    });
-  
-    const flowConnections = JSON.parse(`<%- JSON.stringify(connections, null, 2); %>`);
-    window.addEventListener('load', () => initializeFlowConnections(flowConnections));
-  </script>
-  <%- include('methods') %>
-  <%- include('connection-lines') %>
-</body>
-</html>
 </FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/views/document/style.ejs">
 <style>
@@ -475,6 +502,7 @@ You will now be given the actual INPUT you must work with.
     padding: 0.5em;
     overflow-y: auto;
     border-right: 1px solid #111;
+    z-index: 10;
   }
 
   .main-content {
@@ -540,35 +568,60 @@ You will now be given the actual INPUT you must work with.
   }
 </style>
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/views/main.ejs">
-<main>
-  <h1>FBP Steam Engine</h1>
-  <p>The complete Flow-based Programming solution:</p>
-  <div style="overflow: hidden;">
-    <ul class="navigation">
-      <li><a href="/flows"><button>flows</button></a></li>
-      <li><a href="/components"><button>components</button></a></li>
-      <li><a href="/events"><button>events</button></a></li>
-      <li><a href="/stateMachines"><button>state machines</button></a></li>
-      <li><a href="/templates"><button>templates</button></a></li>
-      <li><a href="/logs"><button>logs</button></a></li>
-    </ul>
+<FILE path="/home/travis/Projects/flow-based-programming/src/views/document/view.ejs">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%- message %></title>
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/json-enc.js"></script>
+  <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
+  <%- include('style') %>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <%- include('component-selector', { flowId: selected.flowId, componentId: selected.componentId, components: components }) %>
+    </div>
+    <div class="main-content">
+      <div id="swimlane-container" class="swimlane-container">
+        <div id="main-swimlane" class="swimlane" data-index="0"
+             hx-get="/documentComponent/<%= selected.flowId %>/<%= selected.componentId %>/main-swimlane"
+             hx-trigger="load"
+             hx-target="#main-swimlane">
+          <!-- Main component will be loaded here -->
+        </div>
+      </div>
+    </div>
   </div>
-  <p>
-    > Works best with multiple screens! (chart, document, logger)<br />
-    > *ideal for domain specific languages*
-  </p>
-  <hr>
-  <p>
-    What is FBP? Is it time for a new Steam Engine?<br />
-    <a href="https://www.youtube.com/watch?v=up2yhNTsaDs" target="_blank">https://www.youtube.com/watch?v=up2yhNTsaDs</a>
-  </p>  
-  <p>
-    Fork this FBP Steam Engine repository for each application.<br />
-    <a href="https://github.com/subvind/flow-based-programming" target="_blank">https://github.com/subvind/flow-based-programming</a>
-  </p>
-  <span>~made with &hearts; by <a href="https://istrav.com">isTrav</a> & <a href="https://subvind.com">subVind</a> + ai :)</span>
-</main>
+
+  <script>
+    const socket = io();
+
+    socket.on('display-flow-component-template-content', function(event) {
+      const targetId = `${event.flowId}.${event.componentId}.${event.templateId}`;
+      const targetElement = document.getElementById(targetId);
+      console.log('display-flow-component-template-content', targetId);
+      if (targetElement) {
+        targetElement.outerHTML = event.content;
+        // Reinitialize HTMX on the new content
+        htmx.process(document.getElementById(targetId));
+      }
+    });
+
+    htmx.on("htmx:configRequest", (event) => {
+      event.detail.headers['Content-Type'] = 'application/json';
+    });
+  
+    const flowConnections = JSON.parse(`<%- JSON.stringify(connections, null, 2); %>`);
+    window.addEventListener('load', () => initializeFlowConnections(flowConnections));
+  </script>
+  <%- include('methods') %>
+  <%- include('connection-lines') %>
+</body>
+</html>
 </FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/views/style.ejs">
 
@@ -692,103 +745,109 @@ export class FlowExecutorService {
   }
 }
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/connection.interface.ts">
-import { Component } from "./component.interface";
+<FILE path="/home/travis/Projects/flow-based-programming/src/services/component-registry.service.ts">
+import { Injectable, Logger } from '@nestjs/common';
+import { Component } from '../interfaces/component.interface';
 
-export interface Connection {
-  toFlow: string;
-  toComponent: string;
-  toEvent: string;
-  connectedTo: Component | undefined;
-  fromFlow: string;
-  fromComponent: string;
-  fromEvent: string;
-  connectedFrom: Component | undefined;
-  next: Component | undefined;
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/component.interface.ts">
-import { Connection } from "./connection.interface";
-import { Port } from "./port.interface";
+@Injectable()
+export class ComponentRegistry {
+  private components: Map<string, Component> = new Map();
+  private readonly logger = new Logger(ComponentRegistry.name);
 
-export interface Component {
-  ports: { inputs: string[]; outputs: string[]; };
-  componentRef: string;
-  slug: string;
-  description?: string;
-  flowId: string;
-  componentId: string;
-  handleEvent: (eventId: string, data: any) => Promise<void>;
-  publish: (flowId: string, componentId: string, eventId: string, data: any) => Promise<void>;
-  getPorts: () => Promise<{ inputs: Port[], outputs: Port[] }>;
-  findPort: (portId: string) => Promise<Port>;
-  findConnections: (port: Port) => Promise<Connection[]>
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/flow.interface.ts">
-import { Connection } from "./connection.interface";
+  registerComponent(component: Component) {
+    const key = `${component.flowId}.${component.componentId}`;
+    this.logger.log(`Registering component: ${key}`);
+    this.components.set(key, component);
+  }
 
-export interface Flow {
-  id: string;
-  components: {
-    componentId: string;
-    componentRef: string;
-    init: any | undefined;
-  }[];
-  connections: Connection[];
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/schema/flow.schema.ts">
-import { Flow } from "../interfaces/flow.interface";
-
-export function schema(flow: any): Flow {
-  const components = Object.entries(flow.components).map(([componentId, component]) => {
-    const [componentRef] = Object.keys(component);
-    let init;
-    let ports = { inputs: [], outputs: [] };
-
-    if (component[componentRef].init) {
-      init = component[componentRef].init;
+  getComponent(flowId: string, componentId: string): Component | undefined {
+    const key = `${flowId}.${componentId}`;
+    const component = this.components.get(key);
+    if (!component) {
+      this.logger.warn(`Component not found: ${key}`);
     }
-
-    if (component[componentRef].ports) {
-      if (component[componentRef].ports.inputs) {
-        ports.inputs = Object.keys(component[componentRef].ports.inputs);
-      }
-      if (component[componentRef].ports.outputs) {
-        ports.outputs = Object.keys(component[componentRef].ports.outputs);
-      }
-    }
-
-    return { componentId, componentRef, init, ports };
-  });
-
-  const connections = flow.connections.map((connection) => {
-    const fromParts = connection.from.split('.');
-    const toParts = connection.to.split('.');
-
-    // parts format: components.<componentId>.<componentRef>.ports.inputs.<eventId>
-    
-    return {
-      fromFlow: flow.id,
-      fromComponent: fromParts[1],
-      fromEvent: fromParts[5],
-      toFlow: flow.id,
-      toComponent: toParts[1],
-      toEvent: toParts[5],
-    };
-  });
-
-  let code = {
-    id: flow.id,
-    components,
-    connections,
-  };
-
-  // console.log('code', code);
-
-  return code;
+    return component;
+  }
 }
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/views/flow/index.ejs">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%- message %></title>
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/json-enc.js"></script>
+  <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
+  <%- include('../document/style') %>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <%- include('component-selector', { flowId: flowId, components: components }) %>
+    </div>
+    <div class="main-content">
+      <div style="padding: 1em 3em;">
+        <h1>Select a Component</h1>
+        <div id="component-details">
+          <p>Select a component to view its details.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const socket = io();
+
+    socket.on('display-flow-component-template-content', function(event) {
+      const targetId = `${event.flowId}.${event.componentId}.${event.templateId}`;
+      const targetElement = document.getElementById(targetId);
+      console.log(targetId, event.content);
+      if (targetElement) {
+        targetElement.outerHTML = event.content;
+        // Reinitialize HTMX on the new content
+        htmx.process(document.getElementById(targetId));
+      }
+    });
+
+    htmx.on("htmx:configRequest", (event) => {
+      event.detail.headers['Content-Type'] = 'application/json';
+    });
+  </script>
+  <%- include('../document/methods') %> 
+</body>
+</html>
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/views/main.ejs">
+<main>
+  <h1>FBP Steam Engine</h1>
+  <p>The complete Flow-based Programming solution:</p>
+  <div style="overflow: hidden;">
+    <ul class="navigation">
+      <li><a href="/flows"><button>flows</button></a></li>
+      <li><a href="/components"><button>components</button></a></li>
+      <li><a href="/events"><button>events</button></a></li>
+      <li><a href="/stateMachines"><button>state machines</button></a></li>
+      <li><a href="/templates"><button>templates</button></a></li>
+      <li><a href="/logs"><button>logs</button></a></li>
+    </ul>
+  </div>
+  <p>
+    > Works best with multiple screens! (chart, document, logger)<br />
+    > *ideal for domain specific languages*
+  </p>
+  <hr>
+  <p>
+    What is FBP? Is it time for a new Steam Engine?<br />
+    <a href="https://www.youtube.com/watch?v=up2yhNTsaDs" target="_blank">https://www.youtube.com/watch?v=up2yhNTsaDs</a>
+  </p>  
+  <p>
+    Fork this FBP Steam Engine repository for each application.<br />
+    <a href="https://github.com/subvind/flow-based-programming" target="_blank">https://github.com/subvind/flow-based-programming</a>
+  </p>
+  <span>~made with &hearts; by <a href="https://istrav.com">isTrav</a> & <a href="https://subvind.com">subVind</a> + ai :)</span>
+</main>
 </FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/controllers/app.controller.ts">
 import { Logger, Controller, Get, Post, Render, Body, Param, Res, Req } from '@nestjs/common';
@@ -1104,11 +1163,20 @@ export async function bootstrapApp(logger: CustomLogger): Promise<any> {
 </FILE>
 <FILE path="src/views/document/connection-lines.ejs" TARGET>
 <script>
+  let resizeObserver;
+
   function drawConnectionLines() {
+    console.log('window.flowConnections', window.flowConnections)
     const svg = document.getElementById('connection-lines');
     if (!svg) {
       const newSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       newSvg.id = 'connection-lines';
+      newSvg.style.position = 'absolute';
+      newSvg.style.top = '0';
+      newSvg.style.left = '0';
+      newSvg.style.width = '100%';
+      newSvg.style.height = '100%';
+      newSvg.style.pointerEvents = 'none';
       document.body.appendChild(newSvg);
     }
     
@@ -1126,7 +1194,7 @@ export async function bootstrapApp(logger: CustomLogger): Promise<any> {
         // Find connections for this output port
         const connections = window.flowConnections.filter(conn => 
           conn.fromComponent === fromComponentId.split('.')[1] && 
-          conn.fromEvent === fromEvent.split('.')[2]
+          conn.fromEvent === fromEvent.split('.')[2] // io format: <dataType>.<dataMethod>.<eventId>
         );
         
         connections.forEach(connection => {
@@ -1136,6 +1204,30 @@ export async function bootstrapApp(logger: CustomLogger): Promise<any> {
           if (toComponent) {
             const inputPort = toComponent.querySelector(`.input-port[data-port$=".${connection.toEvent}"]`);
             if (inputPort) {
+              drawLine(outputPort, inputPort);
+            }
+          }
+        });
+      });
+
+      // Handle all input ports, including htmx.display
+      const inputPorts = fromComponent.querySelectorAll('.input-port');
+      inputPorts.forEach(inputPort => {
+        const toEvent = inputPort.dataset.port;
+
+        // Find connections for this input port
+        const connections = window.flowConnections.filter(conn => 
+          conn.toComponent === fromComponentId.split('.')[1] && 
+          conn.toEvent === toEvent
+        );
+
+        connections.forEach(connection => {
+          const fromComponentId = `${connection.fromFlow}.${connection.fromComponent}`;
+          const fromComponent = document.getElementById(fromComponentId);
+          
+          if (fromComponent) {
+            const outputPort = fromComponent.querySelector(`.output-port[data-port$=".${connection.fromEvent}"]`);
+            if (outputPort) {
               drawLine(outputPort, inputPort);
             }
           }
@@ -1166,15 +1258,43 @@ export async function bootstrapApp(logger: CustomLogger): Promise<any> {
     svg.appendChild(line);
   }
 
-  window.addEventListener('resize', drawConnectionLines);
+  function setupResizeObserver() {
+    if (resizeObserver) {
+      resizeObserver.disconnect();
+    }
 
-  // This function should be called when the flow data is loaded
+    resizeObserver = new ResizeObserver(drawConnectionLines);
+    const swimlanes = document.querySelectorAll('.swimlane');
+    swimlanes.forEach(swimlane => resizeObserver.observe(swimlane));
+  }
+
   function initializeFlowConnections(flowConnections) {
     window.flowConnections = flowConnections;
     drawConnectionLines();
+    setupResizeObserver();
   }
+
+  window.addEventListener('resize', drawConnectionLines);
+  window.addEventListener('scroll', drawConnectionLines);
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const swimlaneContainer = document.getElementById('swimlane-container');
+    if (swimlaneContainer) {
+      swimlaneContainer.addEventListener('scroll', drawConnectionLines);
+    }
+    const mainSwimlane = document.getElementById('main-swimlane');
+    if (mainSwimlane) {
+      mainSwimlane.addEventListener('scroll', drawConnectionLines);
+    }
+  });
+
+  // Call drawConnectionLines after any HTMX content updates
+  document.body.addEventListener('htmx:afterSettle', () => {
+    drawConnectionLines();
+    setupResizeObserver();
+  });
 </script>
 </FILE>
 <REQUEST>
-lines are not displaying properly or updated when the swimlanes are scrolled up and down or when the page is scrolled left and right
+htmx.display is not a connection to a fbp component it is just a connection to a websocket. its eventId and componentId between connections are the same.
 </REQUEST>
