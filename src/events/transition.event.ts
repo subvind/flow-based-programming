@@ -13,16 +13,18 @@ export async function transition(process, message): Promise<void> {
 
   await process.updateDisplay();
   
-  // Publish to the specific event port
-  await process.publish(process.flowId, process.componentId, `get-${message}`, { 
-    previousState,
-    currentState
-  });
-
-  // Also publish to the general stateChanged port
-  await process.publish(process.flowId, process.componentId, 'stateChanged', { 
-    previousState,
-    currentState,
-    message
-  });
+  if (previousState !== currentState) {
+    // Publish to the specific event port
+    await process.publish(process.flowId, process.componentId, `get-${message}`, { 
+      previousState,
+      currentState
+    });
+  
+    // Also publish to the general stateChanged port
+    await process.publish(process.flowId, process.componentId, 'stateChanged', { 
+      previousState,
+      currentState,
+      message
+    });
+  }
 }
