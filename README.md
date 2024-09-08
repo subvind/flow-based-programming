@@ -3,10 +3,10 @@ flow-based-programming
 What is FBP? Is it time for a new Steam Engine?
 https://www.youtube.com/watch?v=up2yhNTsaDs 
 
-Fork this FBP Steam Engine repository for each application.
+Fork this repository for each application.
 https://github.com/subvind/flow-based-programming
 
-Steam Engine:
+FBP:
   - we don't try to control the exact sequence of every event
   - much like clay; very maluable in development, then britle in production
   - clear and obvious changes
@@ -19,9 +19,11 @@ Steam Engine:
   - structure as typescript
   - simple visible structure with clean interfaces
   - black box components = simple on the outside + complex(?) on the inside
-  - dataflow between components using rabbitmq
+  - dataflow between components using a backplane
+  - backplane compatibility with rabbitmq or ismq (default)
   - moveable components
   - reusable components
+  - nestable components
   - paramiterized components to the point of a mini language
   - ideal for domain specific languages
   - chart + document + logger = steam engine
