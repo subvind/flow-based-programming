@@ -1,0 +1,43 @@
+c[[90m6:29:24 PM[0m] Starting compilation in watch mode...
+
+[[90m6:29:25 PM[0m] Found 0 errors. Watching for file changes.
+
+[AppModule] RabbitMQ URI: amqp://localhost:5672
+[32m[Nest] 1465187  - [39m09/09/2024, 6:29:25 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 1465187  - [39m09/09/2024, 6:29:25 PM [32m    LOG[39m [38;5;3m[AmqpConnection] [39m[32mTrying to connect to RabbitMQ broker (default)[39m
+[32m[Nest] 1465187  - [39m09/09/2024, 6:29:25 PM [32m    LOG[39m [38;5;3m[RabbitMQModule] [39m[32mSuccessfully connected to RabbitMQ[39m
+[32m[Nest] 1465187  - [39m09/09/2024, 6:29:25 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDiscoveryModule dependencies initialized[39m[38;5;3m +8ms[39m
+[32m[Nest] 1465187  - [39m09/09/2024, 6:29:25 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRabbitMQModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 1465187  - [39m09/09/2024, 6:29:25 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +0ms[39m
+[2024-09-09T23:29:25.404Z] [LOG] [Bootstrap] Starting main application...
+[2024-09-09T23:29:25.404Z] [LOG] [Bootstrap] [NestFactory] Starting Nest application...
+[2024-09-09T23:29:25.407Z] [LOG] [Bootstrap] [AmqpConnection] Trying to connect to RabbitMQ broker (default)
+[2024-09-09T23:29:25.408Z] [LOG] [Bootstrap] [RabbitMQModule] Successfully connected to RabbitMQ
+[2024-09-09T23:29:25.409Z] [LOG] [Bootstrap] [InstanceLoader] DiscoveryModule dependencies initialized
+[2024-09-09T23:29:25.409Z] [LOG] [Bootstrap] [InstanceLoader] RabbitMQModule dependencies initialized
+[2024-09-09T23:29:25.409Z] [LOG] [Bootstrap] [InstanceLoader] AppModule dependencies initialized
+[2024-09-09T23:29:25.417Z] [LOG] [Bootstrap] [WebSocketsController] EventTriggerComponent subscribed to the "client-event" message
+[2024-09-09T23:29:25.417Z] [LOG] [Bootstrap] [WebSocketsController] NumberGeneratorComponent subscribed to the "client-event" message
+[2024-09-09T23:29:25.418Z] [LOG] [Bootstrap] [WebSocketsController] NumberMultiplierComponent subscribed to the "client-event" message
+[2024-09-09T23:29:25.418Z] [LOG] [Bootstrap] [WebSocketsController] StateMachineComponent subscribed to the "client-event" message
+[2024-09-09T23:29:25.418Z] [LOG] [Bootstrap] [WebSocketsController] JobStateMachineComponent subscribed to the "client-event" message
+[2024-09-09T23:29:25.418Z] [LOG] [Bootstrap] [WebSocketsController] ButtonTriggerComponent subscribed to the "client-event" message
+[2024-09-09T23:29:25.419Z] [LOG] [Bootstrap] [RoutesResolver] AppController {/}:
+[2024-09-09T23:29:25.421Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/, GET} route
+[2024-09-09T23:29:25.421Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/flows, GET} route
+[2024-09-09T23:29:25.422Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/flow/:flowId, GET} route
+[2024-09-09T23:29:25.422Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/document/:flowId/:componentId, GET} route
+[2024-09-09T23:29:25.422Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentComponent/:flowId/:componentId/:swimlaneId, GET} route
+[2024-09-09T23:29:25.422Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentConnections/:flowId/:componentId/:portId/:swimlaneId, GET} route
+[2024-09-09T23:29:25.422Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/logger, GET} route
+[2024-09-09T23:29:25.422Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/trigger-event/:flowComponentEvent, POST} route
+[2024-09-09T23:29:25.423Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/template/:flowId/:componentId/:templateId, GET} route
+[2024-09-09T23:29:25.424Z] [WARN] [Bootstrap] [BackplaneService] Channel not initialized, attempting to reconnect...
+[2024-09-09T23:29:25.424Z] [LOG] [Bootstrap] [BackplaneService] Connecting to RabbitMQ...
+[2024-09-09T23:29:25.426Z] [ERROR] [Bootstrap] Bootstrap error: Failed to initialize channel
+[2024-09-09T23:29:25.426Z] [ERROR] [Bootstrap] Error: Failed to initialize channel
+    at BackplaneService.ensureConnection (/home/travis/Projects/flow-based-programming/src/services/backplane.service.ts:72:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at BackplaneService.subscribe (/home/travis/Projects/flow-based-programming/src/services/backplane.service.ts:53:5)
+    at EventProcessor.subscribeToEvents (/home/travis/Projects/flow-based-programming/src/processors/event.processor.ts:20:5)
+    at EventProcessor.onModuleInit (/home/travis/Projects/flow-based-programming/src/processors/event.processor.ts:16:5)

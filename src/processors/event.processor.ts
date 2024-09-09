@@ -1,19 +1,37 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ComponentRegistry } from '../services/component-registry.service';
+import { BackplaneService } from '../services/backplane.service';
 
 @Injectable()
-export class EventProcessor {
+export class EventProcessor implements OnModuleInit {
   private readonly logger = new Logger(EventProcessor.name);
   private connections: Map<string, Array<{ toFlow: string; toComponent: string; toEvent: string }>> = new Map();
 
-  constructor(private componentRegistry: ComponentRegistry) {}
+  constructor(
+    private componentRegistry: ComponentRegistry,
+    private backplaneService: BackplaneService
+  ) {}
 
-  @RabbitSubscribe({
-    exchange: 'flow_exchange',
-    routingKey: 'componentEvent',
-    queue: 'component_event_queue',
-  })
+  async onModuleInit() {
+    await this.subscribeToEvents();
+  }
+
+  private async subscribeToEvents() {
+    await this.backplaneService.subscribe(
+      'flow_exchange',
+      'componentEvent',
+      'component_event_queue',
+      this.handleComponentEvent.bind(this)
+    );
+
+    await this.backplaneService.subscribe(
+      'flow_exchange',
+      'createConnection',
+      'create_connection_queue',
+      this.createConnection.bind(this)
+    );
+  }
+
   async handleComponentEvent(msg: {flowId: string, componentId: string, eventId: string, data: any}): Promise<void> {
     const { flowId, componentId, eventId, data: eventData } = msg;
     this.logger.log(`[handleComponentEvent] [${flowId}.${componentId}.${eventId}] data: ${JSON.stringify(eventData)}`);
@@ -43,11 +61,6 @@ export class EventProcessor {
     }
   }
 
-  @RabbitSubscribe({
-    exchange: 'flow_exchange',
-    routingKey: 'createConnection',
-    queue: 'create_connection_queue',
-  })
   async createConnection(msg: {flowId: string, fromComponent: string, fromEvent: string, toComponent: string, toEvent: string}): Promise<void>  {
     const { flowId, fromComponent, fromEvent, toComponent, toEvent } = msg;
     this.logger.log(`Received createConnection: ${flowId}.${fromComponent}.${fromEvent} -> ${toComponent}.${toEvent}`);

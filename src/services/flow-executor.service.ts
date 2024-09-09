@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { ComponentRegistry } from './component-registry.service';
 import { Flow } from '../interfaces/flow.interface';
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
@@ -7,6 +6,7 @@ import { Server } from 'socket.io';
 import { initializeComponent } from '../initializers/component.initialize';
 import { Component } from 'src/interfaces/component.interface';
 import { TemplateCacheService } from './template-cache.service';
+import { BackplaneService } from './backplane.service';
 
 @WebSocketGateway()
 @Injectable()
@@ -16,11 +16,10 @@ export class FlowExecutorService {
   private flows: Flow[] = [];
   
   constructor(
-    private amqpConnection: AmqpConnection,
+    private backplaneService: BackplaneService,
     private componentRegistry: ComponentRegistry,
     private templateCacheService: TemplateCacheService
-  ) {
-  }
+  ) {}
 
   async getFlows(): Promise<Flow[]> {
     return this.flows;
@@ -43,7 +42,7 @@ export class FlowExecutorService {
     // Create connections
     for (const connection of flow.connections) {
       this.logger.log(`Creating connection: ${connection.fromComponent}.${connection.fromEvent} -> ${connection.toComponent}.${connection.toEvent}`);
-      await this.amqpConnection.publish('flow_exchange', 'createConnection', { ...connection, flowId: flow.id });
+      await this.backplaneService.publish('flow_exchange', 'createConnection', { ...connection, flowId: flow.id });
     }
 
     // Construct components
@@ -52,7 +51,7 @@ export class FlowExecutorService {
       this.logger.log(`Constructing component: ${component.componentId} (${component.componentRef}) for flow: ${flow.id}`);
       
       // initialize a new component instance
-      let componentInstance: Component = initializeComponent(flow, component, this.amqpConnection, this.server, this.templateCacheService);
+      let componentInstance: Component = initializeComponent(flow, component, this.backplaneService, this.server, this.templateCacheService);
 
       // register new instance with component registery
       this.componentRegistry.registerComponent(componentInstance);
@@ -70,12 +69,12 @@ export class FlowExecutorService {
       this.logger.log(`Initializing component: ${component.componentId} (${component.componentRef}) for flow: ${flow.id}`);
 
       try {
-        await this.amqpConnection.publish('flow_exchange', 'componentEvent', {
+        await this.backplaneService.publish('flow_exchange', 'componentEvent', {
           flowId: flow.id,
-          componentId: component.componentId, // dynamically defined
-          componentRef: component.componentRef, // hard code defined
-          eventId: 'init', // flow executor defined
-          data: component.init, // dynamically defined
+          componentId: component.componentId,
+          componentRef: component.componentRef,
+          eventId: 'init',
+          data: component.init,
         });
       } catch (error) {
         this.logger.error(`Error initializing component ${component.componentId} for flow ${flow.id}:`, error);

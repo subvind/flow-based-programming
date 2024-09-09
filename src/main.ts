@@ -2,7 +2,6 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './modules/app.module';
 import { CustomLogger } from './logger/custom-logger';
 import { bootstrapApp } from './bootstrap/app.bootstrap';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { EventEmitter } from 'events';
 
 async function bootstrap(): Promise<void> {
@@ -11,11 +10,8 @@ async function bootstrap(): Promise<void> {
 
   const app = await NestFactory.create(AppModule);
   
-  // Get the AmqpConnection from the app context
-  const amqpConnection = app.get(AmqpConnection);
-  
-  // Create the CustomLogger with the AmqpConnection
-  const logger = new CustomLogger('Bootstrap', amqpConnection);
+  // Create the CustomLogger
+  const logger = new CustomLogger('Bootstrap');
   
   try {
     logger.log('Starting main application...');

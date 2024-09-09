@@ -1,7 +1,7 @@
 import { CustomLogger } from '../../logger/custom-logger';
 import { Injectable, Inject } from '@nestjs/common';
 import { ComponentBase } from '../../bases/component.base';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { BackplaneService } from 'src/services/backplane.service';
 import { Server } from 'socket.io';
 import { TemplateCacheService } from 'src/services/template-cache.service';
 
@@ -31,14 +31,14 @@ export class StateMachineComponent extends ComponentBase {
   constructor(
     @Inject('FLOW_ID') flowId: string,
     @Inject('COMPONENT_ID') componentId: string,
-    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
+    @Inject(BackplaneService) backplane: BackplaneService,
     @Inject('WEB_SOCKET_SERVER') protected server: Server,
     @Inject('TEMPLATES') templates: TemplateCacheService
   ) {
-    super('stateMachine', 'state-machine', 'Implements a simple state machine', flowId, componentId, amqpConnection, server, templates);
+    super('stateMachine', 'state-machine', 'Implements a simple state machine', flowId, componentId, backplane, server, templates);
     this.flowId = flowId;
     this.componentId = componentId;
-    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
+    this.logger = new CustomLogger(`${flowId}.${componentId}`);
     this.states = new Set();
     this.transitions = new Map();
   }

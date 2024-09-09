@@ -1,7 +1,7 @@
 import { CustomLogger } from '../../logger/custom-logger';
 import { Injectable, Inject } from '@nestjs/common';
 import { ComponentBase } from '../../bases/component.base';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { BackplaneService } from 'src/services/backplane.service';
 import { Server } from 'socket.io';
 import { TemplateCacheService } from 'src/services/template-cache.service';
 
@@ -9,7 +9,7 @@ import { triggerEvent } from './trigger-event.event';
 
 @Injectable()
 export class EventTriggerComponent extends ComponentBase {
-  public logger;
+  public logger: CustomLogger;
   public ports = { // io format: <dataType>.<dataMethod>.<eventId>
     inputs: [
       'any.publish.triggerEvent',
@@ -22,14 +22,12 @@ export class EventTriggerComponent extends ComponentBase {
   constructor(
     @Inject('FLOW_ID') flowId: string,
     @Inject('COMPONENT_ID') componentId: string,
-    @Inject(AmqpConnection) amqpConnection: AmqpConnection,
+    @Inject(BackplaneService) protected backplaneService: BackplaneService,
     @Inject('WEB_SOCKET_SERVER') protected server: Server,
     @Inject('TEMPLATES') templates: TemplateCacheService
   ) {
-    super('eventTrigger', 'event-trigger', 'Handles HTMX requests and triggers events', flowId, componentId, amqpConnection, server, templates);
-    this.flowId = flowId;
-    this.componentId = componentId;
-    this.logger = new CustomLogger(`${flowId}.${componentId}`, this.amqpConnection);
+    super('eventTrigger', 'event-trigger', 'Handles HTMX requests and triggers events', flowId, componentId, backplaneService, server, templates);
+    this.logger = new CustomLogger(`${flowId}.${componentId}`);
   }
 
   async handleEvent(eventId: string, data: any): Promise<void> {
@@ -42,7 +40,7 @@ export class EventTriggerComponent extends ComponentBase {
     }
   }
 
-  private async triggerEvent(data): Promise<void> {
+  private async triggerEvent(data: any): Promise<void> {
     return await triggerEvent(this, data);
   }
 }

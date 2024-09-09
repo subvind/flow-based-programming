@@ -1,5 +1,4 @@
 import { ConsoleLogger, Injectable, Inject } from '@nestjs/common';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -7,7 +6,6 @@ import * as path from 'path';
 export class CustomLogger extends ConsoleLogger {
   constructor(
     private logId: string,
-    @Inject(AmqpConnection) private amqpConnection: AmqpConnection
   ) {
     super(logId);
     this.setLogLevels(['log', 'error', 'warn', 'debug', 'verbose']);

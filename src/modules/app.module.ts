@@ -5,6 +5,7 @@ import { EventProcessor } from '../processors/event.processor';
 import { CustomLogger } from '../logger/custom-logger';
 import { AppController } from '../controllers/app.controller';
 import { TemplateCacheService } from 'src/services/template-cache.service';
+import { BackplaneService } from '../services/backplane.service';
 
 import { initializeAppModule, components } from '../initializers/app.initialize';
 
@@ -30,6 +31,15 @@ const metadata = {
     ComponentRegistry,
     FlowExecutorService,
     TemplateCacheService,
+    BackplaneService,
+    {
+      provide: 'BACKPLANE',
+      useFactory: (backplaneService: BackplaneService) => {
+        return () => backplaneService.onModuleInit();
+      },
+      inject: [BackplaneService],
+      multi: true,
+    },
     {
       provide: 'FLOW_ID',
       useValue: 'example-flow', // Use a default flow ID
@@ -44,7 +54,7 @@ const metadata = {
     },
     {
       provide: 'TEMPLATES',
-      useValue: null, // 
+      useValue: null, // This will be set later (?)
     },
     ...components,
     CustomLogger

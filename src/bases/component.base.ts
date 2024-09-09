@@ -1,5 +1,4 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { Component } from '../interfaces/component.interface';
 import { CustomLogger } from '../logger/custom-logger';
 import { WebSocketGateway, WebSocketServer, SubscribeMessage, MessageBody } from '@nestjs/websockets';
@@ -10,6 +9,7 @@ import { Connection } from 'src/interfaces/connection.interface';
 import { Port } from 'src/interfaces/port.interface';
 import { ComponentRegistry } from 'src/services/component-registry.service';
 import { TemplateCacheService } from 'src/services/template-cache.service';
+import { BackplaneService } from '../services/backplane.service';
 
 @WebSocketGateway()
 @Injectable()
@@ -26,22 +26,18 @@ export abstract class ComponentBase implements Component {
     public description: string,
     public flowId: string,
     public componentRef: string,
-    @Inject(AmqpConnection) protected amqpConnection: AmqpConnection,
+    @Inject(BackplaneService) protected backplaneService: BackplaneService,
     protected server: Server,
     public templateCacheService: TemplateCacheService
   ) {
-    this.logger = new CustomLogger(this.componentId, amqpConnection);
+    this.logger = new CustomLogger(this.componentId);
   }
 
   abstract handleEvent(eventId: string, data: any): Promise<void>;
 
   async publish(flowId: string, componentId: string, eventId: string, data: any): Promise<void> {
     this.logger.log(`Publishing: ${flowId}.${componentId}.${eventId} -> ${data}`);
-    if (!this.amqpConnection) {
-      this.logger.error('AmqpConnection is not initialized');
-      return;
-    }
-    await this.amqpConnection.publish('flow_exchange', 'componentEvent', {
+    await this.backplaneService.publish('flow_exchange', 'componentEvent', {
       flowId,
       componentId,
       eventId,
