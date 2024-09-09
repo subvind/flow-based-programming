@@ -28,7 +28,7 @@ FBP:
   - moveable components
   - reusable components
   - nestable components
-  - paramiterized components to the point of a mini language
+  - parameterized components to the point of a mini language
   - ideal for domain specific languages
   - chart + document + logger = steam engine
 
