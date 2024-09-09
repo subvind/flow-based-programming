@@ -1,5 +1,9 @@
 flow-based-programming
 ========
+
+requirements:
+- https://github.com/subvind/message-queue
+
 What is FBP? Is it time for a new Steam Engine?
 https://www.youtube.com/watch?v=up2yhNTsaDs 
 
