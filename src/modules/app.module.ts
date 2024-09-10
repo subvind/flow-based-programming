@@ -1,4 +1,3 @@
-import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { ComponentRegistry } from '../services/component-registry.service';
 import { FlowExecutorService } from '../services/flow-executor.service';
 import { EventProcessor } from '../processors/event.processor';
@@ -13,18 +12,7 @@ const rabbitmqUri = process.env.RABBITMQ || 'amqp://localhost:5672';
 console.log(`[AppModule] RabbitMQ URI: ${rabbitmqUri}`);
 
 const metadata = {
-  imports: [
-    RabbitMQModule.forRoot(RabbitMQModule, {
-      exchanges: [
-        {
-          name: 'flow_exchange',
-          type: 'topic',
-        },
-      ],
-      uri: rabbitmqUri,
-      connectionInitOptions: { wait: false },
-    }),
-  ],
+  imports: [],
   controllers: [AppController],
   providers: [
     EventProcessor,

@@ -66,30 +66,33 @@ class AmqpAdapter implements MessageQueueAdapter {
 }
 
 class IsmqAdapter implements MessageQueueAdapter {
-  private mq: MessageQueueClient | null = null;
+  private client: MessageQueueClient | null = null;
 
   constructor(private readonly logger: Logger) {}
 
   async connect(): Promise<void> {
     this.logger.log('Connecting to ISMQ...');
-    this.mq = new MessageQueueClient('http://localhost:3030');
-    await this.mq.connectWebSocket();
+    this.client = new MessageQueueClient('http://localhost:3030');
+    await this.client.connectWebSocket();
     this.logger.log('Successfully connected to ISMQ');
   }
 
   async disconnect(): Promise<void> {
-    if (this.mq) {
-      await this.mq.disconnectWebSocket();
-      this.mq = null;
+    if (this.client) {
+      this.client.disconnectWebSocket();
+      this.client = null;
     }
     this.logger.log('Disconnected from ISMQ');
   }
 
   async publish(exchange: string, routingKey: string, message: any): Promise<void> {
-    if (!this.mq) {
+    if (!this.client) {
       throw new Error('ISMQ is not available');
     }
-    await this.mq.publish(exchange, routingKey, message);
+    this.logger.log(`Publishing message to exchange: ${exchange}, routingKey: ${routingKey}`);
+    await this.client.createExchange(exchange);
+    await this.client.publish(exchange, routingKey, message);
+    this.logger.log('Message published successfully');
   }
 
   async subscribe(
@@ -98,10 +101,22 @@ class IsmqAdapter implements MessageQueueAdapter {
     queue: string,
     callback: (msg: any) => Promise<void>
   ): Promise<void> {
-    if (!this.mq) {
+    if (!this.client) {
       throw new Error('ISMQ is not available');
     }
-    await this.mq.subscribeToQueue(exchange, queue, callback);
+    this.logger.log(`Subscribing to exchange: ${exchange}, routingKey: ${routingKey}, queue: ${queue}`);
+    await this.client.createExchange(exchange);
+    await this.client.bind(exchange, queue, routingKey);
+    let subscription = await this.client.subscribeToQueue(exchange, queue, async (message) => {
+      this.logger.log(`Received message on queue: ${queue}, content: ${JSON.stringify(message)}`);
+      try {
+        await callback(message);
+        this.logger.log(`Successfully processed message from queue: ${queue}`);
+      } catch (error) {
+        this.logger.error(`Error processing message from queue ${queue}: ${error.message}`);
+      }
+    });
+    this.logger.log(`Successfully subscribed to queue: ${queue}`);
   }
 }
 
