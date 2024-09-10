@@ -12,7 +12,7 @@ export async function initProxyMachine(process, message): Promise<void> {
       if (smComponent) {
         // console.log('smComponent', smComponent)
         process.stateMachine = smComponent;
-        console.log(process.stateMachine.componentId);
+        // console.log(process.stateMachine.componentId);
         break; // We only need to initialize one state machine
       }
     }

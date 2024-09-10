@@ -272,74 +272,6 @@ export function dot(a: V3, b: V3): number {
 
 You will now be given the actual INPUT you must work with.
 
-<FILE path="/home/travis/Projects/flow-based-programming/src/modules/app.module.ts">
-import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
-import { ComponentRegistry } from '../services/component-registry.service';
-import { FlowExecutorService } from '../services/flow-executor.service';
-import { EventProcessor } from '../processors/event.processor';
-import { CustomLogger } from '../logger/custom-logger';
-import { AppController } from '../controllers/app.controller';
-import { TemplateCacheService } from 'src/services/template-cache.service';
-import { BackplaneService } from '../services/backplane.service';
-import { APP_INITIALIZER } from '@nestjs/core';
-
-import { initializeAppModule, components } from '../initializers/app.initialize';
-
-const rabbitmqUri = process.env.RABBITMQ || 'amqp://localhost:5672';
-console.log(`[AppModule] RabbitMQ URI: ${rabbitmqUri}`);
-
-const metadata = {
-  imports: [
-    RabbitMQModule.forRoot(RabbitMQModule, {
-      exchanges: [
-        {
-          name: 'flow_exchange',
-          type: 'topic',
-        },
-      ],
-      uri: rabbitmqUri,
-      connectionInitOptions: { wait: false },
-    }),
-  ],
-  controllers: [AppController],
-  providers: [
-    EventProcessor,
-    ComponentRegistry,
-    FlowExecutorService,
-    TemplateCacheService,
-    BackplaneService,
-    {
-      provide: APP_INITIALIZER,
-      useFactory: (backplaneService: BackplaneService) => {
-        return () => backplaneService.onModuleInit();
-      },
-      inject: [BackplaneService],
-      multi: true,
-    },
-    {
-      provide: 'FLOW_ID',
-      useValue: 'example-flow', // Use a default flow ID
-    },
-    {
-      provide: 'COMPONENT_ID',
-      useFactory: () => `component-${Date.now()}`, // Generate a unique component ID
-    },
-    {
-      provide: 'WEB_SOCKET_SERVER',
-      useValue: null, // This will be set later in the FlowExecutorService
-    },
-    {
-      provide: 'TEMPLATES',
-      useValue: null, // This will be set later (?)
-    },
-    ...components,
-    CustomLogger
-  ],
-  exports: [EventProcessor],
-}
-
-export const AppModule = initializeAppModule(metadata)
-</FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/main.ts">
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './modules/app.module';
@@ -376,6 +308,73 @@ bootstrap().catch((error) => {
   process.exit(1);
 });
 </FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/modules/app.module.ts">
+import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
+import { ComponentRegistry } from '../services/component-registry.service';
+import { FlowExecutorService } from '../services/flow-executor.service';
+import { EventProcessor } from '../processors/event.processor';
+import { CustomLogger } from '../logger/custom-logger';
+import { AppController } from '../controllers/app.controller';
+import { TemplateCacheService } from 'src/services/template-cache.service';
+import { BackplaneService } from '../services/backplane.service';
+
+import { initializeAppModule, components } from '../initializers/app.initialize';
+
+const rabbitmqUri = process.env.RABBITMQ || 'amqp://localhost:5672';
+console.log(`[AppModule] RabbitMQ URI: ${rabbitmqUri}`);
+
+const metadata = {
+  imports: [
+    RabbitMQModule.forRoot(RabbitMQModule, {
+      exchanges: [
+        {
+          name: 'flow_exchange',
+          type: 'topic',
+        },
+      ],
+      uri: rabbitmqUri,
+      connectionInitOptions: { wait: false },
+    }),
+  ],
+  controllers: [AppController],
+  providers: [
+    EventProcessor,
+    ComponentRegistry,
+    FlowExecutorService,
+    TemplateCacheService,
+    BackplaneService,
+    {
+      provide: 'BACKPLANE',
+      useFactory: (backplaneService: BackplaneService) => {
+        return () => backplaneService.onModuleInit();
+      },
+      inject: [BackplaneService],
+      multi: true,
+    },
+    {
+      provide: 'FLOW_ID',
+      useValue: 'example-flow', // Use a default flow ID
+    },
+    {
+      provide: 'COMPONENT_ID',
+      useFactory: () => `component-${Date.now()}`, // Generate a unique component ID
+    },
+    {
+      provide: 'WEB_SOCKET_SERVER',
+      useValue: null, // This will be set later in the FlowExecutorService
+    },
+    {
+      provide: 'TEMPLATES',
+      useValue: null, // This will be set later (?)
+    },
+    ...components,
+    CustomLogger
+  ],
+  exports: [EventProcessor],
+}
+
+export const AppModule = initializeAppModule(metadata)
+</FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/bootstrap/app.bootstrap.ts">
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '../modules/app.module';
@@ -411,6 +410,118 @@ export async function bootstrapApp(logger: CustomLogger): Promise<any> {
   logger.log('Application is running on: http://localhost:3000');
 
   return app;
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/services/backplane.service.ts">
+import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
+import * as amqp from 'amqplib';
+
+@Injectable()
+export class BackplaneService implements OnModuleInit, OnModuleDestroy {
+  private connection: amqp.Connection | null = null;
+  private channel: amqp.Channel | null = null;
+  private connectionPromise: Promise<void> | null = null;
+  private readonly logger = new Logger(BackplaneService.name);
+  private isInitialized = false;
+
+  async onModuleInit() {
+    await this.connect();
+  }
+
+  async onModuleDestroy() {
+    await this.disconnect();
+  }
+
+  private async connect() {
+    if (this.connectionPromise) {
+      return this.connectionPromise;
+    }
+
+    this.connectionPromise = new Promise<void>(async (resolve, reject) => {
+      try {
+        this.logger.log('Connecting to RabbitMQ...');
+        this.connection = await amqp.connect('amqp://localhost:5672');
+        this.channel = await this.connection.createChannel();
+        this.logger.log('Successfully connected to RabbitMQ');
+        this.isInitialized = true;
+        resolve();
+      } catch (error) {
+        this.logger.error('Failed to connect to RabbitMQ', error);
+        this.isInitialized = false;
+        this.connection = null;
+        this.channel = null;
+        reject(error);
+      } finally {
+        this.connectionPromise = null;
+      }
+    });
+
+    return this.connectionPromise;
+  }
+
+  private async disconnect() {
+    try {
+      if (this.channel) {
+        await this.channel.close();
+        this.channel = null;
+      }
+      if (this.connection) {
+        await this.connection.close();
+        this.connection = null;
+      }
+      this.isInitialized = false;
+      this.logger.log('Disconnected from RabbitMQ');
+    } catch (error) {
+      this.logger.error('Error disconnecting from RabbitMQ', error);
+    }
+  }
+
+  async publish(exchange: string, routingKey: string, message: any): Promise<void> {
+    await this.ensureConnection();
+    if (!this.channel) {
+      throw new Error('Channel is not available');
+    }
+    await this.channel.assertExchange(exchange, 'topic', { durable: true });
+    this.channel.publish(exchange, routingKey, Buffer.from(JSON.stringify(message)));
+  }
+
+  async subscribe(exchange: string, routingKey: string, queue: string, callback: (msg: any) => Promise<void>): Promise<void> {
+    await this.ensureConnection();
+    if (!this.channel) {
+      throw new Error('Channel is not available');
+    }
+    await this.channel.assertExchange(exchange, 'topic', { durable: true });
+    const q = await this.channel.assertQueue(queue, { exclusive: true });
+    await this.channel.bindQueue(q.queue, exchange, routingKey);
+    
+    this.channel.consume(q.queue, async (msg) => {
+      if (msg !== null) {
+        const content = JSON.parse(msg.content.toString());
+        await callback(content);
+        this.channel.ack(msg);
+      }
+    });
+  }
+
+  private async ensureConnection(): Promise<void> {
+    if (!this.isInitialized || !this.connection || !this.channel) {
+      this.logger.warn('Connection not initialized or lost, attempting to reconnect...');
+      await this.connect();
+    }
+    
+    if (!this.channel || this.channel.closed) {
+      this.logger.warn('Channel not initialized or closed, attempting to create a new channel...');
+      try {
+        if (!this.connection) {
+          throw new Error('Connection is not available');
+        }
+        this.channel = await this.connection.createChannel();
+      } catch (error) {
+        this.logger.error('Failed to create a new channel', error);
+        throw new Error('Failed to initialize channel');
+      }
+    }
+  }
 }
 </FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/initializers/app.initialize.ts">
@@ -460,61 +571,6 @@ export const components = [
   ButtonTriggerComponent,
 ]
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/initializers/component.initialize.ts">
-import { EventTriggerComponent } from '../components/event-trigger/event-trigger.handler';
-import { NumberGeneratorComponent } from '../components/number-generator/number-generator.handler';
-import { NumberMultiplierComponent } from '../components/number-multiplier/number-multiplier.handler';
-import { StateMachineComponent } from 'src/components/state-machine/state-machine.handler';
-import { JobStateMachineComponent } from 'src/components/job-state-machine/job-state-machine.handler';
-import { ButtonTriggerComponent } from 'src/components/button-trigger/button-trigger.handler';
-
-export function initializeComponent(flow, component, backplane, server, templates) {
-  let componentInstance;
-  switch (component.componentRef) {
-    case 'eventTrigger':
-      componentInstance = new EventTriggerComponent(flow.id, component.componentId, backplane, server, templates);
-      break;
-    case 'numberGenerator':
-      componentInstance = new NumberGeneratorComponent(flow.id, component.componentId, backplane, server, templates);
-      break;
-    case 'numberMultiplier':
-      componentInstance = new NumberMultiplierComponent(flow.id, component.componentId, backplane, server, templates);
-      break;
-    case 'stateMachine':
-      componentInstance = new StateMachineComponent(flow.id, component.componentId, backplane, server, templates);
-      break;
-    case 'jobStateMachine':
-      componentInstance = new JobStateMachineComponent(flow.id, component.componentId, backplane, server, templates);
-      break;
-    case 'buttonTrigger':
-      componentInstance = new ButtonTriggerComponent(flow.id, component.componentId, backplane, server, templates);
-      break;
-    default:
-      this.logger.warn(`Unknown component type: ${component.componentRef}`);
-      break;
-  }
-  return componentInstance;
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/initializers/flows.initialize.ts">
-import { FlowBase } from "src/bases/flow.base";
-import { FlowExecutorService } from "src/services/flow-executor.service";
-
-import {default as exampleFlow} from "src/flows/example-flow.flow";
-
-const flows = [
-  new FlowBase(exampleFlow.id, exampleFlow.components, exampleFlow.connections),
-];
-
-export async function initializeFlows(flowExecutor: FlowExecutorService) {
-  flows.forEach(async (flow) => {
-    await flowExecutor.executeFlow(flow);
-  })
-}
-</FILE>
-
-
-
 <FILE path="/home/travis/Projects/flow-based-programming/src/controllers/app.controller.ts">
 import { Logger, Controller, Get, Post, Render, Body, Param, Res, Req } from '@nestjs/common';
 import { Response, Request } from 'express';
@@ -733,81 +789,172 @@ export class AppController {
   }
 }
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/services/backplane.service.ts">
-import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
-import * as amqp from 'amqplib';
+<FILE path="/home/travis/Projects/flow-based-programming/src/stateMachines/mq-connection.state-machine.ts">
+export default {
+  initialState: 'disconnected',
+  states: ['disconnected', 'connecting', 'connected', 'error'],
+  transitions: {
+    disconnected: { connect: 'connecting', fail: 'error' },
+    connecting: { success: 'connected', fail: 'error' },
+    connected: { disconnect: 'disconnected', fail: 'error' },
+    error: { reset: 'disconnected' }
+  }
+}
+
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/stateMachines/mq-queue.state-machine.ts">
+export default {
+  initialState: 'idle',
+  states: ['idle', 'binding', 'ready', 'consuming', 'error'],
+  transitions: {
+    idle: { bindToExchange: 'binding', fail: 'error' },
+    binding: { success: 'ready', fail: 'error' },
+    ready: { consume: 'consuming', unbind: 'idle', fail: 'error' },
+    consuming: { ack: 'ready', nack: 'ready', fail: 'error' },
+    error: { reset: 'idle' }
+  }
+}
+
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/components/event-trigger/event-trigger.handler.ts">
+import { CustomLogger } from '../../logger/custom-logger';
+import { Injectable, Inject } from '@nestjs/common';
+import { ComponentBase } from '../../bases/component.base';
+import { BackplaneService } from 'src/services/backplane.service';
+import { Server } from 'socket.io';
+import { TemplateCacheService } from 'src/services/template-cache.service';
+
+import { triggerEvent } from './trigger-event.event';
 
 @Injectable()
-export class BackplaneService implements OnModuleInit, OnModuleDestroy {
-  private connection: amqp.Connection;
-  private channel: amqp.Channel;
-  private connectionPromise: Promise<void>;
-  private readonly logger = new Logger(BackplaneService.name);
-
-  async onModuleInit() {
-    this.connectionPromise = this.connect();
-    await this.connectionPromise;
+export class EventTriggerComponent extends ComponentBase {
+  public logger: CustomLogger;
+  public ports = { // io format: <dataType>.<dataMethod>.<eventId>
+    inputs: [
+      'any.publish.triggerEvent',
+    ],
+    outputs: [
+      'any.publish.any'
+    ]
   }
 
-  async onModuleDestroy() {
-    await this.disconnect();
+  constructor(
+    @Inject('FLOW_ID') flowId: string,
+    @Inject('COMPONENT_ID') componentId: string,
+    @Inject(BackplaneService) protected backplaneService: BackplaneService,
+    @Inject('WEB_SOCKET_SERVER') protected server: Server,
+    @Inject('TEMPLATES') templates: TemplateCacheService
+  ) {
+    super('eventTrigger', 'event-trigger', 'Handles HTMX requests and triggers events', flowId, componentId, backplaneService, server, templates);
+    this.logger = new CustomLogger(`${flowId}.${componentId}`);
   }
 
-  private async connect() {
-    try {
-      this.logger.log('Connecting to RabbitMQ...');
-      this.connection = await amqp.connect('amqp://localhost:5672');
-      this.channel = await this.connection.createChannel();
-      this.logger.log('Successfully connected to RabbitMQ');
-    } catch (error) {
-      this.logger.error('Failed to connect to RabbitMQ', error);
-      throw error;
+  async handleEvent(eventId: string, data: any): Promise<void> {
+    switch (eventId) {
+      case 'triggerEvent':
+        await this.triggerEvent(data);
+        break;
+      default:
+        break;
     }
   }
 
-  private async disconnect() {
-    try {
-      if (this.channel) {
-        await this.channel.close();
+  private async triggerEvent(data: any): Promise<void> {
+    return await triggerEvent(this, data);
+  }
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/components/job-state-machine/job-state-machine.handler.ts">
+import { Injectable, Inject } from '@nestjs/common';
+import { ComponentBase } from '../../bases/component.base';
+import { BackplaneService } from 'src/services/backplane.service';
+import { Server } from 'socket.io';
+import { CustomLogger } from '../../logger/custom-logger';
+import { TemplateCacheService } from 'src/services/template-cache.service';
+
+import { StateMachine } from 'src/interfaces/state-machine.interface';
+import { initProxyMachine } from 'src/events/initProxyMachine.event';
+import { transition } from 'src/events/transition.event';
+
+@Injectable()
+export class JobStateMachineComponent extends ComponentBase {
+  public logger: CustomLogger;
+  public stateMachine: StateMachine;
+  
+  public ports = {
+    inputs: [
+      'any.publish.initProxyMachine',
+      'any.publish.set-start',
+      'any.publish.set-pause',
+      'any.publish.set-resume',
+      'any.publish.set-finish',
+      'any.publish.set-reset'
+    ],
+    outputs: [
+      'any.publish.get-start',
+      'any.publish.get-pause',
+      'any.publish.get-resume',
+      'any.publish.get-finish',
+      'any.publish.get-reset',
+      'any.publish.stateChanged',
+      'htmx.display.job-state-machine'
+    ]
+  }
+
+  constructor(
+    @Inject('FLOW_ID') flowId: string,
+    @Inject('COMPONENT_ID') componentId: string,
+    @Inject(BackplaneService) backplane: BackplaneService,
+    @Inject('WEB_SOCKET_SERVER') protected server: Server,
+    @Inject('TEMPLATES') templates: TemplateCacheService
+  ) {
+    super('jobStateMachine', 'job-state-machine', 'Implements a job state machine', flowId, componentId, backplane, server, templates);
+    this.flowId = flowId;
+    this.componentId = componentId;
+    this.logger = new CustomLogger(`${flowId}.${componentId}`);
+  }
+
+  async handleEvent(eventId: string, data: any): Promise<void> {
+    this.logger.log(`Handling event: ${eventId}`);
+    switch (eventId) {
+      case "initProxyMachine": {
+        await this.initProxyMachine(data);
+        break;
       }
-      if (this.connection) {
-        await this.connection.close();
+      case "set-start":
+      case "set-pause":
+      case "set-resume":
+      case "set-finish":
+      case "set-reset": {
+        await this.transition(eventId.substring(4)); // Remove 'set-' prefix
+        break;
       }
-      this.logger.log('Disconnected from RabbitMQ');
-    } catch (error) {
-      this.logger.error('Error disconnecting from RabbitMQ', error);
     }
   }
 
-  async publish(exchange: string, routingKey: string, message: any): Promise<void> {
-    await this.ensureConnection();
-    await this.channel.assertExchange(exchange, 'topic', { durable: true });
-    this.channel.publish(exchange, routingKey, Buffer.from(JSON.stringify(message)));
+  public initProxyMachine(data): Promise<void> {
+    return initProxyMachine(this, data);
   }
 
-  async subscribe(exchange: string, routingKey: string, queue: string, callback: (msg: any) => Promise<void>): Promise<void> {
-    await this.ensureConnection();
-    await this.channel.assertExchange(exchange, 'topic', { durable: true });
-    const q = await this.channel.assertQueue(queue, { exclusive: true });
-    await this.channel.bindQueue(q.queue, exchange, routingKey);
-    
-    this.channel.consume(q.queue, async (msg) => {
-      if (msg !== null) {
-        const content = JSON.parse(msg.content.toString());
-        await callback(content);
-        this.channel.ack(msg);
-      }
+  public transition(data): Promise<void> {
+    return transition(this, data);
+  }
+
+  public async updateDisplay(): Promise<void> {
+    if (!this.stateMachine) {
+      this.logger.error('[display] State machine not initialized');
+      return;
+    }
+
+    const currentState = this.stateMachine.getCurrentState();
+    const states = this.stateMachine.getStates();
+    const transitions = this.stateMachine.getTransitions();
+
+    await this.display(this.flowId, this.componentId, 'job-state-machine', {
+      currentState,
+      states: Array.from(states),
+      transitions: Object.fromEntries(transitions)
     });
-  }
-
-  private async ensureConnection(): Promise<void> {
-    if (!this.channel) {
-      this.logger.warn('Channel not initialized, attempting to reconnect...');
-      await this.connectionPromise;
-      if (!this.channel) {
-        throw new Error('Failed to initialize channel');
-      }
-    }
   }
 }
 </FILE>
@@ -888,235 +1035,284 @@ export class EventProcessor implements OnModuleInit {
   }
 }
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/components/event-trigger/event-trigger.handler.ts">
-import { CustomLogger } from '../../logger/custom-logger';
-import { Injectable, Inject } from '@nestjs/common';
-import { ComponentBase } from '../../bases/component.base';
-import { BackplaneService } from 'src/services/backplane.service';
-import { Server } from 'socket.io';
-import { TemplateCacheService } from 'src/services/template-cache.service';
-
-import { triggerEvent } from './trigger-event.event';
+<FILE path="/home/travis/Projects/flow-based-programming/src/logger/custom-logger.ts">
+import { ConsoleLogger, Injectable, Inject } from '@nestjs/common';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
-export class EventTriggerComponent extends ComponentBase {
-  public logger: CustomLogger;
-  public ports = { // io format: <dataType>.<dataMethod>.<eventId>
-    inputs: [
-      'any.publish.triggerEvent',
-    ],
-    outputs: [
-      'any.publish.any'
-    ]
-  }
-
+export class CustomLogger extends ConsoleLogger {
   constructor(
-    @Inject('FLOW_ID') flowId: string,
-    @Inject('COMPONENT_ID') componentId: string,
-    @Inject(BackplaneService) protected backplaneService: BackplaneService,
-    @Inject('WEB_SOCKET_SERVER') protected server: Server,
-    @Inject('TEMPLATES') templates: TemplateCacheService
+    private logId: string,
   ) {
-    super('eventTrigger', 'event-trigger', 'Handles HTMX requests and triggers events', flowId, componentId, backplaneService, server, templates);
-    this.logger = new CustomLogger(`${flowId}.${componentId}`);
+    super(logId);
+    this.setLogLevels(['log', 'error', 'warn', 'debug', 'verbose']);
   }
 
-  async handleEvent(eventId: string, data: any): Promise<void> {
-    switch (eventId) {
-      case 'triggerEvent':
-        await this.triggerEvent(data);
-        break;
-      default:
-        break;
+  log(message: string, context?: string) {
+    this.printMessage(message, 'log', context);
+    // this.emitLogEvent('log', message);
+  }
+
+  warn(message: string, context?: string) {
+    this.printMessage(message, 'warn', context);
+    // this.emitLogEvent('warn', message);
+  }
+
+  error(message: string, trace?: string, context?: string) {
+    this.printMessage(message, 'error', context);
+    // this.emitLogEvent('error', message);
+    if (trace) {
+      this.printMessage(trace, 'error', context);
     }
   }
 
-  private async triggerEvent(data: any): Promise<void> {
-    return await triggerEvent(this, data);
+  debug(message: string, context?: string) {
+    this.printMessage(message, 'debug', context);
+  }
+
+  verbose(message: string, context?: string) {
+    this.printMessage(message, 'verbose', context);
+  }
+
+  private printMessage(message: string, logLevel: string, context?: string) {
+    const output = context ? `[${context}] ${message}` : message;
+    console.log(`[${this.getNow()}] [${logLevel.toUpperCase()}] [${this.logId}] ${output}`);
+  }
+
+  private getNow(): string {
+    return new Date().toISOString();
+  }
+
+  static write_to_file(message: string) {
+    const logFile = path.join(process.cwd(), 'start:dev.stdout.txt');
+    fs.appendFile(logFile, message, (err) => {
+      if (err) {
+        console.error('Failed to write to log file:', err);
+      }
+    });
+  }
+
+  static clearSTDOUT() {
+    const logFile = path.join(process.cwd(), 'start:dev.stdout.txt');
+    try {
+      fs.writeFileSync(logFile, '');
+      console.log(`Log file cleared at ${logFile}`);
+    } catch (error) {
+      console.error('Failed to clear log file:', error);
+    }
   }
 }
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/components/number-generator/number-generator.handler.ts">
-import { CustomLogger } from '../../logger/custom-logger';
-import { Injectable, Inject } from '@nestjs/common';
-import { ComponentBase } from '../../bases/component.base';
-import { BackplaneService } from 'src/services/backplane.service';
+<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/component.interface.ts">
+import { Connection } from "./connection.interface";
+import { Port } from "./port.interface";
+
+export interface Component {
+  ports: { inputs: string[]; outputs: string[]; };
+  componentRef: string;
+  slug: string;
+  description?: string;
+  flowId: string;
+  componentId: string;
+  handleEvent: (eventId: string, data: any) => Promise<void>;
+  publish: (flowId: string, componentId: string, eventId: string, data: any) => Promise<void>;
+  getPorts: () => Promise<{ inputs: Port[], outputs: Port[] }>;
+  findPort: (portId: string) => Promise<Port>;
+  findConnections: (port: Port) => Promise<Connection[]>
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/flow.interface.ts">
+import { Connection } from "./connection.interface";
+
+export interface Flow {
+  id: string;
+  components: {
+    componentId: string;
+    componentRef: string;
+    init: any | undefined;
+  }[];
+  connections: Connection[];
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/services/flow-executor.service.ts">
+import { Injectable, Logger } from '@nestjs/common';
+import { ComponentRegistry } from './component-registry.service';
+import { Flow } from '../interfaces/flow.interface';
+import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { TemplateCacheService } from 'src/services/template-cache.service';
+import { initializeComponent } from '../initializers/component.initialize';
+import { Component } from 'src/interfaces/component.interface';
+import { TemplateCacheService } from './template-cache.service';
+import { BackplaneService } from './backplane.service';
 
-import { startGenerating } from './start-generating.event';
-import { stopGenerating } from './stop-generating.event';
-
+@WebSocketGateway()
 @Injectable()
-export class NumberGeneratorComponent extends ComponentBase {
-  public logger;
-  public interval: NodeJS.Timeout | null = null;
-  public ports = { // io format: <dataType>.<dataMethod>.<eventId>
-    inputs: [
-      'any.publish.start',
-      'any.publish.stop'
-    ],
-    outputs: [
-      'number.publish.numberGenerated',
-      'htmx.display.number-generator'
-    ]
-  }
-
+export class FlowExecutorService {
+  @WebSocketServer() server: Server;
+  private readonly logger = new Logger(FlowExecutorService.name);
+  private flows: Flow[] = [];
+  
   constructor(
-    @Inject('FLOW_ID') flowId: string,
-    @Inject('COMPONENT_ID') componentId: string,
-    @Inject(BackplaneService) backplane: BackplaneService,
-    @Inject('WEB_SOCKET_SERVER') protected server: Server,
-    @Inject('TEMPLATES') templates: TemplateCacheService
-  ) {
-    super('numberGenerator', 'number-generator', 'Generates random numbers periodically', flowId, componentId, backplane, server, templates);
-    this.flowId = flowId;
-    this.componentId = componentId;
-    this.logger = new CustomLogger(`${flowId}.${componentId}`);
+    private backplaneService: BackplaneService,
+    private componentRegistry: ComponentRegistry,
+    private templateCacheService: TemplateCacheService
+  ) {}
+
+  async getFlows(): Promise<Flow[]> {
+    return this.flows;
   }
 
-  async handleEvent(eventId: string, data: any): Promise<void> {
-    this.logger.log(`NumberGenerator (${this.flowId}) handling event: ${eventId}`);
-    switch (eventId) {
-      case "start": {
-        this.logger.log(`NumberGenerator (${this.flowId}) starting number generation`);
-        this.startGenerating(data);
-        break;
-      }
-      case "stop": {
-        this.logger.log(`NumberGenerator (${this.flowId}) stopping number generation`);
-        this.stopGenerating(data);
-        break;
+  async getFlow(flowId: string): Promise<Flow | undefined> {
+    return this.flows.find(flow => flow.id === flowId);
+  }
+
+  async executeFlow(flow: Flow) {
+    this.logger.log(`Executing flow: ${flow.id}`);
+
+    // Remove old flow and add new flow
+    var filteredFlows = this.flows.filter(function(f: Flow) { 
+      return f.id != flow.id; 
+    });
+    this.flows = filteredFlows;
+    this.flows.push(flow);
+
+    // Create connections
+    for (const connection of flow.connections) {
+      this.logger.log(`Creating connection: ${connection.fromComponent}.${connection.fromEvent} -> ${connection.toComponent}.${connection.toEvent}`);
+      await this.backplaneService.publish('flow_exchange', 'createConnection', { ...connection, flowId: flow.id });
+    }
+
+    // Construct components
+    let instances = [];
+    for (const component of flow.components) {
+      this.logger.log(`Constructing component: ${component.componentId} (${component.componentRef}) for flow: ${flow.id}`);
+      
+      // initialize a new component instance
+      let componentInstance: Component = initializeComponent(flow, component, this.backplaneService, this.server, this.templateCacheService);
+
+      // register new instance with component registery
+      this.componentRegistry.registerComponent(componentInstance);
+      instances.push(componentInstance);
+    }
+
+    // Sync connections for component
+    for (const instance of instances) {
+      this.logger.log(`Sync connections for component: ${instance.componentId} (${instance.componentRef}) for flow: ${instance.flowId}`);
+      instance.syncConnections(flow.connections, this.componentRegistry);
+    }
+    
+    // Init component
+    for (const component of flow.components) {
+      this.logger.log(`Initializing component: ${component.componentId} (${component.componentRef}) for flow: ${flow.id}`);
+
+      try {
+        await this.backplaneService.publish('flow_exchange', 'componentEvent', {
+          flowId: flow.id,
+          componentId: component.componentId,
+          componentRef: component.componentRef,
+          eventId: 'init',
+          data: component.init,
+        });
+      } catch (error) {
+        this.logger.error(`Error initializing component ${component.componentId} for flow ${flow.id}:`, error);
       }
     }
-  }
-
-  private startGenerating(data): void {
-    return startGenerating(this, data);
-  }
-
-  private stopGenerating(data): void {
-    return stopGenerating(this, data);
   }
 }
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/components/number-multiplier/number-multiplier.handler.ts">
-import { CustomLogger } from '../../logger/custom-logger';
-import { Injectable, Inject } from '@nestjs/common';
-import { ComponentBase } from '../../bases/component.base';
-import { BackplaneService } from 'src/services/backplane.service';
-import { Server } from 'socket.io';
-import { TemplateCacheService } from 'src/services/template-cache.service';
-
-import { numberReceived } from './number-received.event';
+<FILE path="/home/travis/Projects/flow-based-programming/src/services/component-registry.service.ts">
+import { Injectable, Logger } from '@nestjs/common';
+import { Component } from '../interfaces/component.interface';
 
 @Injectable()
-export class NumberMultiplierComponent extends ComponentBase {
-  public logger;
-  public ports = { // io format: <dataType>.<dataMethod>.<eventId>
-    inputs: [
-      'number.publish.firstNumberReceived',
-      'number.publish.secondNumberReceived',
-    ],
-    outputs: [
-      'number.publish.numberMultiplied',
-      'htmx.display.number-multiplier',
-    ]
+export class ComponentRegistry {
+  private components: Map<string, Component> = new Map();
+  private readonly logger = new Logger(ComponentRegistry.name);
+
+  registerComponent(component: Component) {
+    const key = `${component.flowId}.${component.componentId}`;
+    this.logger.log(`Registering component: ${key}`);
+    this.components.set(key, component);
   }
 
-  public firstNumber: number | null = null;
-  public secondNumber: number | null = null;
-
-  constructor(
-    @Inject('FLOW_ID') flowId: string,
-    @Inject('COMPONENT_ID') componentId: string,
-    @Inject(BackplaneService) backplane: BackplaneService,
-    @Inject('WEB_SOCKET_SERVER') protected server: Server,
-    @Inject('TEMPLATES') templates: TemplateCacheService
-  ) {
-    super('numberMultiplier', 'number-multiplier', 'Multiplies two received numbers', flowId, componentId, backplane, server, templates);
-    this.flowId = flowId;
-    this.componentId = componentId;
-    this.logger = new CustomLogger(`${flowId}.${componentId}`);
-  }
-
-  async handleEvent(eventId: string, data: any): Promise<void> {
-    this.logger.log(`NumberMultiplier handling event: ${eventId} ${JSON.stringify(data, null, 2)}`);
-    switch (eventId) {
-      case 'firstNumberReceived':
-        await this.numberReceived(data, 'first');
-        break;
-      case 'secondNumberReceived':
-        await this.numberReceived(data, 'second');
-        break;
-      default:
-        break;
+  getComponent(flowId: string, componentId: string): Component | undefined {
+    const key = `${flowId}.${componentId}`;
+    const component = this.components.get(key);
+    if (!component) {
+      this.logger.warn(`Component not found: ${key}`);
     }
-  }
-
-  private numberReceived(data: any, which: 'first' | 'second'): Promise<void> {
-    return numberReceived(this, data, which);
+    return component;
   }
 }
 </FILE>
 <FILE path="start:dev.stdout.txt" TARGET>
-c[[90m6:12:46 PM[0m] Starting compilation in watch mode...
+c[[90m10:42:09 AM[0m] Starting compilation in watch mode...
 
-[[90m6:12:47 PM[0m] Found 0 errors. Watching for file changes.
+[[90m10:42:10 AM[0m] Found 0 errors. Watching for file changes.
 
 [AppModule] RabbitMQ URI: amqp://localhost:5672
-[32m[Nest] 1455134  - [39m09/09/2024, 6:12:47 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
-[32m[Nest] 1455134  - [39m09/09/2024, 6:12:47 PM [32m    LOG[39m [38;5;3m[AmqpConnection] [39m[32mTrying to connect to RabbitMQ broker (default)[39m
-[32m[Nest] 1455134  - [39m09/09/2024, 6:12:47 PM [32m    LOG[39m [38;5;3m[RabbitMQModule] [39m[32mSuccessfully connected to RabbitMQ[39m
-[32m[Nest] 1455134  - [39m09/09/2024, 6:12:47 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDiscoveryModule dependencies initialized[39m[38;5;3m +9ms[39m
-[32m[Nest] 1455134  - [39m09/09/2024, 6:12:47 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRabbitMQModule dependencies initialized[39m[38;5;3m +0ms[39m
-[32m[Nest] 1455134  - [39m09/09/2024, 6:12:47 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +0ms[39m
-[2024-09-09T23:12:47.889Z] [LOG] [Bootstrap] Starting main application...
-[2024-09-09T23:12:47.889Z] [LOG] [Bootstrap] [NestFactory] Starting Nest application...
-[2024-09-09T23:12:47.892Z] [LOG] [Bootstrap] [AmqpConnection] Trying to connect to RabbitMQ broker (default)
-[2024-09-09T23:12:47.892Z] [LOG] [Bootstrap] [RabbitMQModule] Successfully connected to RabbitMQ
-[2024-09-09T23:12:47.894Z] [LOG] [Bootstrap] [InstanceLoader] DiscoveryModule dependencies initialized
-[2024-09-09T23:12:47.895Z] [LOG] [Bootstrap] [InstanceLoader] RabbitMQModule dependencies initialized
-[2024-09-09T23:12:47.895Z] [LOG] [Bootstrap] [InstanceLoader] AppModule dependencies initialized
-[2024-09-09T23:12:47.903Z] [LOG] [Bootstrap] [WebSocketsController] EventTriggerComponent subscribed to the "client-event" message
-[2024-09-09T23:12:47.903Z] [LOG] [Bootstrap] [WebSocketsController] NumberGeneratorComponent subscribed to the "client-event" message
-[2024-09-09T23:12:47.903Z] [LOG] [Bootstrap] [WebSocketsController] NumberMultiplierComponent subscribed to the "client-event" message
-[2024-09-09T23:12:47.904Z] [LOG] [Bootstrap] [WebSocketsController] StateMachineComponent subscribed to the "client-event" message
-[2024-09-09T23:12:47.904Z] [LOG] [Bootstrap] [WebSocketsController] JobStateMachineComponent subscribed to the "client-event" message
-[2024-09-09T23:12:47.904Z] [LOG] [Bootstrap] [WebSocketsController] ButtonTriggerComponent subscribed to the "client-event" message
-[2024-09-09T23:12:47.905Z] [LOG] [Bootstrap] [RoutesResolver] AppController {/}:
-[2024-09-09T23:12:47.906Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/, GET} route
-[2024-09-09T23:12:47.906Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/flows, GET} route
-[2024-09-09T23:12:47.907Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/flow/:flowId, GET} route
-[2024-09-09T23:12:47.907Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/document/:flowId/:componentId, GET} route
-[2024-09-09T23:12:47.907Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentComponent/:flowId/:componentId/:swimlaneId, GET} route
-[2024-09-09T23:12:47.907Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentConnections/:flowId/:componentId/:portId/:swimlaneId, GET} route
-[2024-09-09T23:12:47.907Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/logger, GET} route
-[2024-09-09T23:12:47.907Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/trigger-event/:flowComponentEvent, POST} route
-[2024-09-09T23:12:47.907Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/template/:flowId/:componentId/:templateId, GET} route
-[2024-09-09T23:12:47.913Z] [ERROR] [Bootstrap] Bootstrap error: Channel not initialized
-[2024-09-09T23:12:47.913Z] [ERROR] [Bootstrap] Error: Channel not initialized
-    at BackplaneService.subscribe (/home/travis/Projects/flow-based-programming/src/services/backplane.service.ts:46:13)
-    at EventProcessor.subscribeToEvents (/home/travis/Projects/flow-based-programming/src/processors/event.processor.ts:20:33)
-    at EventProcessor.onModuleInit (/home/travis/Projects/flow-based-programming/src/processors/event.processor.ts:16:16)
-    at MapIterator.iteratee (/home/travis/Projects/flow-based-programming/node_modules/@nestjs/core/hooks/on-module-init.hook.js:22:43)
-    at MapIterator.next (/home/travis/Projects/flow-based-programming/node_modules/iterare/src/map.ts:9:39)
-    at IteratorWithOperators.next (/home/travis/Projects/flow-based-programming/node_modules/iterare/src/iterate.ts:19:28)
-    at Function.from (<anonymous>)
-    at IteratorWithOperators.toArray (/home/travis/Projects/flow-based-programming/node_modules/iterare/src/iterate.ts:227:22)
-    at callOperator (/home/travis/Projects/flow-based-programming/node_modules/@nestjs/core/hooks/on-module-init.hook.js:23:10)
-    at callModuleInitHook (/home/travis/Projects/flow-based-programming/node_modules/@nestjs/core/hooks/on-module-init.hook.js:43:23)
-c[[90m6:13:53 PM[0m] File change detected. Starting incremental compilation...
+[32m[Nest] 2022114  - [39m09/10/2024, 10:42:10 AM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 2022114  - [39m09/10/2024, 10:42:10 AM [32m    LOG[39m [38;5;3m[AmqpConnection] [39m[32mTrying to connect to RabbitMQ broker (default)[39m
+[32m[Nest] 2022114  - [39m09/10/2024, 10:42:10 AM [32m    LOG[39m [38;5;3m[RabbitMQModule] [39m[32mSuccessfully connected to RabbitMQ[39m
+[32m[Nest] 2022114  - [39m09/10/2024, 10:42:10 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDiscoveryModule dependencies initialized[39m[38;5;3m +9ms[39m
+[32m[Nest] 2022114  - [39m09/10/2024, 10:42:10 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRabbitMQModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 2022114  - [39m09/10/2024, 10:42:10 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +0ms[39m
+[2024-09-10T15:42:10.510Z] [LOG] [Bootstrap] Starting main application...
+[2024-09-10T15:42:10.511Z] [LOG] [Bootstrap] [NestFactory] Starting Nest application...
+[2024-09-10T15:42:10.513Z] [LOG] [Bootstrap] [AmqpConnection] Trying to connect to RabbitMQ broker (default)
+[2024-09-10T15:42:10.513Z] [LOG] [Bootstrap] [RabbitMQModule] Successfully connected to RabbitMQ
+[2024-09-10T15:42:10.514Z] [LOG] [Bootstrap] [InstanceLoader] DiscoveryModule dependencies initialized
+[2024-09-10T15:42:10.514Z] [LOG] [Bootstrap] [InstanceLoader] RabbitMQModule dependencies initialized
+[2024-09-10T15:42:10.514Z] [LOG] [Bootstrap] [InstanceLoader] AppModule dependencies initialized
+[2024-09-10T15:42:10.523Z] [LOG] [Bootstrap] [WebSocketsController] EventTriggerComponent subscribed to the "client-event" message
+[2024-09-10T15:42:10.524Z] [LOG] [Bootstrap] [WebSocketsController] NumberGeneratorComponent subscribed to the "client-event" message
+[2024-09-10T15:42:10.524Z] [LOG] [Bootstrap] [WebSocketsController] NumberMultiplierComponent subscribed to the "client-event" message
+[2024-09-10T15:42:10.524Z] [LOG] [Bootstrap] [WebSocketsController] StateMachineComponent subscribed to the "client-event" message
+[2024-09-10T15:42:10.524Z] [LOG] [Bootstrap] [WebSocketsController] JobStateMachineComponent subscribed to the "client-event" message
+[2024-09-10T15:42:10.525Z] [LOG] [Bootstrap] [WebSocketsController] ButtonTriggerComponent subscribed to the "client-event" message
+[2024-09-10T15:42:10.526Z] [LOG] [Bootstrap] [RoutesResolver] AppController {/}:
+[2024-09-10T15:42:10.527Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/, GET} route
+[2024-09-10T15:42:10.527Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/flows, GET} route
+[2024-09-10T15:42:10.527Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/flow/:flowId, GET} route
+[2024-09-10T15:42:10.528Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/document/:flowId/:componentId, GET} route
+[2024-09-10T15:42:10.528Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentComponent/:flowId/:componentId/:swimlaneId, GET} route
+[2024-09-10T15:42:10.528Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentConnections/:flowId/:componentId/:portId/:swimlaneId, GET} route
+[2024-09-10T15:42:10.528Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/logger, GET} route
+[2024-09-10T15:42:10.528Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/trigger-event/:flowComponentEvent, POST} route
+[2024-09-10T15:42:10.528Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/template/:flowId/:componentId/:templateId, GET} route
+[2024-09-10T15:42:10.529Z] [WARN] [Bootstrap] [BackplaneService] Connection not initialized or lost, attempting to reconnect...
+[2024-09-10T15:42:10.529Z] [LOG] [Bootstrap] [BackplaneService] Connecting to RabbitMQ...
+[2024-09-10T15:42:10.587Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
+[2024-09-10T15:42:10.588Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
+[2024-09-10T15:42:10.589Z] [LOG] [Bootstrap] [BackplaneService] Successfully connected to RabbitMQ
+node:events:497
+      throw er; // Unhandled 'error' event
+      ^
 
-[96msrc/modules/app.module.ts[0m:[93m9[0m:[93m10[0m - [91merror[0m[90m TS2305: [0mModule '"@nestjs/core"' has no exported member 'APP_INITIALIZER'.
+Error: Channel closed by server: 405 (RESOURCE-LOCKED) with message "RESOURCE_LOCKED - cannot obtain exclusive access to locked queue 'component_event_queue' in vhost '/'. It could be originally declared on another connection or the exclusive property value does not match that of the original declaration."
+    at Channel.accept (/home/travis/Projects/flow-based-programming/node_modules/amqplib/lib/channel.js:320:19)
+    at Connection.mainAccept [as accept] (/home/travis/Projects/flow-based-programming/node_modules/amqplib/lib/connection.js:582:33)
+    at Socket.go (/home/travis/Projects/flow-based-programming/node_modules/amqplib/lib/connection.js:434:16)
+    at Socket.emit (node:events:519:28)
+    at emitReadable_ (node:internal/streams/readable:832:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:81:21)
+Emitted 'error' event on ChannelModel instance at:
+    at Connection.emit (node:events:519:28)
+    at Connection.onSocketError (/home/travis/Projects/flow-based-programming/node_modules/amqplib/lib/connection.js:309:12)
+    at Connection.emit (node:events:519:28)
+    at Socket.go (/home/travis/Projects/flow-based-programming/node_modules/amqplib/lib/connection.js:437:14)
+    at Socket.emit (node:events:519:28)
+    at emitReadable_ (node:internal/streams/readable:832:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:81:21) {
+  code: 405,
+  classId: 50,
+  methodId: 10
+}
 
-[7m9[0m import { APP_INITIALIZER } from '@nestjs/core';
-[7m [0m [91m         ~~~~~~~~~~~~~~~[0m
-
-[[90m6:13:53 PM[0m] Found 1 error. Watching for file changes.
-
+Node.js v20.16.0
 
 </FILE>
 <REQUEST>
-has no exported member
+unhandled error
 </REQUEST>

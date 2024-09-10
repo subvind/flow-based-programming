@@ -17,19 +17,23 @@ export class EventProcessor implements OnModuleInit {
   }
 
   private async subscribeToEvents() {
-    await this.backplaneService.subscribe(
-      'flow_exchange',
-      'componentEvent',
-      'component_event_queue',
-      this.handleComponentEvent.bind(this)
-    );
+    try {
+      await this.backplaneService.subscribe(
+        'flow_exchange',
+        'componentEvent',
+        'component_event_queue',
+        this.handleComponentEvent.bind(this)
+      );
 
-    await this.backplaneService.subscribe(
-      'flow_exchange',
-      'createConnection',
-      'create_connection_queue',
-      this.createConnection.bind(this)
-    );
+      await this.backplaneService.subscribe(
+        'flow_exchange',
+        'createConnection',
+        'create_connection_queue',
+        this.createConnection.bind(this)
+      );
+    } catch (error) {
+      this.logger.error(`Failed to subscribe to events: ${error.message}`, error.stack);
+    }
   }
 
   async handleComponentEvent(msg: {flowId: string, componentId: string, eventId: string, data: any}): Promise<void> {
