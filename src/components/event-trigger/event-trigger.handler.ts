@@ -22,11 +22,13 @@ export class EventTriggerComponent extends ComponentBase {
   constructor(
     @Inject('FLOW_ID') flowId: string,
     @Inject('COMPONENT_ID') componentId: string,
-    @Inject(BackplaneService) protected backplaneService: BackplaneService,
+    @Inject(BackplaneService) protected backplane: BackplaneService,
     @Inject('WEB_SOCKET_SERVER') protected server: Server,
     @Inject('TEMPLATES') templates: TemplateCacheService
   ) {
-    super('eventTrigger', 'event-trigger', 'Handles HTMX requests and triggers events', flowId, componentId, backplaneService, server, templates);
+    super('eventTrigger', 'event-trigger', 'Handles HTMX requests and triggers events', flowId, componentId, backplane, server, templates);
+    this.flowId = flowId;
+    this.componentId = componentId;
     this.logger = new CustomLogger(`${flowId}.${componentId}`);
   }
 
