@@ -272,41 +272,20 @@ export function dot(a: V3, b: V3): number {
 
 You will now be given the actual INPUT you must work with.
 
-<FILE path="/home/travis/Projects/flow-based-programming/src/main.ts">
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './modules/app.module';
-import { CustomLogger } from './logger/custom-logger';
-import { bootstrapApp } from './bootstrap/app.bootstrap';
-import { EventEmitter } from 'events';
+<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/connection.interface.ts">
+import { Component } from "./component.interface";
 
-async function bootstrap(): Promise<void> {
-  // Increase the maximum number of listeners
-  EventEmitter.defaultMaxListeners = 100;
-
-  const app = await NestFactory.create(AppModule);
-  
-  // Create the CustomLogger
-  const logger = new CustomLogger('Bootstrap');
-  
-  try {
-    logger.log('Starting main application...');
-    const mainApp = await bootstrapApp(logger);
-
-    process.on('SIGINT', async () => {
-      CustomLogger.clearSTDOUT();
-      await mainApp.close();
-      process.exit();
-    });
-  } catch (error) {
-    logger.error(`Bootstrap error: ${error.message}`, error.stack);
-    process.exit(1);
-  }
+export interface Connection {
+  toFlow: string;
+  toComponent: string;
+  toEvent: string;
+  connectedTo: Component | undefined;
+  fromFlow: string;
+  fromComponent: string;
+  fromEvent: string;
+  connectedFrom: Component | undefined;
+  next: Component | undefined;
 }
-
-bootstrap().catch((error) => {
-  console.error('Unhandled bootstrap error:', error);
-  process.exit(1);
-});
 </FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/modules/app.module.ts">
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
@@ -412,697 +391,41 @@ export async function bootstrapApp(logger: CustomLogger): Promise<any> {
   return app;
 }
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/services/backplane.service.ts">
-import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
-import * as amqp from 'amqplib';
+<FILE path="/home/travis/Projects/flow-based-programming/src/main.ts">
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './modules/app.module';
+import { CustomLogger } from './logger/custom-logger';
+import { bootstrapApp } from './bootstrap/app.bootstrap';
+import { EventEmitter } from 'events';
 
-@Injectable()
-export class BackplaneService implements OnModuleInit, OnModuleDestroy {
-  private connection: amqp.Connection | null = null;
-  private channel: amqp.Channel | null = null;
-  private connectionPromise: Promise<void> | null = null;
-  private readonly logger = new Logger(BackplaneService.name);
-  private isInitialized = false;
+async function bootstrap(): Promise<void> {
+  // Increase the maximum number of listeners
+  EventEmitter.defaultMaxListeners = 100;
 
-  async onModuleInit() {
-    await this.connect();
-  }
-
-  async onModuleDestroy() {
-    await this.disconnect();
-  }
-
-  private async connect() {
-    if (this.connectionPromise) {
-      return this.connectionPromise;
-    }
-
-    this.connectionPromise = new Promise<void>(async (resolve, reject) => {
-      try {
-        this.logger.log('Connecting to RabbitMQ...');
-        this.connection = await amqp.connect('amqp://localhost:5672');
-        this.channel = await this.connection.createChannel();
-        this.logger.log('Successfully connected to RabbitMQ');
-        this.isInitialized = true;
-        resolve();
-      } catch (error) {
-        this.logger.error('Failed to connect to RabbitMQ', error);
-        this.isInitialized = false;
-        this.connection = null;
-        this.channel = null;
-        reject(error);
-      } finally {
-        this.connectionPromise = null;
-      }
-    });
-
-    return this.connectionPromise;
-  }
-
-  private async disconnect() {
-    try {
-      if (this.channel) {
-        await this.channel.close();
-        this.channel = null;
-      }
-      if (this.connection) {
-        await this.connection.close();
-        this.connection = null;
-      }
-      this.isInitialized = false;
-      this.logger.log('Disconnected from RabbitMQ');
-    } catch (error) {
-      this.logger.error('Error disconnecting from RabbitMQ', error);
-    }
-  }
-
-  async publish(exchange: string, routingKey: string, message: any): Promise<void> {
-    await this.ensureConnection();
-    if (!this.channel) {
-      throw new Error('Channel is not available');
-    }
-    await this.channel.assertExchange(exchange, 'topic', { durable: true });
-    this.channel.publish(exchange, routingKey, Buffer.from(JSON.stringify(message)));
-  }
-
-  async subscribe(exchange: string, routingKey: string, queue: string, callback: (msg: any) => Promise<void>): Promise<void> {
-    await this.ensureConnection();
-    if (!this.channel) {
-      throw new Error('Channel is not available');
-    }
-    await this.channel.assertExchange(exchange, 'topic', { durable: true });
-    const q = await this.channel.assertQueue(queue, { exclusive: true });
-    await this.channel.bindQueue(q.queue, exchange, routingKey);
-    
-    this.channel.consume(q.queue, async (msg) => {
-      if (msg !== null) {
-        const content = JSON.parse(msg.content.toString());
-        await callback(content);
-        this.channel.ack(msg);
-      }
-    });
-  }
-
-  private async ensureConnection(): Promise<void> {
-    if (!this.isInitialized || !this.connection || !this.channel) {
-      this.logger.warn('Connection not initialized or lost, attempting to reconnect...');
-      await this.connect();
-    }
-    
-    if (!this.channel || this.channel.closed) {
-      this.logger.warn('Channel not initialized or closed, attempting to create a new channel...');
-      try {
-        if (!this.connection) {
-          throw new Error('Connection is not available');
-        }
-        this.channel = await this.connection.createChannel();
-      } catch (error) {
-        this.logger.error('Failed to create a new channel', error);
-        throw new Error('Failed to initialize channel');
-      }
-    }
-  }
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/initializers/app.initialize.ts">
-import { Module, OnModuleInit } from '@nestjs/common';
-import { ComponentRegistry } from '../services/component-registry.service';
-
-import { NumberGeneratorComponent } from '../components/number-generator/number-generator.handler';
-import { NumberMultiplierComponent } from '../components/number-multiplier/number-multiplier.handler';
-import { EventTriggerComponent } from '../components/event-trigger/event-trigger.handler';
-import { StateMachineComponent } from '../components/state-machine/state-machine.handler';
-import { JobStateMachineComponent } from '../components/job-state-machine/job-state-machine.handler';
-import { ButtonTriggerComponent } from 'src/components/button-trigger/button-trigger.handler';
-
-export function initializeAppModule(metadata): any {
-  @Module(metadata)
-  class AppModule implements OnModuleInit {
-    constructor(
-      private componentRegistry: ComponentRegistry,
-      private eventTriggerComponent: EventTriggerComponent,
-      private numberGeneratorComponent: NumberGeneratorComponent,
-      private numberMultiplierComponent: NumberMultiplierComponent,
-      private stateMachineComponent: StateMachineComponent,
-      private jobStateMachineComponent: JobStateMachineComponent,
-      private buttonTriggerComponent: ButtonTriggerComponent,
-    ) {}
-
-    onModuleInit() {
-      // Register components
-      this.componentRegistry.registerComponent(this.eventTriggerComponent);
-      this.componentRegistry.registerComponent(this.numberGeneratorComponent);
-      this.componentRegistry.registerComponent(this.numberMultiplierComponent);
-      this.componentRegistry.registerComponent(this.stateMachineComponent);
-      this.componentRegistry.registerComponent(this.jobStateMachineComponent);
-      this.componentRegistry.registerComponent(this.buttonTriggerComponent);
-    }
-  }
-
-  return AppModule;
-}
-
-export const components = [
-  EventTriggerComponent,
-  NumberGeneratorComponent,
-  NumberMultiplierComponent,
-  StateMachineComponent,
-  JobStateMachineComponent,
-  ButtonTriggerComponent,
-]
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/controllers/app.controller.ts">
-import { Logger, Controller, Get, Post, Render, Body, Param, Res, Req } from '@nestjs/common';
-import { Response, Request } from 'express';
-import { EventTriggerComponent } from '../components/event-trigger/event-trigger.handler';
-
-import { ComponentRegistry } from 'src/services/component-registry.service';
-import { Connection } from 'src/interfaces/connection.interface';
-import { Port } from 'src/interfaces/port.interface';
-import { FlowExecutorService } from 'src/services/flow-executor.service';
-import { TemplateCacheService } from 'src/services/template-cache.service';
-
-@Controller()
-export class AppController {
-  private readonly logger = new Logger('AppController');
+  const app = await NestFactory.create(AppModule);
   
-  constructor(
-    private eventTriggerComponent: EventTriggerComponent,
-    private componentRegistry: ComponentRegistry,
-    private flowExecutorService: FlowExecutorService,
-    private templateCacheService: TemplateCacheService
-  ) {}
-
-  @Get()
-  @Render('index')
-  async root(@Req() req: Request) {
-    return { message: 'steam engine = chart + document + logger // FBP' };
-  }
-
-  /**
-   * svelte app generated in:
-   * ./src/public/chart/*
-   */
-
-  @Get('flows')
-  @Render('flows/index')
-  async flowsIndex(
-    @Req() req: Request
-  ) {
-    const flows = await this.flowExecutorService.getFlows();
-    return {
-      message: 'flows - steam engine // FBP',
-      flows
-    };
-  }
-
-  @Get('flow/:flowId')
-  @Render('flow/index')
-  async flowComponents(
-    @Param('flowId') flowId: string,
-    @Req() req: Request
-  ) {
-    const flow = await this.flowExecutorService.getFlow(flowId);
-    const components = flow.components.map(c => ({
-      componentId: c.componentId,
-      componentRef: c.componentRef
-    }));
-
-    return {
-      message: 'flow - steam engine // FBP',
-      flowId,
-      components
-    };
-  }
-
-  @Get('document/:flowId/:componentId')
-  @Render('document/view')
-  async documentView(
-    @Param('flowId') flowId: string,
-    @Param('componentId') componentId: string,
-    @Req() req: Request
-  ) {
-    const flow = await this.flowExecutorService.getFlow(flowId);
-    const components = flow.components.map(c => ({
-      componentId: c.componentId,
-      componentRef: c.componentRef
-    }));
-
-    let connections = []
-    flow.connections.forEach((connection: Connection) => {
-      connections.push({
-        fromFlow: connection.fromFlow,
-        fromComponent: connection.fromComponent,
-        fromEvent: connection.fromEvent,
-        toFlow: connection.toFlow,
-        toComponent: connection.toComponent,
-        toEvent: connection.toEvent,
-      })
-    })
-
-    return {
-      selected: {
-        flowId,
-        componentId
-      },
-      components,
-      message: `${flowId}.${componentId} - document - steam engine // FBP`,
-      connections
-    };
-  }
-
-  @Get('documentComponent/:flowId/:componentId/:swimlaneId')
-  @Render('document/component')
-  async documentComponent(
-    @Param('flowId') flowId: string,
-    @Param('componentId') componentId: string,
-    @Param('swimlaneId') swimlaneId: string,
-  ) {
-    const component = this.componentRegistry.getComponent(flowId, componentId);
+  // Create the CustomLogger
+  const logger = new CustomLogger('Bootstrap');
   
-    if (component) {
-      return {
-        component,
-        swimlaneId
-      };
-    }
-    return {
-      component: null,
-      swimlaneId
-    };
-  }
+  try {
+    logger.log('Starting main application...');
+    const mainApp = await bootstrapApp(logger);
 
-  @Get('documentConnections/:flowId/:componentId/:portId/:swimlaneId')
-  @Render('document/connections')
-  async documentConnections( 
-    @Param('flowId') flowId: string, 
-    @Param('componentId') componentId: string,
-    @Param('portId') portId: string,
-    @Param('swimlaneId') swimlaneId: string,
-  ) {
-    const params = { flowId, componentId, portId };
-    const component = this.componentRegistry.getComponent(flowId, componentId);
-    
-    if (component) {
-      let port: Port = await component.findPort(portId);
-
-      let connections: Connection[] = await component.findConnections(port);
-
-      connections.forEach((connection) => {
-        if (port.direction === 'input') {
-          connection.next = connection.connectedFrom;
-        } else {
-          connection.next = connection.connectedTo;
-        }
-      });
-
-      if (port) {
-        if (port.dataMethod === 'publish') {
-          return {
-            ...params,
-            port,
-            connections,
-            swimlaneId
-          };
-        } else if (port.dataMethod === 'display') {
-          let displayHtmxId = `${flowId}.${componentId}.${port.eventId}`;
-          const cacheKey = `${flowId}.${componentId}.${port.eventId}`;
-          const cachedTemplate = this.templateCacheService.getTemplate(cacheKey);
-          
-          return {
-            ...params,
-            port,
-            displayHtmxId,
-            swimlaneId,
-            templateContent: cachedTemplate || 'Template not found'
-          };
-        }
-      }
-    }
-    return {
-      ...params,
-      port: null,
-      swimlaneId
-    };
-  }
-
-  @Get('logger')
-  @Render('logger/index')
-  async loggerIndex(@Req() req: Request) {
-    return { message: 'logger - steam engine // FBP' };
-  }
-
-  @Post('trigger-event/:flowComponentEvent')
-  async triggerEvent(
-    @Param('flowComponentEvent') flowComponentEvent: string,
-    @Body() data: any,
-    @Res() res: Response
-  ) {
-    const fceArray = flowComponentEvent.split('.');
-    const flowId = fceArray[0];
-    const componentId = fceArray[1];
-    const eventId = fceArray[2];
-    
-    this.logger.log(`[trigger-event] [${flowId}] [${componentId}] [${eventId}]`);
-    data._flowId = flowId;
-    data._componentId = componentId;
-    data._eventId = eventId;
-    await this.eventTriggerComponent.handleEvent('triggerEvent', data);
-    res.sendStatus(200);
-  }
-
-  @Get('template/:flowId/:componentId/:templateId')
-  async getTemplate(
-    @Param('flowId') flowId: string,
-    @Param('componentId') componentId: string,
-    @Param('templateId') templateId: string,
-    @Res() res: Response
-  ) {
-    const cacheKey = `${flowId}.${componentId}.${templateId}`;
-    const cachedTemplate = this.templateCacheService.getTemplate(cacheKey);
-
-    if (cachedTemplate) {
-      res.send(cachedTemplate);
-    } else {
-      res.status(404).send('Template not found');
-    }
-  }
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/stateMachines/mq-connection.state-machine.ts">
-export default {
-  initialState: 'disconnected',
-  states: ['disconnected', 'connecting', 'connected', 'error'],
-  transitions: {
-    disconnected: { connect: 'connecting', fail: 'error' },
-    connecting: { success: 'connected', fail: 'error' },
-    connected: { disconnect: 'disconnected', fail: 'error' },
-    error: { reset: 'disconnected' }
-  }
-}
-
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/stateMachines/mq-queue.state-machine.ts">
-export default {
-  initialState: 'idle',
-  states: ['idle', 'binding', 'ready', 'consuming', 'error'],
-  transitions: {
-    idle: { bindToExchange: 'binding', fail: 'error' },
-    binding: { success: 'ready', fail: 'error' },
-    ready: { consume: 'consuming', unbind: 'idle', fail: 'error' },
-    consuming: { ack: 'ready', nack: 'ready', fail: 'error' },
-    error: { reset: 'idle' }
-  }
-}
-
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/components/event-trigger/event-trigger.handler.ts">
-import { CustomLogger } from '../../logger/custom-logger';
-import { Injectable, Inject } from '@nestjs/common';
-import { ComponentBase } from '../../bases/component.base';
-import { BackplaneService } from 'src/services/backplane.service';
-import { Server } from 'socket.io';
-import { TemplateCacheService } from 'src/services/template-cache.service';
-
-import { triggerEvent } from './trigger-event.event';
-
-@Injectable()
-export class EventTriggerComponent extends ComponentBase {
-  public logger: CustomLogger;
-  public ports = { // io format: <dataType>.<dataMethod>.<eventId>
-    inputs: [
-      'any.publish.triggerEvent',
-    ],
-    outputs: [
-      'any.publish.any'
-    ]
-  }
-
-  constructor(
-    @Inject('FLOW_ID') flowId: string,
-    @Inject('COMPONENT_ID') componentId: string,
-    @Inject(BackplaneService) protected backplaneService: BackplaneService,
-    @Inject('WEB_SOCKET_SERVER') protected server: Server,
-    @Inject('TEMPLATES') templates: TemplateCacheService
-  ) {
-    super('eventTrigger', 'event-trigger', 'Handles HTMX requests and triggers events', flowId, componentId, backplaneService, server, templates);
-    this.logger = new CustomLogger(`${flowId}.${componentId}`);
-  }
-
-  async handleEvent(eventId: string, data: any): Promise<void> {
-    switch (eventId) {
-      case 'triggerEvent':
-        await this.triggerEvent(data);
-        break;
-      default:
-        break;
-    }
-  }
-
-  private async triggerEvent(data: any): Promise<void> {
-    return await triggerEvent(this, data);
-  }
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/components/job-state-machine/job-state-machine.handler.ts">
-import { Injectable, Inject } from '@nestjs/common';
-import { ComponentBase } from '../../bases/component.base';
-import { BackplaneService } from 'src/services/backplane.service';
-import { Server } from 'socket.io';
-import { CustomLogger } from '../../logger/custom-logger';
-import { TemplateCacheService } from 'src/services/template-cache.service';
-
-import { StateMachine } from 'src/interfaces/state-machine.interface';
-import { initProxyMachine } from 'src/events/initProxyMachine.event';
-import { transition } from 'src/events/transition.event';
-
-@Injectable()
-export class JobStateMachineComponent extends ComponentBase {
-  public logger: CustomLogger;
-  public stateMachine: StateMachine;
-  
-  public ports = {
-    inputs: [
-      'any.publish.initProxyMachine',
-      'any.publish.set-start',
-      'any.publish.set-pause',
-      'any.publish.set-resume',
-      'any.publish.set-finish',
-      'any.publish.set-reset'
-    ],
-    outputs: [
-      'any.publish.get-start',
-      'any.publish.get-pause',
-      'any.publish.get-resume',
-      'any.publish.get-finish',
-      'any.publish.get-reset',
-      'any.publish.stateChanged',
-      'htmx.display.job-state-machine'
-    ]
-  }
-
-  constructor(
-    @Inject('FLOW_ID') flowId: string,
-    @Inject('COMPONENT_ID') componentId: string,
-    @Inject(BackplaneService) backplane: BackplaneService,
-    @Inject('WEB_SOCKET_SERVER') protected server: Server,
-    @Inject('TEMPLATES') templates: TemplateCacheService
-  ) {
-    super('jobStateMachine', 'job-state-machine', 'Implements a job state machine', flowId, componentId, backplane, server, templates);
-    this.flowId = flowId;
-    this.componentId = componentId;
-    this.logger = new CustomLogger(`${flowId}.${componentId}`);
-  }
-
-  async handleEvent(eventId: string, data: any): Promise<void> {
-    this.logger.log(`Handling event: ${eventId}`);
-    switch (eventId) {
-      case "initProxyMachine": {
-        await this.initProxyMachine(data);
-        break;
-      }
-      case "set-start":
-      case "set-pause":
-      case "set-resume":
-      case "set-finish":
-      case "set-reset": {
-        await this.transition(eventId.substring(4)); // Remove 'set-' prefix
-        break;
-      }
-    }
-  }
-
-  public initProxyMachine(data): Promise<void> {
-    return initProxyMachine(this, data);
-  }
-
-  public transition(data): Promise<void> {
-    return transition(this, data);
-  }
-
-  public async updateDisplay(): Promise<void> {
-    if (!this.stateMachine) {
-      this.logger.error('[display] State machine not initialized');
-      return;
-    }
-
-    const currentState = this.stateMachine.getCurrentState();
-    const states = this.stateMachine.getStates();
-    const transitions = this.stateMachine.getTransitions();
-
-    await this.display(this.flowId, this.componentId, 'job-state-machine', {
-      currentState,
-      states: Array.from(states),
-      transitions: Object.fromEntries(transitions)
+    process.on('SIGINT', async () => {
+      CustomLogger.clearSTDOUT();
+      await mainApp.close();
+      process.exit();
     });
+  } catch (error) {
+    logger.error(`Bootstrap error: ${error.message}`, error.stack);
+    process.exit(1);
   }
 }
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/processors/event.processor.ts">
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ComponentRegistry } from '../services/component-registry.service';
-import { BackplaneService } from '../services/backplane.service';
 
-@Injectable()
-export class EventProcessor implements OnModuleInit {
-  private readonly logger = new Logger(EventProcessor.name);
-  private connections: Map<string, Array<{ toFlow: string; toComponent: string; toEvent: string }>> = new Map();
-
-  constructor(
-    private componentRegistry: ComponentRegistry,
-    private backplaneService: BackplaneService
-  ) {}
-
-  async onModuleInit() {
-    await this.subscribeToEvents();
-  }
-
-  private async subscribeToEvents() {
-    await this.backplaneService.subscribe(
-      'flow_exchange',
-      'componentEvent',
-      'component_event_queue',
-      this.handleComponentEvent.bind(this)
-    );
-
-    await this.backplaneService.subscribe(
-      'flow_exchange',
-      'createConnection',
-      'create_connection_queue',
-      this.createConnection.bind(this)
-    );
-  }
-
-  async handleComponentEvent(msg: {flowId: string, componentId: string, eventId: string, data: any}): Promise<void> {
-    const { flowId, componentId, eventId, data: eventData } = msg;
-    this.logger.log(`[handleComponentEvent] [${flowId}.${componentId}.${eventId}] data: ${JSON.stringify(eventData)}`);
-    
-    const component = this.componentRegistry.getComponent(flowId, componentId);
-    if (component) {
-      this.logger.log(`Passing event to component: ${componentId}`);
-      await component.handleEvent(eventId, eventData);
-
-      // Check if there are connections for this event
-      const connectionKey = `${flowId}.${componentId}.${eventId}`;
-      const connections = this.connections.get(connectionKey) || [];
-      for (const connection of connections) {
-        const { toFlow, toComponent, toEvent } = connection;
-        this.logger.log(`[forwardingComponentEvent] [${toFlow}.${toComponent}.${toEvent}]`);
-        
-        const targetComponent = this.componentRegistry.getComponent(toFlow, toComponent);
-        if (targetComponent) {
-          this.logger.log(`Forwarding event to component: ${targetComponent.componentId}`);
-          await targetComponent.handleEvent(toEvent, eventData);
-        } else {
-          this.logger.warn(`Target component not found: ${toComponent} in flow: ${toFlow}`);
-        }
-      }
-    } else {
-      this.logger.warn(`Component not found: ${flowId}.${componentId}`);
-    }
-  }
-
-  async createConnection(msg: {flowId: string, fromComponent: string, fromEvent: string, toComponent: string, toEvent: string}): Promise<void>  {
-    const { flowId, fromComponent, fromEvent, toComponent, toEvent } = msg;
-    this.logger.log(`Received createConnection: ${flowId}.${fromComponent}.${fromEvent} -> ${toComponent}.${toEvent}`);
-    
-    const connectionKey = `${flowId}.${fromComponent}.${fromEvent}`;
-    if (!this.connections.has(connectionKey)) {
-      this.connections.set(connectionKey, []);
-    }
-    this.connections.get(connectionKey).push({ toFlow: flowId, toComponent, toEvent });
-    this.logger.log(`Connection created: ${connectionKey} -> ${toComponent}.${toEvent}`);
-  }
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/logger/custom-logger.ts">
-import { ConsoleLogger, Injectable, Inject } from '@nestjs/common';
-import * as fs from 'fs';
-import * as path from 'path';
-
-@Injectable()
-export class CustomLogger extends ConsoleLogger {
-  constructor(
-    private logId: string,
-  ) {
-    super(logId);
-    this.setLogLevels(['log', 'error', 'warn', 'debug', 'verbose']);
-  }
-
-  log(message: string, context?: string) {
-    this.printMessage(message, 'log', context);
-    // this.emitLogEvent('log', message);
-  }
-
-  warn(message: string, context?: string) {
-    this.printMessage(message, 'warn', context);
-    // this.emitLogEvent('warn', message);
-  }
-
-  error(message: string, trace?: string, context?: string) {
-    this.printMessage(message, 'error', context);
-    // this.emitLogEvent('error', message);
-    if (trace) {
-      this.printMessage(trace, 'error', context);
-    }
-  }
-
-  debug(message: string, context?: string) {
-    this.printMessage(message, 'debug', context);
-  }
-
-  verbose(message: string, context?: string) {
-    this.printMessage(message, 'verbose', context);
-  }
-
-  private printMessage(message: string, logLevel: string, context?: string) {
-    const output = context ? `[${context}] ${message}` : message;
-    console.log(`[${this.getNow()}] [${logLevel.toUpperCase()}] [${this.logId}] ${output}`);
-  }
-
-  private getNow(): string {
-    return new Date().toISOString();
-  }
-
-  static write_to_file(message: string) {
-    const logFile = path.join(process.cwd(), 'start:dev.stdout.txt');
-    fs.appendFile(logFile, message, (err) => {
-      if (err) {
-        console.error('Failed to write to log file:', err);
-      }
-    });
-  }
-
-  static clearSTDOUT() {
-    const logFile = path.join(process.cwd(), 'start:dev.stdout.txt');
-    try {
-      fs.writeFileSync(logFile, '');
-      console.log(`Log file cleared at ${logFile}`);
-    } catch (error) {
-      console.error('Failed to clear log file:', error);
-    }
-  }
-}
+bootstrap().catch((error) => {
+  console.error('Unhandled bootstrap error:', error);
+  process.exit(1);
+});
 </FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/component.interface.ts">
 import { Connection } from "./connection.interface";
@@ -1122,17 +445,235 @@ export interface Component {
   findConnections: (port: Port) => Promise<Connection[]>
 }
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/flow.interface.ts">
-import { Connection } from "./connection.interface";
+<FILE path="/home/travis/Projects/flow-based-programming/src/bases/component.base.ts">
+import { Inject, Injectable } from '@nestjs/common';
+import { Component } from '../interfaces/component.interface';
+import { CustomLogger } from '../logger/custom-logger';
+import { WebSocketGateway, WebSocketServer, SubscribeMessage, MessageBody } from '@nestjs/websockets';
+import { Server } from 'socket.io';
+import * as ejs from 'ejs';
+import * as path from 'path';
+import { Connection } from 'src/interfaces/connection.interface';
+import { Port } from 'src/interfaces/port.interface';
+import { ComponentRegistry } from 'src/services/component-registry.service';
+import { TemplateCacheService } from 'src/services/template-cache.service';
+import { BackplaneService } from '../services/backplane.service';
 
-export interface Flow {
-  id: string;
-  components: {
-    componentId: string;
-    componentRef: string;
-    init: any | undefined;
-  }[];
-  connections: Connection[];
+@WebSocketGateway()
+@Injectable()
+export abstract class ComponentBase implements Component {
+  protected readonly logger: CustomLogger;
+  public _ports: { inputs: Port[]; outputs: Port[]; };
+  public ports: { inputs: string[]; outputs: string[]; };
+  public _connections: Map<string, Component> = new Map();
+  public connections: Connection[];
+  
+  constructor(
+    public componentId: string,
+    public slug: string,
+    public description: string,
+    public flowId: string,
+    public componentRef: string,
+    @Inject(BackplaneService) protected backplaneService: BackplaneService,
+    protected server: Server,
+    public templateCacheService: TemplateCacheService
+  ) {
+    this.logger = new CustomLogger(this.componentId);
+  }
+
+  abstract handleEvent(eventId: string, data: any): Promise<void>;
+
+  async publish(flowId: string, componentId: string, eventId: string, data: any): Promise<void> {
+    this.logger.log(`Publishing: ${flowId}.${componentId}.${eventId} -> ${data}`);
+    await this.backplaneService.publish('flow_exchange', 'componentEvent', {
+      flowId,
+      componentId,
+      eventId,
+      data,
+    });
+  }
+
+  @SubscribeMessage('client-event')
+  handleClientEvent(@MessageBody() data: any): void {
+    const { flowId, componentId, eventId, ...eventData } = data;
+    this.logger.log(`Received client event: flowId=${flowId}, componentId=${componentId}, eventId=${eventId}, data=${JSON.stringify(eventData)}`);
+    this.publish(flowId, componentId, 'clientEventReceived', eventData);
+  }
+
+  public async display(flowId: string, componentId: string, templateId: string, data: any) {
+    data._flowId = flowId;
+    data._componentId = componentId;
+    data._templateId = templateId;
+    const htmxContent = await this.generateHtmxContent(data);
+    
+    // Cache the generated content
+    const cacheKey = `${flowId}.${componentId}.${templateId}`;
+    this.templateCacheService.setTemplate(cacheKey, htmxContent);
+
+    if (this.server) {
+      // this.logger.log(htmxContent);
+      this.server.emit('display-flow-component-template-content', {
+        flowId,
+        componentId,
+        templateId,
+        content: htmxContent
+      });
+    } else {
+      this.logger.warn('WebSocket server is not initialized');
+    }
+  }
+
+  private async generateHtmxContent(data: any): Promise<string> {
+    const templatePath = path.resolve(__dirname, `../templates/${data._templateId}.ejs`);
+    try {
+      return await ejs.renderFile(templatePath, data);
+    } catch (error) {
+      this.logger.error(`Error rendering EJS template: ${error.message}`);
+      return `<div>Error rendering content</div>`;
+    }
+  }
+
+  public syncConnections(connections: Connection[], componentRegistry: ComponentRegistry): void {
+    if (connections) {
+      this.connections = [];
+      connections.forEach((connection, index) => {
+        // console.log('connection', connection);
+        // console.log('this.componentRegistry', componentRegistry)
+        if (connection.fromFlow === this.flowId && connection.fromComponent === this.componentId) {
+          // console.log(`from is the current instance so register to instance`);
+          const connectionKey = `${connection.fromEvent}>${connection.toFlow}.${connection.toComponent}.${connection.toEvent}`;
+          const connectedComponentInstance = componentRegistry.getComponent(connection.toFlow, connection.toComponent);
+          this._connections.set(connectionKey, connectedComponentInstance);
+          connection.connectedTo = connectedComponentInstance;
+          connection.connectedFrom = this;
+          this.connections.push(connection);
+        } else if (connection.toFlow === this.flowId && connection.toComponent === this.componentId) {
+          // console.log(`to is the current instance so register from instance`);
+          const connectionKey = `${connection.toEvent}>${connection.fromFlow}.${connection.fromComponent}.${connection.fromEvent}`;
+          const connectedComponentInstance = componentRegistry.getComponent(connection.fromFlow, connection.fromComponent);
+          this._connections.set(connectionKey, connectedComponentInstance);
+          connection.connectedTo = this;
+          connection.connectedFrom = connectedComponentInstance;
+          this.connections.push(connection);
+        } else {
+          // connection does not match; do nothing.
+        }
+      })
+    }
+  }
+
+  // TODO: addPort()
+
+  // TODO: removePort()
+
+  // TODO: connectComponentToPort()
+
+  // TODO: disconnectComponentFromPort()
+
+  public async getPorts(): Promise<{ inputs: Port[], outputs: Port[] }> {
+    // portId format: <dataType>.<dataMethod>.<eventId>
+    let ports = {
+      inputs: [],
+      outputs: []
+    }
+    this.ports.inputs.forEach(async (input) => {
+      let i = input.split('.');
+      let port: Port = {
+        direction: 'input',
+        dataType: i[0],
+        dataMethod: i[1] === 'display' ? 'display' : 'publish',
+        eventId: i[2],
+        connections: [...await this.loadConnections('input', i[2])]
+      }
+      ports.inputs.push(port);
+    });
+    this.ports.outputs.forEach(async (output) => {
+      let o = output.split('.');
+      let port: Port = {
+        direction: 'output',
+        dataType: o[0],
+        dataMethod: o[1] === 'display' ? 'display' : 'publish',
+        eventId: o[2],
+        connections: [...await this.loadConnections('output', o[2])]
+      }
+      ports.outputs.push(port);
+    });
+    this._ports = ports;
+    return ports;
+  }
+
+  private async loadConnections(direction: string, eventId: string): Promise<Connection[]> {
+    let connections: Connection[] = [];
+    // console.log('this.connections', this.connections);
+    if (this.connections) {
+      this.connections.forEach((connection: Connection) => {
+        // console.log('connection', connection);
+        if (direction === 'input') {
+          if (connection.toEvent === eventId) {
+            connections.push(connection);
+          }
+        } else {
+          if (connection.fromEvent === eventId) {
+            connections.push(connection);
+          }
+        }
+      });
+      return connections;
+    } else {
+      return [];
+    }
+  }
+
+  public async findPort(portId: string): Promise<Port> {
+    // portId format: <dataType>.<dataMethod>.<eventId>
+    const pId = portId.split('.');
+    const eventId = pId[2];
+    const ports = await this.getPorts();
+    let port: Port;
+    ports.inputs.forEach((input: Port) => {
+      if (input.eventId === eventId) {
+        port = input;
+      }
+    });
+    ports.outputs.forEach((output: Port) => {
+      if (output.eventId === eventId) {
+        port = output;
+      }
+    });
+    return port;
+  }
+
+  public async findConnections(port: Port): Promise<Connection[]> {
+    if (port && port.connections) {
+      return port.connections;
+    }
+    return [];
+  }
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/services/component-registry.service.ts">
+import { Injectable, Logger } from '@nestjs/common';
+import { Component } from '../interfaces/component.interface';
+
+@Injectable()
+export class ComponentRegistry {
+  private components: Map<string, Component> = new Map();
+  private readonly logger = new Logger(ComponentRegistry.name);
+
+  registerComponent(component: Component) {
+    const key = `${component.flowId}.${component.componentId}`;
+    this.logger.log(`Registering component: ${key}`);
+    this.components.set(key, component);
+  }
+
+  getComponent(flowId: string, componentId: string): Component | undefined {
+    const key = `${flowId}.${componentId}`;
+    const component = this.components.get(key);
+    if (!component) {
+      this.logger.warn(`Component not found: ${key}`);
+    }
+    return component;
+  }
 }
 </FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/services/flow-executor.service.ts">
@@ -1221,98 +762,273 @@ export class FlowExecutorService {
   }
 }
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/services/component-registry.service.ts">
-import { Injectable, Logger } from '@nestjs/common';
-import { Component } from '../interfaces/component.interface';
+<FILE path="/home/travis/Projects/flow-based-programming/src/logger/custom-logger.ts">
+import { ConsoleLogger, Injectable, Inject } from '@nestjs/common';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
-export class ComponentRegistry {
-  private components: Map<string, Component> = new Map();
-  private readonly logger = new Logger(ComponentRegistry.name);
-
-  registerComponent(component: Component) {
-    const key = `${component.flowId}.${component.componentId}`;
-    this.logger.log(`Registering component: ${key}`);
-    this.components.set(key, component);
+export class CustomLogger extends ConsoleLogger {
+  constructor(
+    private logId: string,
+  ) {
+    super(logId);
+    this.setLogLevels(['log', 'error', 'warn', 'debug', 'verbose']);
   }
 
-  getComponent(flowId: string, componentId: string): Component | undefined {
-    const key = `${flowId}.${componentId}`;
-    const component = this.components.get(key);
-    if (!component) {
-      this.logger.warn(`Component not found: ${key}`);
+  log(message: string, context?: string) {
+    this.printMessage(message, 'log', context);
+    // this.emitLogEvent('log', message);
+  }
+
+  warn(message: string, context?: string) {
+    this.printMessage(message, 'warn', context);
+    // this.emitLogEvent('warn', message);
+  }
+
+  error(message: string, trace?: string, context?: string) {
+    this.printMessage(message, 'error', context);
+    // this.emitLogEvent('error', message);
+    if (trace) {
+      this.printMessage(trace, 'error', context);
     }
-    return component;
+  }
+
+  debug(message: string, context?: string) {
+    this.printMessage(message, 'debug', context);
+  }
+
+  verbose(message: string, context?: string) {
+    this.printMessage(message, 'verbose', context);
+  }
+
+  private printMessage(message: string, logLevel: string, context?: string) {
+    const output = context ? `[${context}] ${message}` : message;
+    console.log(`[${this.getNow()}] [${logLevel.toUpperCase()}] [${this.logId}] ${output}`);
+  }
+
+  private getNow(): string {
+    return new Date().toISOString();
+  }
+
+  static write_to_file(message: string) {
+    const logFile = path.join(process.cwd(), 'start:dev.stdout.txt');
+    fs.appendFile(logFile, message, (err) => {
+      if (err) {
+        console.error('Failed to write to log file:', err);
+      }
+    });
+  }
+
+  static clearSTDOUT() {
+    const logFile = path.join(process.cwd(), 'start:dev.stdout.txt');
+    try {
+      fs.writeFileSync(logFile, '');
+      console.log(`Log file cleared at ${logFile}`);
+    } catch (error) {
+      console.error('Failed to clear log file:', error);
+    }
   }
 }
 </FILE>
-<FILE path="start:dev.stdout.txt" TARGET>
-c[[90m10:42:09 AM[0m] Starting compilation in watch mode...
-
-[[90m10:42:10 AM[0m] Found 0 errors. Watching for file changes.
-
-[AppModule] RabbitMQ URI: amqp://localhost:5672
-[32m[Nest] 2022114  - [39m09/10/2024, 10:42:10 AM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
-[32m[Nest] 2022114  - [39m09/10/2024, 10:42:10 AM [32m    LOG[39m [38;5;3m[AmqpConnection] [39m[32mTrying to connect to RabbitMQ broker (default)[39m
-[32m[Nest] 2022114  - [39m09/10/2024, 10:42:10 AM [32m    LOG[39m [38;5;3m[RabbitMQModule] [39m[32mSuccessfully connected to RabbitMQ[39m
-[32m[Nest] 2022114  - [39m09/10/2024, 10:42:10 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDiscoveryModule dependencies initialized[39m[38;5;3m +9ms[39m
-[32m[Nest] 2022114  - [39m09/10/2024, 10:42:10 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRabbitMQModule dependencies initialized[39m[38;5;3m +0ms[39m
-[32m[Nest] 2022114  - [39m09/10/2024, 10:42:10 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +0ms[39m
-[2024-09-10T15:42:10.510Z] [LOG] [Bootstrap] Starting main application...
-[2024-09-10T15:42:10.511Z] [LOG] [Bootstrap] [NestFactory] Starting Nest application...
-[2024-09-10T15:42:10.513Z] [LOG] [Bootstrap] [AmqpConnection] Trying to connect to RabbitMQ broker (default)
-[2024-09-10T15:42:10.513Z] [LOG] [Bootstrap] [RabbitMQModule] Successfully connected to RabbitMQ
-[2024-09-10T15:42:10.514Z] [LOG] [Bootstrap] [InstanceLoader] DiscoveryModule dependencies initialized
-[2024-09-10T15:42:10.514Z] [LOG] [Bootstrap] [InstanceLoader] RabbitMQModule dependencies initialized
-[2024-09-10T15:42:10.514Z] [LOG] [Bootstrap] [InstanceLoader] AppModule dependencies initialized
-[2024-09-10T15:42:10.523Z] [LOG] [Bootstrap] [WebSocketsController] EventTriggerComponent subscribed to the "client-event" message
-[2024-09-10T15:42:10.524Z] [LOG] [Bootstrap] [WebSocketsController] NumberGeneratorComponent subscribed to the "client-event" message
-[2024-09-10T15:42:10.524Z] [LOG] [Bootstrap] [WebSocketsController] NumberMultiplierComponent subscribed to the "client-event" message
-[2024-09-10T15:42:10.524Z] [LOG] [Bootstrap] [WebSocketsController] StateMachineComponent subscribed to the "client-event" message
-[2024-09-10T15:42:10.524Z] [LOG] [Bootstrap] [WebSocketsController] JobStateMachineComponent subscribed to the "client-event" message
-[2024-09-10T15:42:10.525Z] [LOG] [Bootstrap] [WebSocketsController] ButtonTriggerComponent subscribed to the "client-event" message
-[2024-09-10T15:42:10.526Z] [LOG] [Bootstrap] [RoutesResolver] AppController {/}:
-[2024-09-10T15:42:10.527Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/, GET} route
-[2024-09-10T15:42:10.527Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/flows, GET} route
-[2024-09-10T15:42:10.527Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/flow/:flowId, GET} route
-[2024-09-10T15:42:10.528Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/document/:flowId/:componentId, GET} route
-[2024-09-10T15:42:10.528Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentComponent/:flowId/:componentId/:swimlaneId, GET} route
-[2024-09-10T15:42:10.528Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentConnections/:flowId/:componentId/:portId/:swimlaneId, GET} route
-[2024-09-10T15:42:10.528Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/logger, GET} route
-[2024-09-10T15:42:10.528Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/trigger-event/:flowComponentEvent, POST} route
-[2024-09-10T15:42:10.528Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/template/:flowId/:componentId/:templateId, GET} route
-[2024-09-10T15:42:10.529Z] [WARN] [Bootstrap] [BackplaneService] Connection not initialized or lost, attempting to reconnect...
-[2024-09-10T15:42:10.529Z] [LOG] [Bootstrap] [BackplaneService] Connecting to RabbitMQ...
-[2024-09-10T15:42:10.587Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
-[2024-09-10T15:42:10.588Z] [LOG] [Bootstrap] [AmqpConnection] Successfully connected to RabbitMQ broker (default)
-[2024-09-10T15:42:10.589Z] [LOG] [Bootstrap] [BackplaneService] Successfully connected to RabbitMQ
-node:events:497
-      throw er; // Unhandled 'error' event
-      ^
-
-Error: Channel closed by server: 405 (RESOURCE-LOCKED) with message "RESOURCE_LOCKED - cannot obtain exclusive access to locked queue 'component_event_queue' in vhost '/'. It could be originally declared on another connection or the exclusive property value does not match that of the original declaration."
-    at Channel.accept (/home/travis/Projects/flow-based-programming/node_modules/amqplib/lib/channel.js:320:19)
-    at Connection.mainAccept [as accept] (/home/travis/Projects/flow-based-programming/node_modules/amqplib/lib/connection.js:582:33)
-    at Socket.go (/home/travis/Projects/flow-based-programming/node_modules/amqplib/lib/connection.js:434:16)
-    at Socket.emit (node:events:519:28)
-    at emitReadable_ (node:internal/streams/readable:832:12)
-    at process.processTicksAndRejections (node:internal/process/task_queues:81:21)
-Emitted 'error' event on ChannelModel instance at:
-    at Connection.emit (node:events:519:28)
-    at Connection.onSocketError (/home/travis/Projects/flow-based-programming/node_modules/amqplib/lib/connection.js:309:12)
-    at Connection.emit (node:events:519:28)
-    at Socket.go (/home/travis/Projects/flow-based-programming/node_modules/amqplib/lib/connection.js:437:14)
-    at Socket.emit (node:events:519:28)
-    at emitReadable_ (node:internal/streams/readable:832:12)
-    at process.processTicksAndRejections (node:internal/process/task_queues:81:21) {
-  code: 405,
-  classId: 50,
-  methodId: 10
+<FILE path="/home/travis/Projects/flow-based-programming/src/stateMachines/mq-connection.state-machine.ts">
+export default {
+  initialState: 'disconnected',
+  states: ['disconnected', 'connecting', 'connected', 'error'],
+  transitions: {
+    disconnected: { connect: 'connecting', fail: 'error' },
+    connecting: { success: 'connected', fail: 'error' },
+    connected: { disconnect: 'disconnected', fail: 'error' },
+    error: { reset: 'disconnected' }
+  }
 }
 
-Node.js v20.16.0
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/stateMachines/mq-consumer.state-machine.ts">
+export default {
+  initialState: 'idle',
+  states: ['idle', 'ready', 'consuming', 'completed', 'error'],
+  transitions: {
+    idle: { subscribe: 'ready', fail: 'error' },
+    ready: { consumeMessage: 'consuming', unsubscribe: 'idle', fail: 'error' },
+    consuming: { ack: 'completed', nack: 'completed', fail: 'error' },
+    completed: { reset: 'ready' },
+    error: { reset: 'idle' }
+  }
+}
 
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/stateMachines/mq-publisher.state-machine.ts">
+export default {
+  initialState: 'idle',
+  states: ['idle', 'publishing', 'completed', 'error'],
+  transitions: {
+    idle: { publishMessage: 'publishing', fail: 'error' },
+    publishing: { success: 'completed', fail: 'error' },
+    completed: { reset: 'idle' },
+    error: { reset: 'idle' }
+  }
+}
+
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/stateMachines/mq-queue.state-machine.ts">
+export default {
+  initialState: 'idle',
+  states: ['idle', 'binding', 'ready', 'consuming', 'error'],
+  transitions: {
+    idle: { bindToExchange: 'binding', fail: 'error' },
+    binding: { success: 'ready', fail: 'error' },
+    ready: { consume: 'consuming', unbind: 'idle', fail: 'error' },
+    consuming: { ack: 'ready', nack: 'ready', fail: 'error' },
+    error: { reset: 'idle' }
+  }
+}
+
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/stateMachines/mq-exchange.state-machine.ts">
+export default {
+  initialState: 'idle',
+  states: ['idle', 'binding', 'ready', 'error'],
+  transitions: {
+    idle: { bindQueue: 'binding', fail: 'error' },
+    binding: { success: 'ready', fail: 'error' },
+    ready: { publish: 'ready', unbindQueue: 'idle', fail: 'error' },
+    error: { reset: 'idle' }
+  }
+}
+
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/stateMachines/mq-message-broker.state-machine.ts">
+export default {
+  initialState: 'idle',
+  states: ['idle', 'starting', 'running', 'stopped', 'error'],
+  transitions: {
+    idle: { start: 'starting', fail: 'error' },
+    starting: { success: 'running', fail: 'error' },
+    running: { stop: 'stopped', fail: 'error' },
+    stopped: { restart: 'starting', fail: 'error' },
+    error: { reset: 'idle' }
+  }
+}
+
+</FILE>
+<FILE path="src/services/backplane.service.ts" TARGET>
+import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
+import * as amqp from 'amqplib';
+
+@Injectable()
+export class BackplaneService implements OnModuleInit, OnModuleDestroy {
+  private connection: amqp.Connection | null = null;
+  private channel: amqp.Channel | null = null;
+  private connectionPromise: Promise<void> | null = null;
+  private readonly logger = new Logger(BackplaneService.name);
+  private isInitialized = false;
+
+  async onModuleInit() {
+    await this.connect();
+  }
+
+  async onModuleDestroy() {
+    await this.disconnect();
+  }
+
+  private async connect() {
+    if (this.connectionPromise) {
+      return this.connectionPromise;
+    }
+
+    this.connectionPromise = new Promise<void>(async (resolve, reject) => {
+      try {
+        this.logger.log('Connecting to RabbitMQ...');
+        this.connection = await amqp.connect('amqp://localhost:5672');
+        this.channel = await this.connection.createChannel();
+        this.logger.log('Successfully connected to RabbitMQ');
+        this.isInitialized = true;
+        resolve();
+      } catch (error) {
+        this.logger.error('Failed to connect to RabbitMQ', error);
+        this.isInitialized = false;
+        this.connection = null;
+        this.channel = null;
+        reject(error);
+      } finally {
+        this.connectionPromise = null;
+      }
+    });
+
+    return this.connectionPromise;
+  }
+
+  private async disconnect() {
+    try {
+      if (this.channel) {
+        await this.channel.close();
+        this.channel = null;
+      }
+      if (this.connection) {
+        await this.connection.close();
+        this.connection = null;
+      }
+      this.isInitialized = false;
+      this.logger.log('Disconnected from RabbitMQ');
+    } catch (error) {
+      this.logger.error('Error disconnecting from RabbitMQ', error);
+    }
+  }
+
+  async publish(exchange: string, routingKey: string, message: any): Promise<void> {
+    await this.ensureConnection();
+    if (!this.channel) {
+      throw new Error('Channel is not available');
+    }
+    await this.channel.assertExchange(exchange, 'topic', { durable: true });
+    this.channel.publish(exchange, routingKey, Buffer.from(JSON.stringify(message)));
+  }
+
+  async subscribe(
+    exchange: string,
+    routingKey: string,
+    queue: string,
+    callback: (msg: any) => Promise<void>
+  ): Promise<void> {
+    await this.ensureConnection();
+    if (!this.channel) {
+      throw new Error('Channel is not available');
+    }
+    await this.channel.assertExchange(exchange, 'topic', { durable: true });
+    const q = await this.channel.assertQueue(queue, { exclusive: false, durable: true });
+    await this.channel.bindQueue(q.queue, exchange, routingKey);
+    
+    this.channel.consume(q.queue, async (msg) => {
+      if (msg !== null) {
+        const content = JSON.parse(msg.content.toString());
+        await callback(content);
+        this.channel.ack(msg);
+      }
+    });
+  }
+
+  private async ensureConnection(): Promise<void> {
+    if (!this.isInitialized || !this.connection || !this.channel) {
+      this.logger.warn('Connection not initialized or lost, attempting to reconnect...');
+      await this.connect();
+    }
+    
+    if (!this.channel || this.channel.closed) {
+      this.logger.warn('Channel not initialized or closed, attempting to create a new channel...');
+      try {
+        if (!this.connection) {
+          throw new Error('Connection is not available');
+        }
+        this.channel = await this.connection.createChannel();
+      } catch (error) {
+        this.logger.error('Failed to create a new channel', error);
+        throw new Error('Failed to initialize channel');
+      }
+    }
+  }
+}
 </FILE>
 <REQUEST>
-unhandled error
+should be able to switch between npm package subvind/message-queue called ismq  and the current amqp
 </REQUEST>
