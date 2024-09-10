@@ -72,27 +72,43 @@ class IsmqAdapter implements MessageQueueAdapter {
 
   async connect(): Promise<void> {
     this.logger.log('Connecting to ISMQ...');
-    this.client = new MessageQueueClient('http://localhost:3030');
-    await this.client.connectWebSocket();
-    this.logger.log('Successfully connected to ISMQ');
+    this.client = new MessageQueueClient('http://localhost:3030', {
+      verbose: false
+    });
+    try {
+      await this.client.connectWebSocket();
+      this.logger.log('Successfully connected to ISMQ');
+    } catch (error) {
+      this.logger.error(`Failed to connect to ISMQ: ${error.message}`);
+      throw error;
+    }
   }
 
   async disconnect(): Promise<void> {
     if (this.client) {
-      this.client.disconnectWebSocket();
-      this.client = null;
+      try {
+        this.client.disconnectWebSocket();
+        this.client = null;
+        this.logger.log('Disconnected from ISMQ');
+      } catch (error) {
+        this.logger.error(`Error disconnecting from ISMQ: ${error.message}`);
+      }
     }
-    this.logger.log('Disconnected from ISMQ');
   }
 
   async publish(exchange: string, routingKey: string, message: any): Promise<void> {
     if (!this.client) {
       throw new Error('ISMQ is not available');
     }
-    this.logger.log(`Publishing message to exchange: ${exchange}, routingKey: ${routingKey}`);
-    await this.client.createExchange(exchange);
-    await this.client.publish(exchange, routingKey, message);
-    this.logger.log('Message published successfully');
+    // this.logger.log(`Publishing message to exchange: ${exchange}, routingKey: ${routingKey}`);
+    try {
+      await this.client.createExchange(exchange);
+      await this.client.publish(exchange, routingKey, message);
+      // this.logger.log('Message published successfully');
+    } catch (error) {
+      this.logger.error(`Failed to publish message: ${error.message}`);
+      throw error;
+    }
   }
 
   async subscribe(
@@ -105,18 +121,24 @@ class IsmqAdapter implements MessageQueueAdapter {
       throw new Error('ISMQ is not available');
     }
     this.logger.log(`Subscribing to exchange: ${exchange}, routingKey: ${routingKey}, queue: ${queue}`);
-    await this.client.createExchange(exchange);
-    await this.client.bind(exchange, queue, routingKey);
-    let subscription = await this.client.subscribeToQueue(exchange, queue, async (message) => {
-      this.logger.log(`Received message on queue: ${queue}, content: ${JSON.stringify(message)}`);
-      try {
-        await callback(message);
-        this.logger.log(`Successfully processed message from queue: ${queue}`);
-      } catch (error) {
-        this.logger.error(`Error processing message from queue ${queue}: ${error.message}`);
-      }
-    });
-    this.logger.log(`Successfully subscribed to queue: ${queue}`);
+    try {
+      await this.client.createExchange(exchange);
+      await this.client.bind(exchange, queue, routingKey);
+      
+      this.logger.log(`Attempting to subscribe to queue: ${queue}`);
+      await this.client.subscribeToQueue(exchange, queue, async (message) => {
+        // this.logger.log(`Received message on queue: ${queue}, content: ${JSON.stringify(message)}`);
+        try {
+          await callback(message);
+          // this.logger.log(`Successfully processed message from queue: ${queue}`);
+        } catch (error) {
+          this.logger.error(`Error processing message from queue ${queue}: ${error.message}`);
+        }
+      });
+    } catch (error) {
+      this.logger.error(`Failed to subscribe to queue ${queue}: ${error.message}`);
+      throw error;
+    }
   }
 }
 
