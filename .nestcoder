@@ -272,76 +272,6 @@ export function dot(a: V3, b: V3): number {
 
 You will now be given the actual INPUT you must work with.
 
-<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/message-queue-adapter.interface.ts">
-export interface MessageQueueAdapter {
-  connect(): Promise<void>;
-  disconnect(): Promise<void>;
-  publish(exchange: string, routingKey: string, message: any): Promise<void>;
-  subscribe(exchange: string, routingKey: string, queue: string, callback: (msg: any) => Promise<void>): Promise<void>;
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/services/backplanes/amqp.backplane.ts">
-import { Logger } from '@nestjs/common';
-import * as amqp from 'amqplib';
-
-import { MessageQueueAdapter } from 'src/interfaces/message-queue-adapter.interface';
-
-export class AmqpAdapter implements MessageQueueAdapter {
-  private connection: amqp.Connection | null = null;
-  private channel: amqp.Channel | null = null;
-
-  constructor(private readonly logger: Logger) {}
-
-  async connect(): Promise<void> {
-    this.logger.log('Connecting to RabbitMQ...');
-    this.connection = await amqp.connect('amqp://localhost:5672');
-    this.channel = await this.connection.createChannel();
-    this.logger.log('Successfully connected to RabbitMQ');
-  }
-
-  async disconnect(): Promise<void> {
-    if (this.channel) {
-      await this.channel.close();
-      this.channel = null;
-    }
-    if (this.connection) {
-      await this.connection.close();
-      this.connection = null;
-    }
-    this.logger.log('Disconnected from RabbitMQ');
-  }
-
-  async publish(exchange: string, routingKey: string, message: any): Promise<void> {
-    if (!this.channel) {
-      throw new Error('Channel is not available');
-    }
-    await this.channel.assertExchange(exchange, 'topic', { durable: true });
-    this.channel.publish(exchange, routingKey, Buffer.from(JSON.stringify(message)));
-  }
-
-  async subscribe(
-    exchange: string,
-    routingKey: string,
-    queue: string,
-    callback: (msg: any) => Promise<void>
-  ): Promise<void> {
-    if (!this.channel) {
-      throw new Error('Channel is not available');
-    }
-    await this.channel.assertExchange(exchange, 'topic', { durable: true });
-    const q = await this.channel.assertQueue(queue, { exclusive: false, durable: true });
-    await this.channel.bindQueue(q.queue, exchange, routingKey);
-    
-    this.channel.consume(q.queue, async (msg) => {
-      if (msg !== null) {
-        const content = JSON.parse(msg.content.toString());
-        await callback(content);
-        this.channel.ack(msg);
-      }
-    });
-  }
-}
-</FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/services/backplanes/ismq.backplane.ts">
 import { Logger } from '@nestjs/common';
 import { MessageQueueClient } from 'message-queue/client';
@@ -420,6 +350,76 @@ export class IsmqAdapter implements MessageQueueAdapter {
   }
 }
 </FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/services/backplanes/amqp.backplane.ts">
+import { Logger } from '@nestjs/common';
+import * as amqp from 'amqplib';
+
+import { MessageQueueAdapter } from 'src/interfaces/message-queue-adapter.interface';
+
+export class AmqpAdapter implements MessageQueueAdapter {
+  private connection: amqp.Connection | null = null;
+  private channel: amqp.Channel | null = null;
+
+  constructor(private readonly logger: Logger) {}
+
+  async connect(): Promise<void> {
+    this.logger.log('Connecting to RabbitMQ...');
+    this.connection = await amqp.connect('amqp://localhost:5672');
+    this.channel = await this.connection.createChannel();
+    this.logger.log('Successfully connected to RabbitMQ');
+  }
+
+  async disconnect(): Promise<void> {
+    if (this.channel) {
+      await this.channel.close();
+      this.channel = null;
+    }
+    if (this.connection) {
+      await this.connection.close();
+      this.connection = null;
+    }
+    this.logger.log('Disconnected from RabbitMQ');
+  }
+
+  async publish(exchange: string, routingKey: string, message: any): Promise<void> {
+    if (!this.channel) {
+      throw new Error('Channel is not available');
+    }
+    await this.channel.assertExchange(exchange, 'topic', { durable: true });
+    this.channel.publish(exchange, routingKey, Buffer.from(JSON.stringify(message)));
+  }
+
+  async subscribe(
+    exchange: string,
+    routingKey: string,
+    queue: string,
+    callback: (msg: any) => Promise<void>
+  ): Promise<void> {
+    if (!this.channel) {
+      throw new Error('Channel is not available');
+    }
+    await this.channel.assertExchange(exchange, 'topic', { durable: true });
+    const q = await this.channel.assertQueue(queue, { exclusive: false, durable: true });
+    await this.channel.bindQueue(q.queue, exchange, routingKey);
+    
+    this.channel.consume(q.queue, async (msg) => {
+      if (msg !== null) {
+        const content = JSON.parse(msg.content.toString());
+        await callback(content);
+        this.channel.ack(msg);
+      }
+    });
+  }
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/message-queue-adapter.interface.ts">
+export interface MessageQueueAdapter {
+  connect(): Promise<void>;
+  disconnect(): Promise<void>;
+  publish(exchange: string, routingKey: string, message: any): Promise<void>;
+  subscribe(exchange: string, routingKey: string, queue: string, callback: (msg: any) => Promise<void>): Promise<void>;
+}
+</FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/logger/custom-logger.ts">
 import { ConsoleLogger, Injectable, Inject } from '@nestjs/common';
 import * as fs from 'fs';
@@ -489,14 +489,1060 @@ export class CustomLogger extends ConsoleLogger {
   }
 }
 </FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/stateMachines/mq-connection.state-machine.ts">
+export default {
+  initialState: 'disconnected',
+  states: ['disconnected', 'connecting', 'connected', 'error'],
+  transitions: {
+    disconnected: { connect: 'connecting', fail: 'error' },
+    connecting: { success: 'connected', fail: 'error' },
+    connected: { disconnect: 'disconnected', fail: 'error' },
+    error: { reset: 'disconnected' }
+  }
+}
 
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/stateMachines/mq-consumer.state-machine.ts">
+export default {
+  initialState: 'idle',
+  states: ['idle', 'ready', 'consuming', 'completed', 'error'],
+  transitions: {
+    idle: { subscribe: 'ready', fail: 'error' },
+    ready: { consumeMessage: 'consuming', unsubscribe: 'idle', fail: 'error' },
+    consuming: { ack: 'completed', nack: 'completed', fail: 'error' },
+    completed: { reset: 'ready' },
+    error: { reset: 'idle' }
+  }
+}
 
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/stateMachines/mq-publisher.state-machine.ts">
+export default {
+  initialState: 'idle',
+  states: ['idle', 'publishing', 'completed', 'error'],
+  transitions: {
+    idle: { publishMessage: 'publishing', fail: 'error' },
+    publishing: { success: 'completed', fail: 'error' },
+    completed: { reset: 'idle' },
+    error: { reset: 'idle' }
+  }
+}
+
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/modules/app.module.ts">
+import { ComponentRegistry } from '../services/component-registry.service';
+import { FlowExecutorService } from '../services/flow-executor.service';
+import { EventProcessor } from '../processors/event.processor';
+import { CustomLogger } from '../logger/custom-logger';
+import { AppController } from '../controllers/app.controller';
+import { TemplateCacheService } from 'src/services/template-cache.service';
+import { BackplaneService } from '../services/backplane.service';
+
+import { initializeAppModule, components } from '../initializers/app.initialize';
+
+const rabbitmqUri = process.env.RABBITMQ || 'amqp://localhost:5672';
+console.log(`[AppModule] RabbitMQ URI: ${rabbitmqUri}`);
+
+const metadata = {
+  imports: [],
+  controllers: [AppController],
+  providers: [
+    EventProcessor,
+    ComponentRegistry,
+    FlowExecutorService,
+    TemplateCacheService,
+    BackplaneService,
+    {
+      provide: 'BACKPLANE',
+      useFactory: (backplaneService: BackplaneService) => {
+        return () => backplaneService.onModuleInit();
+      },
+      inject: [BackplaneService],
+      multi: true,
+    },
+    {
+      provide: 'FLOW_ID',
+      useValue: 'example-flow', // Use a default flow ID
+    },
+    {
+      provide: 'COMPONENT_ID',
+      useFactory: () => `component-${Date.now()}`, // Generate a unique component ID
+    },
+    {
+      provide: 'WEB_SOCKET_SERVER',
+      useValue: null, // This will be set later in the FlowExecutorService
+    },
+    {
+      provide: 'TEMPLATES',
+      useValue: null, // This will be set later (?)
+    },
+    ...components,
+    CustomLogger
+  ],
+  exports: [EventProcessor],
+}
+
+export const AppModule = initializeAppModule(metadata)
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/bootstrap/app.bootstrap.ts">
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from '../modules/app.module';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import * as cookieParser from 'cookie-parser';
+import { FlowExecutorService } from '../services/flow-executor.service';
+import { CustomLogger } from '../logger/custom-logger';
+import { resolve } from 'path';
+import { initializeFlows } from '../initializers/flows.initialize';
+
+export async function bootstrapApp(logger: CustomLogger): Promise<any> {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { logger });
+  
+  app.useStaticAssets(resolve('./src/public'));
+  app.setBaseViewsDir(resolve('./src/views'));
+  app.setViewEngine('ejs');
+
+  app.use(cookieParser());
+
+  // so browsers can use api
+  app.enableCors({
+    origin: '*',
+  });
+
+  const flowExecutor = app.get(FlowExecutorService);
+
+  await app.init();
+
+  logger.log('Starting flow execution...');
+  await initializeFlows(flowExecutor);
+
+  await app.listen(3000);
+  logger.log('Application is running on: http://localhost:3000');
+
+  return app;
+}
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/main.ts">
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './modules/app.module';
+import { CustomLogger } from './logger/custom-logger';
+import { bootstrapApp } from './bootstrap/app.bootstrap';
+import { EventEmitter } from 'events';
+
+async function bootstrap(): Promise<void> {
+  // Increase the maximum number of listeners
+  EventEmitter.defaultMaxListeners = 100;
+
+  const app = await NestFactory.create(AppModule);
+  
+  // Create the CustomLogger
+  const logger = new CustomLogger('Bootstrap');
+  
+  try {
+    logger.log('Starting main application...');
+    const mainApp = await bootstrapApp(logger);
+
+    process.on('SIGINT', async () => {
+      CustomLogger.clearSTDOUT();
+      await mainApp.close();
+      process.exit();
+    });
+  } catch (error) {
+    logger.error(`Bootstrap error: ${error.message}`, error.stack);
+    process.exit(1);
+  }
+}
+
+bootstrap().catch((error) => {
+  console.error('Unhandled bootstrap error:', error);
+  process.exit(1);
+});
+</FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/start:dev.stdout.txt">
+c[[90m1:48:26 PM[0m] Starting compilation in watch mode...
+
+[[90m1:48:27 PM[0m] Found 0 errors. Watching for file changes.
+
+[AppModule] RabbitMQ URI: amqp://localhost:5672
+[32m[Nest] 2626738  - [39m09/11/2024, 1:48:27 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 2626738  - [39m09/11/2024, 1:48:27 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +8ms[39m
+[2024-09-11T18:48:27.931Z] [LOG] [Bootstrap] Starting main application...
+[2024-09-11T18:48:27.932Z] [LOG] [Bootstrap] [NestFactory] Starting Nest application...
+[2024-09-11T18:48:27.934Z] [LOG] [Bootstrap] [InstanceLoader] AppModule dependencies initialized
+[2024-09-11T18:48:27.941Z] [LOG] [Bootstrap] [WebSocketsController] EventTriggerComponent subscribed to the "client-event" message
+[2024-09-11T18:48:27.942Z] [LOG] [Bootstrap] [WebSocketsController] NumberGeneratorComponent subscribed to the "client-event" message
+[2024-09-11T18:48:27.942Z] [LOG] [Bootstrap] [WebSocketsController] NumberMultiplierComponent subscribed to the "client-event" message
+[2024-09-11T18:48:27.942Z] [LOG] [Bootstrap] [WebSocketsController] StateMachineComponent subscribed to the "client-event" message
+[2024-09-11T18:48:27.942Z] [LOG] [Bootstrap] [WebSocketsController] JobStateMachineComponent subscribed to the "client-event" message
+[2024-09-11T18:48:27.943Z] [LOG] [Bootstrap] [WebSocketsController] ButtonTriggerComponent subscribed to the "client-event" message
+[2024-09-11T18:48:27.944Z] [LOG] [Bootstrap] [RoutesResolver] AppController {/}:
+[2024-09-11T18:48:27.945Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/, GET} route
+[2024-09-11T18:48:27.945Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/flows, GET} route
+[2024-09-11T18:48:27.945Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/flow/:flowId, GET} route
+[2024-09-11T18:48:27.945Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/document/:flowId/:componentId, GET} route
+[2024-09-11T18:48:27.946Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentComponent/:flowId/:componentId/:swimlaneId, GET} route
+[2024-09-11T18:48:27.946Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentConnections/:flowId/:componentId/:portId/:swimlaneId, GET} route
+[2024-09-11T18:48:27.946Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/logger, GET} route
+[2024-09-11T18:48:27.946Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/trigger-event/:flowComponentEvent, POST} route
+[2024-09-11T18:48:27.946Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/template/:flowId/:componentId/:templateId, GET} route
+[2024-09-11T18:48:27.947Z] [WARN] [Bootstrap] [BackplaneService] Connection not initialized, attempting to reconnect...
+[2024-09-11T18:48:27.947Z] [LOG] [Bootstrap] [BackplaneService] Connecting to ISMQ...
+[2024-09-11T18:48:27.957Z] [LOG] [Bootstrap] [BackplaneService] Reconnection already in progress, skipping new attempt
+[2024-09-11T18:48:27.969Z] [LOG] [Bootstrap] [BackplaneService] Successfully connected to ISMQ
+[2024-09-11T18:48:27.970Z] [LOG] [Bootstrap] [BackplaneService] Resubscribing to all previous subscriptions...
+[2024-09-11T18:48:27.970Z] [LOG] [Bootstrap] [BackplaneService] Subscribing to exchange: flow_exchange, routingKey: componentEvent, queue: component_event_queue
+Subscription response for flow_exchange/component_event_queue: { status: 'ok', message: 'Subscribed successfully' }
+[2024-09-11T18:48:28.074Z] [LOG] [Bootstrap] [BackplaneService] Subscribing to exchange: flow_exchange, routingKey: createConnection, queue: create_connection_queue
+Subscription response for flow_exchange/create_connection_queue: { status: 'ok', message: 'Subscribed successfully' }
+[2024-09-11T18:48:28.080Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726080507934
+[2024-09-11T18:48:28.081Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726080507934
+[2024-09-11T18:48:28.081Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726080507934
+[2024-09-11T18:48:28.081Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726080507934
+[2024-09-11T18:48:28.081Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726080507934
+[2024-09-11T18:48:28.081Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726080507934
+[2024-09-11T18:48:28.081Z] [LOG] [Bootstrap] [NestApplication] Nest application successfully started
+[2024-09-11T18:48:28.081Z] [LOG] [Bootstrap] Starting flow execution...
+[2024-09-11T18:48:28.081Z] [LOG] [Bootstrap] [FlowExecutorService] Executing flow: example-flow
+[2024-09-11T18:48:28.081Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: sm1.initProxyMachine -> jsm1.initProxyMachine
+[2024-09-11T18:48:28.083Z] [LOG] [Bootstrap] Application is running on: http://localhost:3000
+[2024-09-11T18:48:28.087Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-start -> gen1.start
+[2024-09-11T18:48:28.091Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-finish -> gen1.stop
+[2024-09-11T18:48:28.093Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.sm1.initProxyMachine -> jsm1.initProxyMachine
+[2024-09-11T18:48:28.093Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.sm1.initProxyMachine -> jsm1.initProxyMachine
+[2024-09-11T18:48:28.093Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-start -> gen1.start
+[2024-09-11T18:48:28.093Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-start -> gen1.start
+[2024-09-11T18:48:28.095Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-start -> gen2.start
+[2024-09-11T18:48:28.097Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-finish -> gen1.stop
+[2024-09-11T18:48:28.097Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-finish -> gen1.stop
+[2024-09-11T18:48:28.098Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-finish -> gen2.stop
+[2024-09-11T18:48:28.100Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-start -> gen2.start
+[2024-09-11T18:48:28.100Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-start -> gen2.start
+[2024-09-11T18:48:28.101Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: gen1.numberGenerated -> multi.firstNumberReceived
+[2024-09-11T18:48:28.103Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-finish -> gen2.stop
+[2024-09-11T18:48:28.103Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-finish -> gen2.stop
+[2024-09-11T18:48:28.104Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: gen2.numberGenerated -> multi.secondNumberReceived
+[2024-09-11T18:48:28.105Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.gen1.numberGenerated -> multi.firstNumberReceived
+[2024-09-11T18:48:28.105Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.gen1.numberGenerated -> multi.firstNumberReceived
+[2024-09-11T18:48:28.106Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn1.buttonPressed -> jsm1.set-start
+[2024-09-11T18:48:28.108Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.gen2.numberGenerated -> multi.secondNumberReceived
+[2024-09-11T18:48:28.108Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.gen2.numberGenerated -> multi.secondNumberReceived
+[2024-09-11T18:48:28.108Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn2.buttonPressed -> jsm1.set-pause
+[2024-09-11T18:48:28.110Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn1.buttonPressed -> jsm1.set-start
+[2024-09-11T18:48:28.110Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn1.buttonPressed -> jsm1.set-start
+[2024-09-11T18:48:28.110Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn3.buttonPressed -> jsm1.set-resume
+[2024-09-11T18:48:28.112Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn2.buttonPressed -> jsm1.set-pause
+[2024-09-11T18:48:28.112Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn2.buttonPressed -> jsm1.set-pause
+[2024-09-11T18:48:28.112Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn4.buttonPressed -> jsm1.set-finish
+[2024-09-11T18:48:28.114Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn3.buttonPressed -> jsm1.set-resume
+[2024-09-11T18:48:28.114Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn3.buttonPressed -> jsm1.set-resume
+[2024-09-11T18:48:28.115Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn5.buttonPressed -> jsm1.set-reset
+[2024-09-11T18:48:28.116Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn4.buttonPressed -> jsm1.set-finish
+[2024-09-11T18:48:28.116Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn4.buttonPressed -> jsm1.set-finish
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: main (eventTrigger) for flow: example-flow
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.main
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn1 (buttonTrigger) for flow: example-flow
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn1
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn2 (buttonTrigger) for flow: example-flow
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn2
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn3 (buttonTrigger) for flow: example-flow
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn3
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn4 (buttonTrigger) for flow: example-flow
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn4
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn5 (buttonTrigger) for flow: example-flow
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn5
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: sm1 (stateMachine) for flow: example-flow
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.sm1
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: jsm1 (jobStateMachine) for flow: example-flow
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.jsm1
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: gen1 (numberGenerator) for flow: example-flow
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.gen1
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: gen2 (numberGenerator) for flow: example-flow
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.gen2
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: multi (numberMultiplier) for flow: example-flow
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.multi
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: main (main) for flow: example-flow
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn1 (btn1) for flow: example-flow
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn2 (btn2) for flow: example-flow
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn3 (btn3) for flow: example-flow
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn4 (btn4) for flow: example-flow
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn5 (btn5) for flow: example-flow
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: sm1 (sm1) for flow: example-flow
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: jsm1 (jsm1) for flow: example-flow
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: gen1 (gen1) for flow: example-flow
+[2024-09-11T18:48:28.117Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: gen2 (gen2) for flow: example-flow
+[2024-09-11T18:48:28.118Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: multi (multi) for flow: example-flow
+[2024-09-11T18:48:28.118Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: main (eventTrigger) for flow: example-flow
+[2024-09-11T18:48:28.118Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn5.buttonPressed -> jsm1.set-reset
+[2024-09-11T18:48:28.118Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn5.buttonPressed -> jsm1.set-reset
+[2024-09-11T18:48:28.119Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn1 (buttonTrigger) for flow: example-flow
+[2024-09-11T18:48:28.121Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn2 (buttonTrigger) for flow: example-flow
+[2024-09-11T18:48:28.122Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.main.init] data: undefined
+[2024-09-11T18:48:28.122Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: main
+[2024-09-11T18:48:28.123Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn1.init] data: undefined
+[2024-09-11T18:48:28.123Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn1
+[2024-09-11T18:48:28.123Z] [LOG] [example-flow.btn1] Handling event: init
+[2024-09-11T18:48:28.123Z] [LOG] [example-flow.btn1] Initializing ButtonTriggerComponent with message: undefined
+[2024-09-11T18:48:28.124Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn3 (buttonTrigger) for flow: example-flow
+[2024-09-11T18:48:28.126Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn4 (buttonTrigger) for flow: example-flow
+[2024-09-11T18:48:28.126Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn2.init] data: undefined
+[2024-09-11T18:48:28.126Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn2
+[2024-09-11T18:48:28.126Z] [LOG] [example-flow.btn2] Handling event: init
+[2024-09-11T18:48:28.126Z] [LOG] [example-flow.btn2] Initializing ButtonTriggerComponent with message: undefined
+[2024-09-11T18:48:28.127Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn3.init] data: undefined
+[2024-09-11T18:48:28.127Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn3
+[2024-09-11T18:48:28.127Z] [LOG] [example-flow.btn3] Handling event: init
+[2024-09-11T18:48:28.127Z] [LOG] [example-flow.btn3] Initializing ButtonTriggerComponent with message: undefined
+[2024-09-11T18:48:28.128Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn5 (buttonTrigger) for flow: example-flow
+[2024-09-11T18:48:28.130Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: sm1 (stateMachine) for flow: example-flow
+[2024-09-11T18:48:28.131Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn4.init] data: undefined
+[2024-09-11T18:48:28.131Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn4
+[2024-09-11T18:48:28.131Z] [LOG] [example-flow.btn4] Handling event: init
+[2024-09-11T18:48:28.131Z] [LOG] [example-flow.btn4] Initializing ButtonTriggerComponent with message: undefined
+[2024-09-11T18:48:28.132Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn5.init] data: undefined
+[2024-09-11T18:48:28.132Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn5
+[2024-09-11T18:48:28.132Z] [LOG] [example-flow.btn5] Handling event: init
+[2024-09-11T18:48:28.132Z] [LOG] [example-flow.btn5] Initializing ButtonTriggerComponent with message: undefined
+[2024-09-11T18:48:28.132Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: jsm1 (jobStateMachine) for flow: example-flow
+[2024-09-11T18:48:28.134Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.sm1.init] data: {"initialState":"idle","states":["idle","running","paused","finished"],"transitions":{"idle":{"start":"running"},"running":{"pause":"paused","finish":"finished"},"paused":{"resume":"running","finish":"finished"},"finished":{"reset":"idle"}}}
+[2024-09-11T18:48:28.134Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: sm1
+[2024-09-11T18:48:28.134Z] [LOG] [example-flow.sm1] Handling event: init
+[2024-09-11T18:48:28.134Z] [LOG] [example-flow.sm1] State machine initialized with initial state: idle
+[2024-09-11T18:48:28.134Z] [LOG] [example-flow.sm1] Publishing: example-flow.sm1.stateChanged -> [object Object]
+[2024-09-11T18:48:28.135Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: gen1 (numberGenerator) for flow: example-flow
+[2024-09-11T18:48:28.135Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.jsm1.init] data: undefined
+[2024-09-11T18:48:28.135Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: jsm1
+[2024-09-11T18:48:28.136Z] [LOG] [example-flow.jsm1] Handling event: init
+[2024-09-11T18:48:28.137Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: gen2 (numberGenerator) for flow: example-flow
+[2024-09-11T18:48:28.141Z] [LOG] [example-flow.sm1] Sending initProxyMachine event to the connected x state machine: jsm1
+[2024-09-11T18:48:28.141Z] [LOG] [example-flow.sm1] Publishing: example-flow.jsm1.initProxyMachine -> [object Object]
+[2024-09-11T18:48:28.142Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: multi (numberMultiplier) for flow: example-flow
+[2024-09-11T18:48:28.142Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.init] data: undefined
+[2024-09-11T18:48:28.143Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
+[2024-09-11T18:48:28.143Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: init
+[2024-09-11T18:48:28.143Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.sm1.stateChanged] data: {"currentState":"idle"}
+[2024-09-11T18:48:28.143Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: sm1
+[2024-09-11T18:48:28.143Z] [LOG] [example-flow.sm1] Handling event: stateChanged
+[2024-09-11T18:48:28.143Z] [WARN] [example-flow.sm1] Unknown event: stateChanged
+[2024-09-11T18:48:28.143Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.init] data: undefined
+[2024-09-11T18:48:28.143Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
+[2024-09-11T18:48:28.143Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: init
+[2024-09-11T18:48:28.146Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.multi.init] data: undefined
+[2024-09-11T18:48:28.146Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: multi
+[2024-09-11T18:48:28.147Z] [LOG] [example-flow.multi] NumberMultiplier handling event: init undefined
+[2024-09-11T18:48:28.147Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.jsm1.initProxyMachine] data: {"initialState":"idle","states":["idle","running","paused","finished"],"transitions":{"idle":{},"running":{},"paused":{},"finished":{}}}
+[2024-09-11T18:48:28.147Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: jsm1
+[2024-09-11T18:48:28.147Z] [LOG] [example-flow.jsm1] Handling event: initProxyMachine
+[2024-09-11T18:48:30.978Z] [LOG] [Bootstrap] [AppController] [trigger-event] [example-flow] [btn1] [triggerButton]
+[2024-09-11T18:48:30.978Z] [LOG] [example-flow.component-1726080507934] Publishing: example-flow.btn1.triggerButton -> [object Object]
+[2024-09-11T18:48:30.989Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn1.triggerButton] data: {"targetFlow":"example-flow","targetComponent":"jsm1","targetEvent":"set-start","_flowId":"example-flow","_componentId":"btn1","_eventId":"triggerButton"}
+[2024-09-11T18:48:30.989Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn1
+[2024-09-11T18:48:30.989Z] [LOG] [example-flow.btn1] Handling event: triggerButton
+[2024-09-11T18:48:30.989Z] [LOG] [example-flow.btn1] Button pressed: example-flow.btn1.triggerButton
+[2024-09-11T18:48:30.989Z] [LOG] [example-flow.btn1] Publishing: example-flow.btn1.buttonPressed -> [object Object]
+[2024-09-11T18:48:30.992Z] [LOG] [example-flow.btn1] Publishing: example-flow.jsm1.set-start -> [object Object]
+[2024-09-11T18:48:30.995Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.btn1.buttonPressed] data: {"pressedAt":"2024-09-11T18:48:30.989Z","targetFlow":"example-flow","targetComponent":"jsm1","targetEvent":"set-start"}
+[2024-09-11T18:48:30.995Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: btn1
+[2024-09-11T18:48:30.995Z] [LOG] [example-flow.btn1] Handling event: buttonPressed
+[2024-09-11T18:48:30.995Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.jsm1.set-start]
+[2024-09-11T18:48:30.995Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: jsm1
+[2024-09-11T18:48:30.995Z] [LOG] [example-flow.jsm1] Handling event: set-start
+[2024-09-11T18:48:30.995Z] [LOG] [example-flow.sm1] Transitioned from 'idle' to 'running' on event 'start'
+[2024-09-11T18:48:30.995Z] [LOG] [example-flow.sm1] Publishing: example-flow.sm1.stateChanged -> [object Object]
+[2024-09-11T18:48:30.998Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.jsm1.set-start] data: {"source":"example-flow.btn1","pressedAt":"2024-09-11T18:48:30.992Z"}
+[2024-09-11T18:48:30.998Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: jsm1
+[2024-09-11T18:48:30.998Z] [LOG] [example-flow.jsm1] Handling event: set-start
+[2024-09-11T18:48:30.998Z] [WARN] [example-flow.sm1] No transition defined for event 'start' in state 'running'
+[2024-09-11T18:48:31.002Z] [LOG] [example-flow.jsm1] Publishing: example-flow.jsm1.get-start -> [object Object]
+[2024-09-11T18:48:31.003Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.sm1.stateChanged] data: {"previousState":"idle","currentState":"running","event":"start"}
+[2024-09-11T18:48:31.003Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: sm1
+[2024-09-11T18:48:31.003Z] [LOG] [example-flow.sm1] Handling event: stateChanged
+[2024-09-11T18:48:31.003Z] [WARN] [example-flow.sm1] Unknown event: stateChanged
+[2024-09-11T18:48:31.004Z] [LOG] [example-flow.jsm1] Publishing: example-flow.jsm1.stateChanged -> [object Object]
+[2024-09-11T18:48:31.007Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.jsm1.get-start] data: {"previousState":"idle","currentState":"running"}
+[2024-09-11T18:48:31.007Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: jsm1
+[2024-09-11T18:48:31.007Z] [LOG] [example-flow.jsm1] Handling event: get-start
+[2024-09-11T18:48:31.007Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.gen1.start]
+[2024-09-11T18:48:31.007Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: gen1
+[2024-09-11T18:48:31.007Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: start
+[2024-09-11T18:48:31.007Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) starting number generation
+[2024-09-11T18:48:31.007Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) startGenerating method called
+[2024-09-11T18:48:31.007Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.gen2.start]
+[2024-09-11T18:48:31.007Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: gen2
+[2024-09-11T18:48:31.007Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: start
+[2024-09-11T18:48:31.007Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) starting number generation
+[2024-09-11T18:48:31.007Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) startGenerating method called
+[2024-09-11T18:48:31.007Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.jsm1.stateChanged] data: {"previousState":"idle","currentState":"running","message":"start"}
+[2024-09-11T18:48:31.007Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: jsm1
+[2024-09-11T18:48:31.007Z] [LOG] [example-flow.jsm1] Handling event: stateChanged
+[2024-09-11T18:48:32.008Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) generated number: 0.7535156220346182
+[2024-09-11T18:48:32.008Z] [LOG] [example-flow.gen1] Publishing: example-flow.gen1.numberGenerated -> 0.7535156220346182
+[2024-09-11T18:48:32.009Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.2974449380956885
+[2024-09-11T18:48:32.009Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.2974449380956885
+[2024-09-11T18:48:32.016Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.numberGenerated] data: 0.7535156220346182
+[2024-09-11T18:48:32.016Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
+[2024-09-11T18:48:32.016Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: numberGenerated
+[2024-09-11T18:48:32.016Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.firstNumberReceived]
+[2024-09-11T18:48:32.016Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
+[2024-09-11T18:48:32.016Z] [LOG] [example-flow.multi] NumberMultiplier handling event: firstNumberReceived 0.7535156220346182
+[2024-09-11T18:48:32.016Z] [LOG] [example-flow.multi] NumberMultiplier received first number: 0.7535156220346182
+[2024-09-11T18:48:32.016Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.2974449380956885
+[2024-09-11T18:48:32.016Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
+[2024-09-11T18:48:32.016Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
+[2024-09-11T18:48:32.016Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
+[2024-09-11T18:48:32.016Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
+[2024-09-11T18:48:32.016Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.2974449380956885
+[2024-09-11T18:48:32.016Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.2974449380956885
+[2024-09-11T18:48:32.016Z] [LOG] [example-flow.multi] NumberMultiplier multiplied result: 0.22412940755022123
+[2024-09-11T18:48:32.016Z] [LOG] [example-flow.multi] Publishing: example-flow.multi.numberMultiplied -> 0.22412940755022123
+[2024-09-11T18:48:32.021Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.multi.numberMultiplied] data: 0.22412940755022123
+[2024-09-11T18:48:32.021Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: multi
+[2024-09-11T18:48:32.021Z] [LOG] [example-flow.multi] NumberMultiplier handling event: numberMultiplied 0.22412940755022123
+[2024-09-11T18:48:33.008Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) generated number: 0.25696144115363695
+[2024-09-11T18:48:33.008Z] [LOG] [example-flow.gen1] Publishing: example-flow.gen1.numberGenerated -> 0.25696144115363695
+[2024-09-11T18:48:33.009Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.846022228465807
+[2024-09-11T18:48:33.009Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.846022228465807
+[2024-09-11T18:48:33.016Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.numberGenerated] data: 0.25696144115363695
+[2024-09-11T18:48:33.016Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
+[2024-09-11T18:48:33.016Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: numberGenerated
+[2024-09-11T18:48:33.016Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.846022228465807
+[2024-09-11T18:48:33.016Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
+[2024-09-11T18:48:33.016Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
+[2024-09-11T18:48:33.016Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.firstNumberReceived]
+[2024-09-11T18:48:33.016Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
+[2024-09-11T18:48:33.016Z] [LOG] [example-flow.multi] NumberMultiplier handling event: firstNumberReceived 0.25696144115363695
+[2024-09-11T18:48:33.016Z] [LOG] [example-flow.multi] NumberMultiplier received first number: 0.25696144115363695
+[2024-09-11T18:48:33.016Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
+[2024-09-11T18:48:33.016Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
+[2024-09-11T18:48:33.016Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.846022228465807
+[2024-09-11T18:48:33.016Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.846022228465807
+[2024-09-11T18:48:33.016Z] [LOG] [example-flow.multi] NumberMultiplier multiplied result: 0.21739509107458527
+[2024-09-11T18:48:33.016Z] [LOG] [example-flow.multi] Publishing: example-flow.multi.numberMultiplied -> 0.21739509107458527
+[2024-09-11T18:48:33.020Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.multi.numberMultiplied] data: 0.21739509107458527
+[2024-09-11T18:48:33.020Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: multi
+[2024-09-11T18:48:33.020Z] [LOG] [example-flow.multi] NumberMultiplier handling event: numberMultiplied 0.21739509107458527
+[2024-09-11T18:48:34.009Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) generated number: 0.9609053640769534
+[2024-09-11T18:48:34.009Z] [LOG] [example-flow.gen1] Publishing: example-flow.gen1.numberGenerated -> 0.9609053640769534
+[2024-09-11T18:48:34.010Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.48034946227782394
+[2024-09-11T18:48:34.010Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.48034946227782394
+[2024-09-11T18:48:34.016Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.numberGenerated] data: 0.9609053640769534
+[2024-09-11T18:48:34.016Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
+[2024-09-11T18:48:34.016Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: numberGenerated
+[2024-09-11T18:48:34.016Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.firstNumberReceived]
+[2024-09-11T18:48:34.016Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
+[2024-09-11T18:48:34.016Z] [LOG] [example-flow.multi] NumberMultiplier handling event: firstNumberReceived 0.9609053640769534
+[2024-09-11T18:48:34.016Z] [LOG] [example-flow.multi] NumberMultiplier received first number: 0.9609053640769534
+[2024-09-11T18:48:34.017Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.48034946227782394
+[2024-09-11T18:48:34.017Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
+[2024-09-11T18:48:34.017Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
+[2024-09-11T18:48:34.017Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
+[2024-09-11T18:48:34.017Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
+[2024-09-11T18:48:34.017Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.48034946227782394
+[2024-09-11T18:48:34.017Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.48034946227782394
+[2024-09-11T18:48:34.017Z] [LOG] [example-flow.multi] NumberMultiplier multiplied result: 0.4615703749342412
+[2024-09-11T18:48:34.017Z] [LOG] [example-flow.multi] Publishing: example-flow.multi.numberMultiplied -> 0.4615703749342412
+[2024-09-11T18:48:34.021Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.multi.numberMultiplied] data: 0.4615703749342412
+[2024-09-11T18:48:34.021Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: multi
+[2024-09-11T18:48:34.021Z] [LOG] [example-flow.multi] NumberMultiplier handling event: numberMultiplied 0.4615703749342412
+[2024-09-11T18:48:35.009Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) generated number: 0.25637433614646765
+[2024-09-11T18:48:35.009Z] [LOG] [example-flow.gen1] Publishing: example-flow.gen1.numberGenerated -> 0.25637433614646765
+[2024-09-11T18:48:35.010Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.7986354786750338
+[2024-09-11T18:48:35.010Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.7986354786750338
+[2024-09-11T18:48:35.017Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.numberGenerated] data: 0.25637433614646765
+[2024-09-11T18:48:35.017Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
+[2024-09-11T18:48:35.017Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: numberGenerated
+[2024-09-11T18:48:35.017Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.firstNumberReceived]
+[2024-09-11T18:48:35.017Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
+[2024-09-11T18:48:35.017Z] [LOG] [example-flow.multi] NumberMultiplier handling event: firstNumberReceived 0.25637433614646765
+[2024-09-11T18:48:35.017Z] [LOG] [example-flow.multi] NumberMultiplier received first number: 0.25637433614646765
+[2024-09-11T18:48:35.017Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.7986354786750338
+[2024-09-11T18:48:35.017Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
+[2024-09-11T18:48:35.017Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
+[2024-09-11T18:48:35.017Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
+[2024-09-11T18:48:35.017Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
+[2024-09-11T18:48:35.017Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.7986354786750338
+[2024-09-11T18:48:35.018Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.7986354786750338
+[2024-09-11T18:48:35.018Z] [LOG] [example-flow.multi] NumberMultiplier multiplied result: 0.2047496406683282
+[2024-09-11T18:48:35.018Z] [LOG] [example-flow.multi] Publishing: example-flow.multi.numberMultiplied -> 0.2047496406683282
+[2024-09-11T18:48:35.023Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.multi.numberMultiplied] data: 0.2047496406683282
+[2024-09-11T18:48:35.023Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: multi
+[2024-09-11T18:48:35.023Z] [LOG] [example-flow.multi] NumberMultiplier handling event: numberMultiplied 0.2047496406683282
+[2024-09-11T18:48:36.009Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) generated number: 0.5242618377753894
+[2024-09-11T18:48:36.009Z] [LOG] [example-flow.gen1] Publishing: example-flow.gen1.numberGenerated -> 0.5242618377753894
+[2024-09-11T18:48:36.011Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.9239569487054786
+[2024-09-11T18:48:36.011Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.9239569487054786
+[2024-09-11T18:48:36.017Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen1.numberGenerated] data: 0.5242618377753894
+[2024-09-11T18:48:36.017Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen1
+[2024-09-11T18:48:36.017Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: numberGenerated
+[2024-09-11T18:48:36.017Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.firstNumberReceived]
+[2024-09-11T18:48:36.017Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
+[2024-09-11T18:48:36.017Z] [LOG] [example-flow.multi] NumberMultiplier handling event: firstNumberReceived 0.5242618377753894
+[2024-09-11T18:48:36.017Z] [LOG] [example-flow.multi] NumberMultiplier received first number: 0.5242618377753894
+[2024-09-11T18:48:36.018Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.gen2.numberGenerated] data: 0.9239569487054786
+[2024-09-11T18:48:36.018Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: gen2
+[2024-09-11T18:48:36.018Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: numberGenerated
+[2024-09-11T18:48:36.018Z] [LOG] [Bootstrap] [EventProcessor] [forwardingComponentEvent] [example-flow.multi.secondNumberReceived]
+[2024-09-11T18:48:36.018Z] [LOG] [Bootstrap] [EventProcessor] Forwarding event to component: multi
+[2024-09-11T18:48:36.018Z] [LOG] [example-flow.multi] NumberMultiplier handling event: secondNumberReceived 0.9239569487054786
+[2024-09-11T18:48:36.018Z] [LOG] [example-flow.multi] NumberMultiplier received second number: 0.9239569487054786
+[2024-09-11T18:48:36.018Z] [LOG] [example-flow.multi] NumberMultiplier multiplied result: 0.4843953679536754
+[2024-09-11T18:48:36.018Z] [LOG] [example-flow.multi] Publishing: example-flow.multi.numberMultiplied -> 0.4843953679536754
+[2024-09-11T18:48:36.022Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.multi.numberMultiplied] data: 0.4843953679536754
+[2024-09-11T18:48:36.022Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: multi
+[2024-09-11T18:48:36.022Z] [LOG] [example-flow.multi] NumberMultiplier handling event: numberMultiplied 0.4843953679536754
+[2024-09-11T18:48:37.010Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) generated number: 0.6938354310201236
+[2024-09-11T18:48:37.010Z] [LOG] [example-flow.gen1] Publishing: example-flow.gen1.numberGenerated -> 0.6938354310201236
+[2024-09-11T18:48:37.012Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) generated number: 0.7074511251832338
+[2024-09-11T18:48:37.012Z] [LOG] [example-flow.gen2] Publishing: example-flow.gen2.numberGenerated -> 0.7074511251832338
+[2024-09-11T18:48:37.031Z] [ERROR] [Bootstrap] [BackplaneService] Failed to publish message: 
+[2024-09-11T18:48:37.031Z] [ERROR] [Bootstrap] [BackplaneService] Failed to publish message, attempting to reconnect...
+[2024-09-11T18:48:37.031Z] [ERROR] [Bootstrap] [BackplaneService] AggregateError
+[2024-09-11T18:48:37.031Z] [LOG] [Bootstrap] [BackplaneService] Scheduling reconnection attempt 1 of 5...
+
+node:internal/process/promises:391
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+AxiosError [AggregateError]
+    at Function.AxiosError.from (/home/travis/Projects/flow-based-programming/node_modules/axios/lib/core/AxiosError.js:92:14)
+    at RedirectableRequest.handleRequestError (/home/travis/Projects/flow-based-programming/node_modules/axios/lib/adapters/http.js:620:25)
+    at RedirectableRequest.emit (node:events:519:28)
+    at eventHandlers.<computed> (/home/travis/Projects/flow-based-programming/node_modules/follow-redirects/index.js:49:24)
+    at ClientRequest.emit (node:events:519:28)
+    at Socket.socketErrorListener (node:_http_client:500:9)
+    at Socket.emit (node:events:519:28)
+    at emitErrorNT (node:internal/streams/destroy:169:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:128:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at Axios.request (/home/travis/Projects/flow-based-programming/node_modules/axios/lib/core/Axios.js:45:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async MessageQueueClient.createExchange (/home/travis/Projects/flow-based-programming/node_modules/message-queue/client/dist/index.js:21:26)
+    at IsmqAdapter.publish (/home/travis/Projects/flow-based-programming/src/services/backplanes/ismq.backplane.ts:42:7)
+    at BackplaneService.publish (/home/travis/Projects/flow-based-programming/src/services/backplane.service.ts:71:7)
+    at NumberGeneratorComponent.publish (/home/travis/Projects/flow-based-programming/src/bases/component.base.ts:40:5)
+    at Timeout._onTimeout (/home/travis/Projects/flow-based-programming/src/components/number-generator/start-generating.event.ts:16:5) {
+  code: 'ECONNREFUSED',
+  errors: [
+    Error: connect ECONNREFUSED ::1:3030
+        at createConnectionError (node:net:1648:14)
+        at afterConnectMultiple (node:net:1678:16) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 3030
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:3030
+        at createConnectionError (node:net:1648:14)
+        at afterConnectMultiple (node:net:1678:16) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 3030
+    }
+  ],
+  config: {
+    transitional: {
+      silentJSONParsing: true,
+      forcedJSONParsing: true,
+      clarifyTimeoutError: false
+    },
+    adapter: [ 'xhr', 'http', 'fetch' ],
+    transformRequest: [ [Function: transformRequest] ],
+    transformResponse: [ [Function: transformResponse] ],
+    timeout: 0,
+    xsrfCookieName: 'XSRF-TOKEN',
+    xsrfHeaderName: 'X-XSRF-TOKEN',
+    maxContentLength: -1,
+    maxBodyLength: -1,
+    env: {
+      FormData: [Function: FormData] {
+        LINE_BREAK: '\r\n',
+        DEFAULT_CONTENT_TYPE: 'application/octet-stream'
+      },
+      Blob: [class Blob]
+    },
+    validateStatus: [Function: validateStatus],
+    headers: Object [AxiosHeaders] {
+      Accept: 'application/json, text/plain, */*',
+      'Content-Type': 'application/json',
+      'User-Agent': 'axios/1.7.7',
+      'Content-Length': '24',
+      'Accept-Encoding': 'gzip, compress, deflate, br'
+    },
+    baseURL: 'http://localhost:3030',
+    method: 'post',
+    url: '/message-broker/exchange',
+    data: '{"name":"flow_exchange"}'
+  },
+  request: <ref *2> Writable {
+    _events: {
+      close: undefined,
+      error: [Function: handleRequestError],
+      prefinish: undefined,
+      finish: undefined,
+      drain: undefined,
+      response: [Function: handleResponse],
+      socket: [Function: handleRequestSocket]
+    },
+    _writableState: WritableState {
+      highWaterMark: 16384,
+      length: 0,
+      corked: 0,
+      onwrite: [Function: bound onwrite],
+      writelen: 0,
+      bufferedIndex: 0,
+      pendingcb: 0,
+      [Symbol(kState)]: 17580812,
+      [Symbol(kBufferedValue)]: null
+    },
+    _maxListeners: undefined,
+    _options: {
+      maxRedirects: 21,
+      maxBodyLength: Infinity,
+      protocol: 'http:',
+      path: '/message-broker/exchange',
+      method: 'POST',
+      headers: [Object: null prototype] {
+        Accept: 'application/json, text/plain, */*',
+        'Content-Type': 'application/json',
+        'User-Agent': 'axios/1.7.7',
+        'Content-Length': '24',
+        'Accept-Encoding': 'gzip, compress, deflate, br'
+      },
+      agents: { http: undefined, https: undefined },
+      auth: undefined,
+      family: undefined,
+      beforeRedirect: [Function: dispatchBeforeRedirect],
+      beforeRedirects: { proxy: [Function: beforeRedirect] },
+      hostname: 'localhost',
+      port: '3030',
+      agent: undefined,
+      nativeProtocols: {
+        'http:': {
+          _connectionListener: [Function: connectionListener],
+          METHODS: [
+            'ACL',         'BIND',       'CHECKOUT',
+            'CONNECT',     'COPY',       'DELETE',
+            'GET',         'HEAD',       'LINK',
+            'LOCK',        'M-SEARCH',   'MERGE',
+            'MKACTIVITY',  'MKCALENDAR', 'MKCOL',
+            'MOVE',        'NOTIFY',     'OPTIONS',
+            'PATCH',       'POST',       'PROPFIND',
+            'PROPPATCH',   'PURGE',      'PUT',
+            'REBIND',      'REPORT',     'SEARCH',
+            'SOURCE',      'SUBSCRIBE',  'TRACE',
+            'UNBIND',      'UNLINK',     'UNLOCK',
+            'UNSUBSCRIBE'
+          ],
+          STATUS_CODES: {
+            '100': 'Continue',
+            '101': 'Switching Protocols',
+            '102': 'Processing',
+            '103': 'Early Hints',
+            '200': 'OK',
+            '201': 'Created',
+            '202': 'Accepted',
+            '203': 'Non-Authoritative Information',
+            '204': 'No Content',
+            '205': 'Reset Content',
+            '206': 'Partial Content',
+            '207': 'Multi-Status',
+            '208': 'Already Reported',
+            '226': 'IM Used',
+            '300': 'Multiple Choices',
+            '301': 'Moved Permanently',
+            '302': 'Found',
+            '303': 'See Other',
+            '304': 'Not Modified',
+            '305': 'Use Proxy',
+            '307': 'Temporary Redirect',
+            '308': 'Permanent Redirect',
+            '400': 'Bad Request',
+            '401': 'Unauthorized',
+            '402': 'Payment Required',
+            '403': 'Forbidden',
+            '404': 'Not Found',
+            '405': 'Method Not Allowed',
+            '406': 'Not Acceptable',
+            '407': 'Proxy Authentication Required',
+            '408': 'Request Timeout',
+            '409': 'Conflict',
+            '410': 'Gone',
+            '411': 'Length Required',
+            '412': 'Precondition Failed',
+            '413': 'Payload Too Large',
+            '414': 'URI Too Long',
+            '415': 'Unsupported Media Type',
+            '416': 'Range Not Satisfiable',
+            '417': 'Expectation Failed',
+            '418': "I'm a Teapot",
+            '421': 'Misdirected Request',
+            '422': 'Unprocessable Entity',
+            '423': 'Locked',
+            '424': 'Failed Dependency',
+            '425': 'Too Early',
+            '426': 'Upgrade Required',
+            '428': 'Precondition Required',
+            '429': 'Too Many Requests',
+            '431': 'Request Header Fields Too Large',
+            '451': 'Unavailable For Legal Reasons',
+            '500': 'Internal Server Error',
+            '501': 'Not Implemented',
+            '502': 'Bad Gateway',
+            '503': 'Service Unavailable',
+            '504': 'Gateway Timeout',
+            '505': 'HTTP Version Not Supported',
+            '506': 'Variant Also Negotiates',
+            '507': 'Insufficient Storage',
+            '508': 'Loop Detected',
+            '509': 'Bandwidth Limit Exceeded',
+            '510': 'Not Extended',
+            '511': 'Network Authentication Required'
+          },
+          Agent: [Function: Agent] { defaultMaxSockets: Infinity },
+          ClientRequest: [Function: ClientRequest],
+          IncomingMessage: [Function: IncomingMessage],
+          OutgoingMessage: [Function: OutgoingMessage],
+          Server: [Function: Server],
+          ServerResponse: [Function: ServerResponse],
+          createServer: [Function: createServer],
+          validateHeaderName: [Function: wrappedFn] {
+            withoutStackTrace: [Function (anonymous)]
+          },
+          validateHeaderValue: [Function: wrappedFn] {
+            withoutStackTrace: [Function (anonymous)]
+          },
+          get: [Function: get],
+          request: [Function: request],
+          setMaxIdleHTTPParsers: [Function: setMaxIdleHTTPParsers],
+          maxHeaderSize: [Getter],
+          globalAgent: [Getter/Setter]
+        },
+        'https:': {
+          Agent: [Function: Agent],
+          globalAgent: Agent {
+            _events: [Object: null prototype],
+            _eventsCount: 2,
+            _maxListeners: undefined,
+            defaultPort: 443,
+            protocol: 'https:',
+            options: [Object: null prototype],
+            requests: [Object: null prototype] {},
+            sockets: [Object: null prototype] {},
+            freeSockets: [Object: null prototype] {},
+            keepAliveMsecs: 1000,
+            keepAlive: true,
+            maxSockets: Infinity,
+            maxFreeSockets: 256,
+            scheduling: 'lifo',
+            maxTotalSockets: Infinity,
+            totalSocketCount: 0,
+            maxCachedSessions: 100,
+            _sessionCache: [Object],
+            [Symbol(shapeMode)]: false,
+            [Symbol(kCapture)]: false
+          },
+          Server: [Function: Server],
+          createServer: [Function: createServer],
+          get: [Function: get],
+          request: [Function: request]
+        }
+      },
+      pathname: '/message-broker/exchange'
+    },
+    _ended: false,
+    _ending: true,
+    _redirectCount: 0,
+    _redirects: [],
+    _requestBodyLength: 24,
+    _requestBodyBuffers: [
+      {
+        data: Buffer(24) [Uint8Array] [
+          123,  34, 110,  97, 109, 101,  34,
+           58,  34, 102, 108, 111, 119,  95,
+          101, 120,  99, 104,  97, 110, 103,
+          101,  34, 125
+        ],
+        encoding: undefined
+      }
+    ],
+    _eventsCount: 3,
+    _onNativeResponse: [Function (anonymous)],
+    _currentRequest: <ref *1> ClientRequest {
+      _events: [Object: null prototype] {
+        response: [Function: bound onceWrapper] {
+          listener: [Function (anonymous)]
+        },
+        abort: [Function (anonymous)],
+        aborted: [Function (anonymous)],
+        connect: [Function (anonymous)],
+        error: [Function (anonymous)],
+        socket: [Function (anonymous)],
+        timeout: [Function (anonymous)]
+      },
+      _eventsCount: 7,
+      _maxListeners: undefined,
+      outputData: [],
+      outputSize: 0,
+      writable: true,
+      destroyed: false,
+      _last: false,
+      chunkedEncoding: false,
+      shouldKeepAlive: true,
+      maxRequestsOnConnectionReached: false,
+      _defaultKeepAlive: true,
+      useChunkedEncodingByDefault: true,
+      sendDate: false,
+      _removedConnection: false,
+      _removedContLen: false,
+      _removedTE: false,
+      strictContentLength: false,
+      _contentLength: '24',
+      _hasBody: true,
+      _trailer: '',
+      finished: false,
+      _headerSent: true,
+      _closed: false,
+      socket: Socket {
+        connecting: false,
+        _hadError: true,
+        _parent: null,
+        _host: 'localhost',
+        _closeAfterHandlingError: false,
+        _events: {
+          close: [
+            [Function: onClose],
+            [Function: socketCloseListener],
+            [Function]
+          ],
+          error: [Function: socketErrorListener],
+          prefinish: undefined,
+          finish: undefined,
+          drain: [Function: ondrain],
+          data: undefined,
+          end: [Function: onReadableStreamEnd],
+          readable: undefined,
+          connect: [ [Function], [Function], [Function] ],
+          free: [Function: onFree],
+          timeout: [ [Function: onTimeout], [Function] ],
+          agentRemove: [Function: onRemove]
+        },
+        _readableState: ReadableState {
+          highWaterMark: 16384,
+          buffer: [],
+          bufferIndex: 0,
+          length: 0,
+          pipes: [],
+          awaitDrainWriters: null,
+          [Symbol(kState)]: 59777526,
+          [Symbol(kErroredValue)]: AggregateError [ECONNREFUSED]: 
+              at internalConnectMultiple (node:net:1118:18)
+              at afterConnectMultiple (node:net:1685:7) {
+            code: 'ECONNREFUSED',
+            [errors]: [Array]
+          }
+        },
+        _writableState: WritableState {
+          highWaterMark: 16384,
+          length: 278,
+          corked: 0,
+          onwrite: [Function: bound onwrite],
+          writelen: 278,
+          bufferedIndex: 0,
+          pendingcb: 1,
+          [Symbol(kState)]: 118260214,
+          [Symbol(kBufferedValue)]: null,
+          [Symbol(kWriteCbValue)]: [Function (anonymous)],
+          [Symbol(kErroredValue)]: AggregateError [ECONNREFUSED]: 
+              at internalConnectMultiple (node:net:1118:18)
+              at afterConnectMultiple (node:net:1685:7) {
+            code: 'ECONNREFUSED',
+            [errors]: [Array]
+          }
+        },
+        allowHalfOpen: false,
+        _maxListeners: undefined,
+        _eventsCount: 8,
+        _sockname: null,
+        _pendingData: [
+          {
+            chunk: 'POST /message-broker/exchange HTTP/1.1\r\n' +
+              'Accept: application/json, text/plain, */*\r\n' +
+              'Content-Type: application/json\r\n' +
+              'User-Agent: axios/1.7.7\r\n' +
+              'Content-Length: 24\r\n' +
+              'Accept-Encoding: gzip, compress, deflate, br\r\n' +
+              'Host: localhost:3030\r\n' +
+              'Connection: keep-alive\r\n' +
+              '\r\n',
+            encoding: 'latin1',
+            callback: [Function: nop]
+          },
+          {
+            chunk: [Buffer [Uint8Array]],
+            encoding: 'buffer',
+            callback: [Function (anonymous)]
+          },
+          allBuffers: false
+        ],
+        _pendingEncoding: '',
+        server: null,
+        _server: null,
+        timeout: 5000,
+        parser: null,
+        _httpMessage: [Circular *1],
+        autoSelectFamilyAttemptedAddresses: [ '::1:3030', '127.0.0.1:3030' ],
+        [Symbol(async_id_symbol)]: 2029,
+        [Symbol(kHandle)]: null,
+        [Symbol(lastWriteQueueSize)]: 0,
+        [Symbol(timeout)]: Timeout {
+          _idleTimeout: -1,
+          _idlePrev: null,
+          _idleNext: null,
+          _idleStart: 9343,
+          _onTimeout: null,
+          _timerArgs: undefined,
+          _repeat: null,
+          _destroyed: true,
+          [Symbol(refed)]: false,
+          [Symbol(kHasPrimitive)]: false,
+          [Symbol(asyncId)]: 2014,
+          [Symbol(triggerId)]: 0
+        },
+        [Symbol(kBuffer)]: null,
+        [Symbol(kBufferCb)]: null,
+        [Symbol(kBufferGen)]: null,
+        [Symbol(shapeMode)]: true,
+        [Symbol(kCapture)]: false,
+        [Symbol(kSetNoDelay)]: true,
+        [Symbol(kSetKeepAlive)]: true,
+        [Symbol(kSetKeepAliveInitialDelay)]: 60,
+        [Symbol(kBytesRead)]: 0,
+        [Symbol(kBytesWritten)]: 0
+      },
+      _header: 'POST /message-broker/exchange HTTP/1.1\r\n' +
+        'Accept: application/json, text/plain, */*\r\n' +
+        'Content-Type: application/json\r\n' +
+        'User-Agent: axios/1.7.7\r\n' +
+        'Content-Length: 24\r\n' +
+        'Accept-Encoding: gzip, compress, deflate, br\r\n' +
+        'Host: localhost:3030\r\n' +
+        'Connection: keep-alive\r\n' +
+        '\r\n',
+      _keepAliveTimeout: 0,
+      _onPendingData: [Function: nop],
+      agent: Agent {
+        _events: [Object: null prototype] {
+          free: [Function (anonymous)],
+          newListener: [Function: maybeEnableKeylog]
+        },
+        _eventsCount: 2,
+        _maxListeners: undefined,
+        defaultPort: 80,
+        protocol: 'http:',
+        options: [Object: null prototype] {
+          keepAlive: true,
+          scheduling: 'lifo',
+          timeout: 5000,
+          noDelay: true,
+          path: null
+        },
+        requests: [Object: null prototype] {},
+        sockets: [Object: null prototype] {
+          'localhost:3030:': [ [Socket], [Socket] ]
+        },
+        freeSockets: [Object: null prototype] {},
+        keepAliveMsecs: 1000,
+        keepAlive: true,
+        maxSockets: Infinity,
+        maxFreeSockets: 256,
+        scheduling: 'lifo',
+        maxTotalSockets: Infinity,
+        totalSocketCount: 2,
+        [Symbol(shapeMode)]: false,
+        [Symbol(kCapture)]: false
+      },
+      socketPath: undefined,
+      method: 'POST',
+      maxHeaderSize: undefined,
+      insecureHTTPParser: undefined,
+      joinDuplicateHeaders: undefined,
+      path: '/message-broker/exchange',
+      _ended: false,
+      res: null,
+      aborted: false,
+      timeoutCb: [Function: emitRequestTimeout],
+      upgradeOrConnect: false,
+      parser: null,
+      maxHeadersCount: null,
+      reusedSocket: false,
+      host: 'localhost',
+      protocol: 'http:',
+      _redirectable: [Circular *2],
+      [Symbol(shapeMode)]: false,
+      [Symbol(kCapture)]: false,
+      [Symbol(kBytesWritten)]: 0,
+      [Symbol(kNeedDrain)]: false,
+      [Symbol(corked)]: 0,
+      [Symbol(kOutHeaders)]: [Object: null prototype] {
+        accept: [ 'Accept', 'application/json, text/plain, */*' ],
+        'content-type': [ 'Content-Type', 'application/json' ],
+        'user-agent': [ 'User-Agent', 'axios/1.7.7' ],
+        'content-length': [ 'Content-Length', '24' ],
+        'accept-encoding': [ 'Accept-Encoding', 'gzip, compress, deflate, br' ],
+        host: [ 'Host', 'localhost:3030' ]
+      },
+      [Symbol(errored)]: null,
+      [Symbol(kHighWaterMark)]: 16384,
+      [Symbol(kRejectNonStandardBodyWrites)]: false,
+      [Symbol(kUniqueHeaders)]: null
+    },
+    _currentUrl: 'http://localhost:3030/message-broker/exchange',
+    [Symbol(shapeMode)]: true,
+    [Symbol(kCapture)]: false
+  },
+  cause: AggregateError [ECONNREFUSED]: 
+      at internalConnectMultiple (node:net:1118:18)
+      at afterConnectMultiple (node:net:1685:7) {
+    code: 'ECONNREFUSED',
+    [errors]: [
+      Error: connect ECONNREFUSED ::1:3030
+          at createConnectionError (node:net:1648:14)
+          at afterConnectMultiple (node:net:1678:16) {
+        errno: -111,
+        code: 'ECONNREFUSED',
+        syscall: 'connect',
+        address: '::1',
+        port: 3030
+      },
+      Error: connect ECONNREFUSED 127.0.0.1:3030
+          at createConnectionError (node:net:1648:14)
+          at afterConnectMultiple (node:net:1678:16) {
+        errno: -111,
+        code: 'ECONNREFUSED',
+        syscall: 'connect',
+        address: '127.0.0.1',
+        port: 3030
+      }
+    ]
+  }
+}
+
+Node.js v20.16.0
+
+</FILE>
 <FILE path="src/services/backplane.service.ts" TARGET>
 import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
 
 import { MessageQueueAdapter } from 'src/interfaces/message-queue-adapter.interface';
 import { AmqpAdapter } from './backplanes/amqp.backplane';
 import { IsmqAdapter } from './backplanes/ismq.backplane';
+
+interface Subscription {
+  exchange: string;
+  routingKey: string;
+  queue: string;
+  callback: (msg: any) => Promise<void>;
+}
 
 @Injectable()
 export class BackplaneService implements OnModuleInit, OnModuleDestroy {
@@ -506,6 +1552,8 @@ export class BackplaneService implements OnModuleInit, OnModuleDestroy {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectInterval = 5000; // 5 seconds
+  private isReconnecting = false;
+  private subscriptions: Subscription[] = [];
 
   constructor() {
     const adapterType = process.env.MESSAGE_QUEUE_ADAPTER || 'ismq';
@@ -521,13 +1569,22 @@ export class BackplaneService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async connect() {
+    if (this.isReconnecting) {
+      this.logger.log('Reconnection already in progress, skipping new attempt');
+      return;
+    }
+
+    this.isReconnecting = true;
     try {
       await this.adapter.connect();
       this.isInitialized = true;
       this.reconnectAttempts = 0;
+      this.isReconnecting = false;
+      await this.resubscribeAll();
     } catch (error) {
       this.logger.error('Failed to connect to message queue', error);
       this.isInitialized = false;
+      this.isReconnecting = false;
       await this.scheduleReconnect();
     }
   }
@@ -561,6 +1618,7 @@ export class BackplaneService implements OnModuleInit, OnModuleDestroy {
     await this.ensureConnection();
     try {
       await this.adapter.subscribe(exchange, routingKey, queue, callback);
+      this.subscriptions.push({ exchange, routingKey, queue, callback });
     } catch (error) {
       this.logger.error('Failed to subscribe, attempting to reconnect...', error);
       await this.scheduleReconnect();
@@ -569,13 +1627,18 @@ export class BackplaneService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async ensureConnection(): Promise<void> {
-    if (!this.isInitialized) {
+    if (!this.isInitialized && !this.isReconnecting) {
       this.logger.warn('Connection not initialized, attempting to reconnect...');
       await this.connect();
     }
   }
 
   private async scheduleReconnect(): Promise<void> {
+    if (this.isReconnecting) {
+      this.logger.log('Reconnection already scheduled, skipping new attempt');
+      return;
+    }
+
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
       this.logger.log(`Scheduling reconnection attempt ${this.reconnectAttempts} of ${this.maxReconnectAttempts}...`);
@@ -589,10 +1652,23 @@ export class BackplaneService implements OnModuleInit, OnModuleDestroy {
     this.logger.log('Resetting backplane connection...');
     await this.disconnect();
     this.reconnectAttempts = 0;
+    this.isReconnecting = false;
     await this.connect();
+  }
+
+  private async resubscribeAll(): Promise<void> {
+    this.logger.log('Resubscribing to all previous subscriptions...');
+    for (const sub of this.subscriptions) {
+      try {
+        await this.adapter.subscribe(sub.exchange, sub.routingKey, sub.queue, sub.callback);
+        this.logger.log(`Resubscribed to ${sub.exchange} ${sub.routingKey} ${sub.queue}`);
+      } catch (error) {
+        this.logger.error(`Failed to resubscribe to ${sub.exchange} ${sub.routingKey} ${sub.queue}`, error);
+      }
+    }
   }
 }
 </FILE>
 <REQUEST>
-should not schedule reconnection attempt if attempt is already being made
+getting 'Error: connect ECONNREFUSED ::1:3030' unhandled error when ismq is down
 </REQUEST>

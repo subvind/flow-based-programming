@@ -4,15 +4,23 @@ import { MessageQueueAdapter } from 'src/interfaces/message-queue-adapter.interf
 import { AmqpAdapter } from './backplanes/amqp.backplane';
 import { IsmqAdapter } from './backplanes/ismq.backplane';
 
+interface Subscription {
+  exchange: string;
+  routingKey: string;
+  queue: string;
+  callback: (msg: any) => Promise<void>;
+}
+
 @Injectable()
 export class BackplaneService implements OnModuleInit, OnModuleDestroy {
   private adapter: MessageQueueAdapter;
   private readonly logger = new Logger(BackplaneService.name);
   private isInitialized = false;
   private reconnectAttempts = 0;
-  private maxReconnectAttempts = Infinity;
+  private maxReconnectAttempts = 5;
   private reconnectInterval = 5000; // 5 seconds
   private isReconnecting = false;
+  private subscriptions: Subscription[] = [];
 
   constructor() {
     const adapterType = process.env.MESSAGE_QUEUE_ADAPTER || 'ismq';
@@ -39,11 +47,9 @@ export class BackplaneService implements OnModuleInit, OnModuleDestroy {
       this.isInitialized = true;
       this.reconnectAttempts = 0;
       this.isReconnecting = false;
+      await this.resubscribeAll();
     } catch (error) {
-      this.logger.error('Failed to connect to message queue', error);
-      this.isInitialized = false;
-      this.isReconnecting = false;
-      await this.scheduleReconnect();
+      this.handleConnectionError(error);
     }
   }
 
@@ -57,13 +63,11 @@ export class BackplaneService implements OnModuleInit, OnModuleDestroy {
   }
 
   async publish(exchange: string, routingKey: string, message: any): Promise<void> {
-    await this.ensureConnection();
     try {
+      await this.ensureConnection();
       await this.adapter.publish(exchange, routingKey, message);
     } catch (error) {
-      this.logger.error('Failed to publish message, attempting to reconnect...', error);
-      await this.scheduleReconnect();
-      throw error;
+      this.handlePublishError(error);
     }
   }
 
@@ -73,13 +77,12 @@ export class BackplaneService implements OnModuleInit, OnModuleDestroy {
     queue: string,
     callback: (msg: any) => Promise<void>
   ): Promise<void> {
-    await this.ensureConnection();
     try {
+      await this.ensureConnection();
       await this.adapter.subscribe(exchange, routingKey, queue, callback);
+      this.subscriptions.push({ exchange, routingKey, queue, callback });
     } catch (error) {
-      this.logger.error('Failed to subscribe, attempting to reconnect...', error);
-      await this.scheduleReconnect();
-      throw error;
+      this.handleSubscribeError(error);
     }
   }
 
@@ -111,5 +114,46 @@ export class BackplaneService implements OnModuleInit, OnModuleDestroy {
     this.reconnectAttempts = 0;
     this.isReconnecting = false;
     await this.connect();
+  }
+
+  private async resubscribeAll(): Promise<void> {
+    this.logger.log('Resubscribing to all previous subscriptions...');
+    for (const sub of this.subscriptions) {
+      try {
+        await this.adapter.subscribe(sub.exchange, sub.routingKey, sub.queue, sub.callback);
+        this.logger.log(`Resubscribed to ${sub.exchange} ${sub.routingKey} ${sub.queue}`);
+      } catch (error) {
+        this.logger.error(`Failed to resubscribe to ${sub.exchange} ${sub.routingKey} ${sub.queue}`, error);
+      }
+    }
+  }
+
+  private handleConnectionError(error: any) {
+    this.isInitialized = false;
+    this.isReconnecting = false;
+    if (error.code === 'ECONNREFUSED') {
+      this.logger.error(`Failed to connect to message queue: ${error.message}`);
+      this.scheduleReconnect();
+    } else {
+      this.logger.error('Unexpected error while connecting to message queue', error);
+    }
+  }
+
+  private handlePublishError(error: any) {
+    if (error.code === 'ECONNREFUSED') {
+      this.logger.error(`Failed to publish message: ${error.message}`);
+      this.scheduleReconnect();
+    } else {
+      this.logger.error('Unexpected error while publishing message', error);
+    }
+  }
+
+  private handleSubscribeError(error: any) {
+    if (error.code === 'ECONNREFUSED') {
+      this.logger.error(`Failed to subscribe: ${error.message}`);
+      this.scheduleReconnect();
+    } else {
+      this.logger.error('Unexpected error while subscribing', error);
+    }
   }
 }
