@@ -10,8 +10,9 @@ export class BackplaneService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(BackplaneService.name);
   private isInitialized = false;
   private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
+  private maxReconnectAttempts = Infinity;
   private reconnectInterval = 5000; // 5 seconds
+  private isReconnecting = false;
 
   constructor() {
     const adapterType = process.env.MESSAGE_QUEUE_ADAPTER || 'ismq';
@@ -27,13 +28,21 @@ export class BackplaneService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async connect() {
+    if (this.isReconnecting) {
+      this.logger.log('Reconnection already in progress, skipping new attempt');
+      return;
+    }
+
+    this.isReconnecting = true;
     try {
       await this.adapter.connect();
       this.isInitialized = true;
       this.reconnectAttempts = 0;
+      this.isReconnecting = false;
     } catch (error) {
       this.logger.error('Failed to connect to message queue', error);
       this.isInitialized = false;
+      this.isReconnecting = false;
       await this.scheduleReconnect();
     }
   }
@@ -75,13 +84,18 @@ export class BackplaneService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async ensureConnection(): Promise<void> {
-    if (!this.isInitialized) {
+    if (!this.isInitialized && !this.isReconnecting) {
       this.logger.warn('Connection not initialized, attempting to reconnect...');
       await this.connect();
     }
   }
 
   private async scheduleReconnect(): Promise<void> {
+    if (this.isReconnecting) {
+      this.logger.log('Reconnection already scheduled, skipping new attempt');
+      return;
+    }
+
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
       this.logger.log(`Scheduling reconnection attempt ${this.reconnectAttempts} of ${this.maxReconnectAttempts}...`);
@@ -95,6 +109,7 @@ export class BackplaneService implements OnModuleInit, OnModuleDestroy {
     this.logger.log('Resetting backplane connection...');
     await this.disconnect();
     this.reconnectAttempts = 0;
+    this.isReconnecting = false;
     await this.connect();
   }
 }
