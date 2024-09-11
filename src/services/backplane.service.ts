@@ -15,11 +15,9 @@ interface Subscription {
 export class BackplaneService implements OnModuleInit, OnModuleDestroy {
   private adapter: MessageQueueAdapter;
   private readonly logger = new Logger(BackplaneService.name);
-  private isInitialized = false;
-  private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
-  private reconnectInterval = 5000; // 5 seconds
-  private isReconnecting = false;
+  private isConnecting = false;
+  private isConnected = false;
+  private reconnectInterval: NodeJS.Timeout | null = null;
   private subscriptions: Subscription[] = [];
 
   constructor() {
@@ -36,35 +34,41 @@ export class BackplaneService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async connect() {
-    if (this.isReconnecting) {
-      this.logger.log('Reconnection already in progress, skipping new attempt');
+    if (this.isConnecting || this.isConnected) {
       return;
     }
 
-    this.isReconnecting = true;
+    this.isConnecting = true;
     try {
       await this.adapter.connect();
-      this.isInitialized = true;
-      this.reconnectAttempts = 0;
-      this.isReconnecting = false;
+      this.isConnected = true;
+      this.clearReconnectInterval();
+      this.logger.log('Successfully connected to message queue');
       await this.resubscribeAll();
     } catch (error) {
       this.handleConnectionError(error);
+    } finally {
+      this.isConnecting = false;
     }
   }
 
   private async disconnect() {
+    if (!this.isConnected) {
+      return;
+    }
+
     try {
       await this.adapter.disconnect();
-      this.isInitialized = false;
+      this.isConnected = false;
+      this.clearReconnectInterval();
     } catch (error) {
       this.logger.error('Error disconnecting from message queue', error);
     }
   }
 
   async publish(exchange: string, routingKey: string, message: any): Promise<void> {
+    await this.ensureConnection();
     try {
-      await this.ensureConnection();
       await this.adapter.publish(exchange, routingKey, message);
     } catch (error) {
       this.handlePublishError(error);
@@ -77,8 +81,8 @@ export class BackplaneService implements OnModuleInit, OnModuleDestroy {
     queue: string,
     callback: (msg: any) => Promise<void>
   ): Promise<void> {
+    await this.ensureConnection();
     try {
-      await this.ensureConnection();
       await this.adapter.subscribe(exchange, routingKey, queue, callback);
       this.subscriptions.push({ exchange, routingKey, queue, callback });
     } catch (error) {
@@ -87,32 +91,32 @@ export class BackplaneService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async ensureConnection(): Promise<void> {
-    if (!this.isInitialized && !this.isReconnecting) {
-      this.logger.warn('Connection not initialized, attempting to reconnect...');
+    if (!this.isConnected) {
       await this.connect();
     }
   }
 
-  private async scheduleReconnect(): Promise<void> {
-    if (this.isReconnecting) {
-      this.logger.log('Reconnection already scheduled, skipping new attempt');
-      return;
+  private startReconnectInterval(): void {
+    if (!this.reconnectInterval) {
+      this.logger.log('Starting backplane reconnection interval...');
+      this.reconnectInterval = setInterval(() => {
+        this.logger.log('Attempting to reconnect to backplane...');
+        this.connect();
+      }, 5000);
     }
+  }
 
-    if (this.reconnectAttempts < this.maxReconnectAttempts) {
-      this.reconnectAttempts++;
-      this.logger.log(`Scheduling reconnection attempt ${this.reconnectAttempts} of ${this.maxReconnectAttempts}...`);
-      setTimeout(() => this.connect(), this.reconnectInterval);
-    } else {
-      this.logger.error('Max reconnection attempts reached. Please check the MQ server and restart the application.');
+  private clearReconnectInterval(): void {
+    if (this.reconnectInterval) {
+      clearInterval(this.reconnectInterval);
+      this.reconnectInterval = null;
+      this.logger.log('Cleared reconnection interval');
     }
   }
 
   public async reset(): Promise<void> {
     this.logger.log('Resetting backplane connection...');
     await this.disconnect();
-    this.reconnectAttempts = 0;
-    this.isReconnecting = false;
     await this.connect();
   }
 
@@ -129,11 +133,10 @@ export class BackplaneService implements OnModuleInit, OnModuleDestroy {
   }
 
   private handleConnectionError(error: any) {
-    this.isInitialized = false;
-    this.isReconnecting = false;
+    this.isConnected = false;
     if (error.code === 'ECONNREFUSED') {
-      this.logger.error(`Failed to connect to message queue: ${error.message}`);
-      this.scheduleReconnect();
+      // this.logger.error(`Failed to connect to message queue: ${error.message}`);
+      this.startReconnectInterval();
     } else {
       this.logger.error('Unexpected error while connecting to message queue', error);
     }
@@ -141,8 +144,9 @@ export class BackplaneService implements OnModuleInit, OnModuleDestroy {
 
   private handlePublishError(error: any) {
     if (error.code === 'ECONNREFUSED') {
-      this.logger.error(`Failed to publish message: ${error.message}`);
-      this.scheduleReconnect();
+      // this.logger.error(`Failed to publish message: ${error.message}`);
+      this.isConnected = false;
+      this.startReconnectInterval();
     } else {
       this.logger.error('Unexpected error while publishing message', error);
     }
@@ -150,8 +154,9 @@ export class BackplaneService implements OnModuleInit, OnModuleDestroy {
 
   private handleSubscribeError(error: any) {
     if (error.code === 'ECONNREFUSED') {
-      this.logger.error(`Failed to subscribe: ${error.message}`);
-      this.scheduleReconnect();
+      // this.logger.error(`Failed to subscribe: ${error.message}`);
+      this.isConnected = false;
+      this.startReconnectInterval();
     } else {
       this.logger.error('Unexpected error while subscribing', error);
     }
