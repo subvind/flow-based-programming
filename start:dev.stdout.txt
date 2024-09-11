@@ -170,3 +170,117 @@ Subscription response for flow_exchange/create_connection_queue: { status: 'ok',
 [2024-09-11T19:24:17.183Z] [LOG] [Bootstrap] [EventProcessor] [handleComponentEvent] [example-flow.multi.init] data: undefined
 [2024-09-11T19:24:17.183Z] [LOG] [Bootstrap] [EventProcessor] Passing event to component: multi
 [2024-09-11T19:24:17.183Z] [LOG] [example-flow.multi] NumberMultiplier handling event: init undefined
+c[[90m4:16:25 PM[0m] File change detected. Starting incremental compilation...
+
+[[90m4:16:25 PM[0m] Found 0 errors. Watching for file changes.
+
+[AppModule] RabbitMQ URI: amqp://localhost:5672
+[32m[Nest] 2714538  - [39m09/11/2024, 4:16:25 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 2714538  - [39m09/11/2024, 4:16:25 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +8ms[39m
+[2024-09-11T21:16:25.697Z] [LOG] [Bootstrap] Starting main application...
+[2024-09-11T21:16:25.697Z] [LOG] [Bootstrap] [NestFactory] Starting Nest application...
+[2024-09-11T21:16:25.699Z] [LOG] [Bootstrap] [InstanceLoader] AppModule dependencies initialized
+[2024-09-11T21:16:25.706Z] [LOG] [Bootstrap] [WebSocketsController] EventTriggerComponent subscribed to the "client-event" message
+[2024-09-11T21:16:25.707Z] [LOG] [Bootstrap] [WebSocketsController] NumberGeneratorComponent subscribed to the "client-event" message
+[2024-09-11T21:16:25.707Z] [LOG] [Bootstrap] [WebSocketsController] NumberMultiplierComponent subscribed to the "client-event" message
+[2024-09-11T21:16:25.707Z] [LOG] [Bootstrap] [WebSocketsController] StateMachineComponent subscribed to the "client-event" message
+[2024-09-11T21:16:25.707Z] [LOG] [Bootstrap] [WebSocketsController] JobStateMachineComponent subscribed to the "client-event" message
+[2024-09-11T21:16:25.707Z] [LOG] [Bootstrap] [WebSocketsController] ButtonTriggerComponent subscribed to the "client-event" message
+[2024-09-11T21:16:25.708Z] [LOG] [Bootstrap] [RoutesResolver] AppController {/}:
+[2024-09-11T21:16:25.710Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/, GET} route
+[2024-09-11T21:16:25.710Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/flows, GET} route
+[2024-09-11T21:16:25.710Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/flow/:flowId, GET} route
+[2024-09-11T21:16:25.710Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/document/:flowId/:componentId, GET} route
+[2024-09-11T21:16:25.710Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentComponent/:flowId/:componentId/:swimlaneId, GET} route
+[2024-09-11T21:16:25.711Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentConnections/:flowId/:componentId/:portId/:swimlaneId, GET} route
+[2024-09-11T21:16:25.711Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/logger, GET} route
+[2024-09-11T21:16:25.711Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/trigger-event/:flowComponentEvent, POST} route
+[2024-09-11T21:16:25.711Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/template/:flowId/:componentId/:templateId, GET} route
+[2024-09-11T21:16:25.712Z] [LOG] [Bootstrap] [BackplaneService] Connecting to ISMQ...
+[2024-09-11T21:16:25.737Z] [LOG] [Bootstrap] [BackplaneService] Successfully connected to ISMQ
+[2024-09-11T21:16:25.737Z] [LOG] [Bootstrap] [BackplaneService] Successfully connected to message queue
+[2024-09-11T21:16:25.737Z] [LOG] [Bootstrap] [BackplaneService] Resubscribing to all previous subscriptions...
+[2024-09-11T21:16:25.737Z] [LOG] [Bootstrap] [BackplaneService] Subscribing to exchange: flow_exchange, routingKey: componentEvent, queue: component_event_queue
+Subscription response for flow_exchange/component_event_queue: { status: 'ok', message: 'Subscribed successfully' }
+[2024-09-11T21:16:25.840Z] [LOG] [Bootstrap] [BackplaneService] Subscribing to exchange: flow_exchange, routingKey: createConnection, queue: create_connection_queue
+Subscription response for flow_exchange/create_connection_queue: { status: 'ok', message: 'Subscribed successfully' }
+[2024-09-11T21:16:25.846Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726089385699
+[2024-09-11T21:16:25.846Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726089385699
+[2024-09-11T21:16:25.846Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726089385699
+[2024-09-11T21:16:25.846Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726089385699
+[2024-09-11T21:16:25.846Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726089385699
+[2024-09-11T21:16:25.846Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726089385699
+[2024-09-11T21:16:25.847Z] [LOG] [Bootstrap] [NestApplication] Nest application successfully started
+[2024-09-11T21:16:25.847Z] [LOG] [Bootstrap] Starting flow execution...
+[2024-09-11T21:16:25.847Z] [LOG] [Bootstrap] [FlowExecutorService] Executing flow: example-flow
+[2024-09-11T21:16:25.847Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: sm1.initProxyMachine -> jsm1.initProxyMachine
+[2024-09-11T21:16:25.849Z] [LOG] [Bootstrap] Application is running on: http://localhost:3000
+[2024-09-11T21:16:25.854Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-start -> gen1.start
+[2024-09-11T21:16:25.906Z] [ERROR] [Bootstrap] [BackplaneService] Failed to publish message: read ECONNRESET
+[2024-09-11T21:16:25.907Z] [ERROR] [Bootstrap] [BackplaneService] Unexpected error while publishing message
+[2024-09-11T21:16:25.907Z] [ERROR] [Bootstrap] [BackplaneService] Error: read ECONNRESET
+[2024-09-11T21:16:25.907Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-finish -> gen1.stop
+[2024-09-11T21:16:25.911Z] [ERROR] [Bootstrap] [BackplaneService] Failed to publish message: 
+[2024-09-11T21:16:25.911Z] [LOG] [Bootstrap] [BackplaneService] Starting backplane reconnection interval...
+[2024-09-11T21:16:25.911Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-start -> gen2.start
+[2024-09-11T21:16:25.911Z] [LOG] [Bootstrap] [BackplaneService] Connecting to ISMQ...
+[2024-09-11T21:16:30.913Z] [LOG] [Bootstrap] [BackplaneService] Attempting to reconnect to backplane...
+[2024-09-11T21:16:35.914Z] [LOG] [Bootstrap] [BackplaneService] Attempting to reconnect to backplane...
+[2024-09-11T21:16:40.915Z] [LOG] [Bootstrap] [BackplaneService] Attempting to reconnect to backplane...
+[2024-09-11T21:16:45.919Z] [LOG] [Bootstrap] [BackplaneService] Attempting to reconnect to backplane...
+[2024-09-11T21:16:50.921Z] [LOG] [Bootstrap] [BackplaneService] Attempting to reconnect to backplane...
+[2024-09-11T21:16:55.921Z] [LOG] [Bootstrap] [BackplaneService] Attempting to reconnect to backplane...
+c[[90m4:17:00 PM[0m] File change detected. Starting incremental compilation...
+
+[[90m4:17:00 PM[0m] Found 0 errors. Watching for file changes.
+
+[AppModule] RabbitMQ URI: amqp://localhost:5672
+[32m[Nest] 2714926  - [39m09/11/2024, 4:17:00 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 2714926  - [39m09/11/2024, 4:17:00 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +9ms[39m
+[2024-09-11T21:17:00.689Z] [LOG] [Bootstrap] Starting main application...
+[2024-09-11T21:17:00.690Z] [LOG] [Bootstrap] [NestFactory] Starting Nest application...
+[2024-09-11T21:17:00.692Z] [LOG] [Bootstrap] [InstanceLoader] AppModule dependencies initialized
+[2024-09-11T21:17:00.699Z] [LOG] [Bootstrap] [WebSocketsController] EventTriggerComponent subscribed to the "client-event" message
+[2024-09-11T21:17:00.700Z] [LOG] [Bootstrap] [WebSocketsController] NumberGeneratorComponent subscribed to the "client-event" message
+[2024-09-11T21:17:00.700Z] [LOG] [Bootstrap] [WebSocketsController] NumberMultiplierComponent subscribed to the "client-event" message
+[2024-09-11T21:17:00.700Z] [LOG] [Bootstrap] [WebSocketsController] StateMachineComponent subscribed to the "client-event" message
+[2024-09-11T21:17:00.700Z] [LOG] [Bootstrap] [WebSocketsController] JobStateMachineComponent subscribed to the "client-event" message
+[2024-09-11T21:17:00.701Z] [LOG] [Bootstrap] [WebSocketsController] ButtonTriggerComponent subscribed to the "client-event" message
+[2024-09-11T21:17:00.702Z] [LOG] [Bootstrap] [RoutesResolver] AppController {/}:
+[2024-09-11T21:17:00.703Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/, GET} route
+[2024-09-11T21:17:00.703Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/flows, GET} route
+[2024-09-11T21:17:00.703Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/flow/:flowId, GET} route
+[2024-09-11T21:17:00.704Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/document/:flowId/:componentId, GET} route
+[2024-09-11T21:17:00.704Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentComponent/:flowId/:componentId/:swimlaneId, GET} route
+[2024-09-11T21:17:00.704Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentConnections/:flowId/:componentId/:portId/:swimlaneId, GET} route
+[2024-09-11T21:17:00.704Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/logger, GET} route
+[2024-09-11T21:17:00.704Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/trigger-event/:flowComponentEvent, POST} route
+[2024-09-11T21:17:00.704Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/template/:flowId/:componentId/:templateId, GET} route
+[2024-09-11T21:17:00.705Z] [LOG] [Bootstrap] [BackplaneService] Connecting to ISMQ...
+c[[90m4:20:47 PM[0m] File change detected. Starting incremental compilation...
+
+[[90m4:20:47 PM[0m] Found 0 errors. Watching for file changes.
+
+[AppModule] RabbitMQ URI: amqp://localhost:5672
+[32m[Nest] 2717449  - [39m09/11/2024, 4:20:47 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 2717449  - [39m09/11/2024, 4:20:47 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +7ms[39m
+[2024-09-11T21:20:47.834Z] [LOG] [Bootstrap] Starting main application...
+[2024-09-11T21:20:47.835Z] [LOG] [Bootstrap] [NestFactory] Starting Nest application...
+[2024-09-11T21:20:47.836Z] [LOG] [Bootstrap] [InstanceLoader] AppModule dependencies initialized
+[2024-09-11T21:20:47.841Z] [LOG] [Bootstrap] [WebSocketsController] EventTriggerComponent subscribed to the "client-event" message
+[2024-09-11T21:20:47.841Z] [LOG] [Bootstrap] [WebSocketsController] NumberGeneratorComponent subscribed to the "client-event" message
+[2024-09-11T21:20:47.841Z] [LOG] [Bootstrap] [WebSocketsController] NumberMultiplierComponent subscribed to the "client-event" message
+[2024-09-11T21:20:47.842Z] [LOG] [Bootstrap] [WebSocketsController] StateMachineComponent subscribed to the "client-event" message
+[2024-09-11T21:20:47.842Z] [LOG] [Bootstrap] [WebSocketsController] JobStateMachineComponent subscribed to the "client-event" message
+[2024-09-11T21:20:47.842Z] [LOG] [Bootstrap] [WebSocketsController] ButtonTriggerComponent subscribed to the "client-event" message
+[2024-09-11T21:20:47.843Z] [LOG] [Bootstrap] [RoutesResolver] AppController {/}:
+[2024-09-11T21:20:47.843Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/, GET} route
+[2024-09-11T21:20:47.843Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/flows, GET} route
+[2024-09-11T21:20:47.844Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/flow/:flowId, GET} route
+[2024-09-11T21:20:47.844Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/document/:flowId/:componentId, GET} route
+[2024-09-11T21:20:47.844Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentComponent/:flowId/:componentId/:swimlaneId, GET} route
+[2024-09-11T21:20:47.844Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentConnections/:flowId/:componentId/:portId/:swimlaneId, GET} route
+[2024-09-11T21:20:47.844Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/logger, GET} route
+[2024-09-11T21:20:47.844Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/trigger-event/:flowComponentEvent, POST} route
+[2024-09-11T21:20:47.844Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/template/:flowId/:componentId/:templateId, GET} route
+[2024-09-11T21:20:47.845Z] [LOG] [Bootstrap] [BackplaneService] Connecting to ISMQ...
