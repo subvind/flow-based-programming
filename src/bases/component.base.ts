@@ -36,7 +36,7 @@ export abstract class ComponentBase implements Component {
   abstract handleEvent(eventId: string, data: any): Promise<void>;
 
   async publish(flowId: string, componentId: string, eventId: string, data: any): Promise<void> {
-    this.logger.log(`Publishing: ${flowId}.${componentId}.${eventId} -> ${data}`);
+    // this.logger.log(`Publishing: ${flowId}.${componentId}.${eventId} -> ${data}`); // keep important for debugging
     await this.backplaneService.publish('flow_exchange', 'componentEvent', {
       flowId,
       componentId,

@@ -8,10 +8,9 @@ import { TemplateCacheService } from 'src/services/template-cache.service';
 @Injectable()
 export class MessageGeneratorComponent extends ComponentBase {
   public logger: CustomLogger;
-  private interval: NodeJS.Timeout | null = null;
   private messageSize: number = 1;
   private messagesToGenerate: number = 500;
-  private generatedCount: number = 0;
+  private isGenerating: boolean = false;
   public ports = {
     inputs: [
       'any.publish.start',
@@ -44,7 +43,7 @@ export class MessageGeneratorComponent extends ComponentBase {
         break;
       }
       case "start": {
-        this.startGenerating();
+        await this.startGenerating();
         break;
       }
       case "stop": {
@@ -65,33 +64,31 @@ export class MessageGeneratorComponent extends ComponentBase {
     this.logger.log(`MessageGenerator initialized with messages to generate: ${this.messagesToGenerate}`);
   }
 
-  private startGenerating(): void {
+  private async startGenerating(): Promise<void> {
     this.logger.log(`MessageGenerator (${this.flowId}) starting message generation`);
-    this.generatedCount = 0;
-    if (this.interval) {
-      clearInterval(this.interval);
-    }
-    this.interval = setInterval(async () => {
-      if (this.generatedCount < this.messagesToGenerate) {
-        const message = { 
-          timestamp: Date.now(), 
-          content: "B".repeat(this.messageSize),
-          size: this.messageSize
-        };
-        await this.publish(this.flowId, this.componentId, 'messageGenerated', message);
-        this.generatedCount++;
-      } else {
-        this.stopGenerating();
+    this.isGenerating = true;
+    
+    for (let i = 0; i < this.messagesToGenerate + 10 && this.isGenerating; i++) {
+      const message = { 
+        timestamp: Date.now(), 
+        content: "B".repeat(this.messageSize),
+        size: this.messageSize
+      };
+      await this.publish(this.flowId, this.componentId, 'messageGenerated', message);
+      
+      // Optional: Add a small delay to prevent blocking the event loop
+      if (i % 1000 === 0) {
+        await new Promise(resolve => setImmediate(resolve));
       }
-    }, 1); // Generate messages as fast as possible
+    }
+
+    this.isGenerating = false;
+    this.logger.log(`MessageGenerator (${this.flowId}) finished generating ${this.messagesToGenerate} messages`);
   }
 
   private stopGenerating(): void {
     this.logger.log(`MessageGenerator (${this.flowId}) stopping message generation`);
-    if (this.interval) {
-      clearInterval(this.interval);
-      this.interval = null;
-    }
+    this.isGenerating = false;
   }
 
   private setMessageSize(size: number): void {

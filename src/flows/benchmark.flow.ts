@@ -30,8 +30,7 @@ let benchmarkAnalyzer = {
     inputs: {
       startBenchmark: {},
       endBenchmark: {},
-      dataPoint: {},
-      setMessageSize: {}
+      dataPoint: {}
     },
     outputs: {
       benchmarkResult: {},

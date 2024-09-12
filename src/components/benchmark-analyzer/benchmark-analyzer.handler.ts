@@ -19,8 +19,7 @@ export class BenchmarkAnalyzerComponent extends ComponentBase {
     inputs: [
       'any.publish.startBenchmark',
       'any.publish.endBenchmark',
-      'any.publish.dataPoint',
-      'any.publish.setMessageSize'
+      'any.publish.dataPoint'
     ],
     outputs: [
       'any.publish.benchmarkResult',
@@ -45,7 +44,7 @@ export class BenchmarkAnalyzerComponent extends ComponentBase {
   }
 
   async handleEvent(eventId: string, data: any): Promise<void> {
-    this.logger.log(`BenchmarkAnalyzer (${this.flowId}) handling event: ${eventId}`);
+    // this.logger.log(`BenchmarkAnalyzer (${this.flowId}) handling event: ${eventId}`);
     switch (eventId) {
       case "init": {
         await this.initBenchmark(data);
@@ -61,10 +60,6 @@ export class BenchmarkAnalyzerComponent extends ComponentBase {
       }
       case "dataPoint": {
         await this.addDataPoint(data.processingTime, data.size);
-        break;
-      }
-      case "setMessageSize": {
-        this.setMessageSize(data.size);
         break;
       }
     }
@@ -86,9 +81,11 @@ export class BenchmarkAnalyzerComponent extends ComponentBase {
     this.currentSizeIndex = 0;
     this.currentMessageSize = this.messageSizes[this.currentSizeIndex];
     this.resetDataPoints();
-    this.logger.log(`Benchmark started for size ${this.currentMessageSize} at ${this.startTime}`);
     
-    await this.publish(this.flowId, this.componentId, 'startMessageGeneration', { size: this.currentMessageSize });
+    console.log('========');
+    console.log(`Benchmark started for size ${this.currentMessageSize} at ${this.startTime}`);
+    console.log('========');
+    await this.publish(this.flowId, this.componentId, 'startMessageGeneration', {});
   }
 
   private async endBenchmark(): Promise<void> {
@@ -97,6 +94,11 @@ export class BenchmarkAnalyzerComponent extends ComponentBase {
 
     await this.publish(this.flowId, this.componentId, 'stopMessageGeneration', {});
 
+    console.log('========');
+    console.log('waiting 2s for benchmark to finish');
+    console.log('========');
+    await new Promise(resolve => setTimeout(resolve, 2000)); // wait for benchmark to finish
+
     if (this.currentSizeIndex < this.messageSizes.length - 1) {
       this.currentSizeIndex++;
       await this.startNextSizeBenchmark();
@@ -104,30 +106,35 @@ export class BenchmarkAnalyzerComponent extends ComponentBase {
       const result = this.analyzeBenchmark();
       await this.publish(this.flowId, this.componentId, 'benchmarkResult', result);
       await this.display(this.flowId, this.componentId, 'benchmark-results', { results: result });
+      console.log('!!!!!!!!');
+      console.log('benchmark-results: success');
+      console.log('!!!!!!!!');
     }
   }
 
   private async addDataPoint(processingTime: number, size: number): Promise<void> {
+    // console.log('addDataPoint', size, processingTime);
     if (!this.dataPoints[size]) {
       this.dataPoints[size] = [];
     }
     this.dataPoints[size].push(processingTime);
-    this.logger.log(`Added data point for size ${size}: ${processingTime}ms (Total: ${this.dataPoints[size].length})`);
+    // this.logger.log(`Added data point for size ${size}: ${processingTime}ms (Total: ${this.dataPoints[size].length})`);
     
-    if (this.dataPoints[size].length >= this.messagesPerSize) {
+    if (this.dataPoints[size].length === this.messagesPerSize) {
+      console.log('////////// end benchmark', this.dataPoints[size].length, '===', this.messagesPerSize);
       await this.endBenchmark();
     }
   }
 
-  private setMessageSize(size: number): void {
-    this.currentMessageSize = size;
-    this.logger.log(`Set message size to ${size} bytes`);
-  }
-
   private async startNextSizeBenchmark(): Promise<void> {
     this.currentMessageSize = this.messageSizes[this.currentSizeIndex];
+    this.logger.log(`Starting benchmark for next size: ${this.currentMessageSize}`);
     await this.publish(this.flowId, this.componentId, 'nextMessageSize', { size: this.currentMessageSize });
-    await this.publish(this.flowId, this.componentId, 'startMessageGeneration', { size: this.currentMessageSize });
+    console.log('~~~~~~ startNextSizeBenchmark', this.currentMessageSize);
+    await new Promise(resolve => setTimeout(resolve, 2000)); // wait for nextMessageSize to propagate
+    await this.publish(this.flowId, this.componentId, 'startMessageGeneration', {});
+    await this.publish(this.flowId, this.componentId, 'startMessageGeneration', {});
+    await this.publish(this.flowId, this.componentId, 'startMessageGeneration', {});
   }
 
   private analyzeBenchmark(): BenchmarkResults {
