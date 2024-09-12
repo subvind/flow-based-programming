@@ -1,335 +1,231 @@
-c[[90m4:31:41 PM[0m] Starting compilation in watch mode...
+c[[90m5:30:18 PM[0m] Starting compilation in watch mode...
 
-[[90m4:31:42 PM[0m] Found 0 errors. Watching for file changes.
+[[90m5:30:19 PM[0m] Found 0 errors. Watching for file changes.
 
 [AppModule] RabbitMQ URI: amqp://localhost:5672
-[32m[Nest] 3174828  - [39m09/12/2024, 4:31:42 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
-[32m[Nest] 3174828  - [39m09/12/2024, 4:31:42 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +9ms[39m
-[2024-09-12T21:31:42.831Z] [LOG] [Bootstrap] Starting main application...
-[2024-09-12T21:31:42.832Z] [LOG] [Bootstrap] [NestFactory] Starting Nest application...
-[2024-09-12T21:31:42.834Z] [LOG] [Bootstrap] [InstanceLoader] AppModule dependencies initialized
-[2024-09-12T21:31:42.841Z] [LOG] [Bootstrap] [WebSocketsController] EventTriggerComponent subscribed to the "client-event" message
-[2024-09-12T21:31:42.842Z] [LOG] [Bootstrap] [WebSocketsController] NumberGeneratorComponent subscribed to the "client-event" message
-[2024-09-12T21:31:42.842Z] [LOG] [Bootstrap] [WebSocketsController] NumberMultiplierComponent subscribed to the "client-event" message
-[2024-09-12T21:31:42.842Z] [LOG] [Bootstrap] [WebSocketsController] StateMachineComponent subscribed to the "client-event" message
-[2024-09-12T21:31:42.842Z] [LOG] [Bootstrap] [WebSocketsController] JobStateMachineComponent subscribed to the "client-event" message
-[2024-09-12T21:31:42.843Z] [LOG] [Bootstrap] [WebSocketsController] ButtonTriggerComponent subscribed to the "client-event" message
-[2024-09-12T21:31:42.843Z] [LOG] [Bootstrap] [WebSocketsController] BenchmarkAnalyzerComponent subscribed to the "client-event" message
-[2024-09-12T21:31:42.843Z] [LOG] [Bootstrap] [WebSocketsController] MessageGeneratorComponent subscribed to the "client-event" message
-[2024-09-12T21:31:42.843Z] [LOG] [Bootstrap] [WebSocketsController] MessageProcessorComponent subscribed to the "client-event" message
-[2024-09-12T21:31:42.845Z] [LOG] [Bootstrap] [RoutesResolver] AppController {/}:
-[2024-09-12T21:31:42.846Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/, GET} route
-[2024-09-12T21:31:42.846Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/flows, GET} route
-[2024-09-12T21:31:42.847Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/flow/:flowId, GET} route
-[2024-09-12T21:31:42.847Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/document/:flowId/:componentId, GET} route
-[2024-09-12T21:31:42.847Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentComponent/:flowId/:componentId/:swimlaneId, GET} route
-[2024-09-12T21:31:42.847Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentConnections/:flowId/:componentId/:portId/:swimlaneId, GET} route
-[2024-09-12T21:31:42.847Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/logger, GET} route
-[2024-09-12T21:31:42.847Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/trigger-event/:flowComponentEvent, POST} route
-[2024-09-12T21:31:42.848Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/template/:flowId/:componentId/:templateId, GET} route
-[2024-09-12T21:31:42.848Z] [LOG] [Bootstrap] [BackplaneService] Connecting to ISMQ...
-[2024-09-12T21:31:42.875Z] [LOG] [Bootstrap] [BackplaneService] Successfully connected to ISMQ
-[2024-09-12T21:31:42.875Z] [LOG] [Bootstrap] [BackplaneService] Successfully connected to message queue
-[2024-09-12T21:31:42.875Z] [LOG] [Bootstrap] [BackplaneService] Resubscribing to all previous subscriptions...
-[2024-09-12T21:31:42.875Z] [LOG] [Bootstrap] [BackplaneService] Subscribing to exchange: flow_exchange, routingKey: componentEvent, queue: component_event_queue
+[32m[Nest] 3211175  - [39m09/12/2024, 5:30:20 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 3211175  - [39m09/12/2024, 5:30:20 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +9ms[39m
+[2024-09-12T22:30:20.155Z] [LOG] [Bootstrap] Starting main application...
+[2024-09-12T22:30:20.155Z] [LOG] [Bootstrap] [NestFactory] Starting Nest application...
+[2024-09-12T22:30:20.158Z] [LOG] [Bootstrap] [InstanceLoader] AppModule dependencies initialized
+[2024-09-12T22:30:20.165Z] [LOG] [Bootstrap] [WebSocketsController] EventTriggerComponent subscribed to the "client-event" message
+[2024-09-12T22:30:20.165Z] [LOG] [Bootstrap] [WebSocketsController] NumberGeneratorComponent subscribed to the "client-event" message
+[2024-09-12T22:30:20.165Z] [LOG] [Bootstrap] [WebSocketsController] NumberMultiplierComponent subscribed to the "client-event" message
+[2024-09-12T22:30:20.165Z] [LOG] [Bootstrap] [WebSocketsController] StateMachineComponent subscribed to the "client-event" message
+[2024-09-12T22:30:20.166Z] [LOG] [Bootstrap] [WebSocketsController] JobStateMachineComponent subscribed to the "client-event" message
+[2024-09-12T22:30:20.166Z] [LOG] [Bootstrap] [WebSocketsController] ButtonTriggerComponent subscribed to the "client-event" message
+[2024-09-12T22:30:20.166Z] [LOG] [Bootstrap] [WebSocketsController] BenchmarkAnalyzerComponent subscribed to the "client-event" message
+[2024-09-12T22:30:20.166Z] [LOG] [Bootstrap] [WebSocketsController] MessageGeneratorComponent subscribed to the "client-event" message
+[2024-09-12T22:30:20.166Z] [LOG] [Bootstrap] [WebSocketsController] MessageProcessorComponent subscribed to the "client-event" message
+[2024-09-12T22:30:20.168Z] [LOG] [Bootstrap] [RoutesResolver] AppController {/}:
+[2024-09-12T22:30:20.169Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/, GET} route
+[2024-09-12T22:30:20.169Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/flows, GET} route
+[2024-09-12T22:30:20.170Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/flow/:flowId, GET} route
+[2024-09-12T22:30:20.170Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/document/:flowId/:componentId, GET} route
+[2024-09-12T22:30:20.170Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentComponent/:flowId/:componentId/:swimlaneId, GET} route
+[2024-09-12T22:30:20.170Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/documentConnections/:flowId/:componentId/:portId/:swimlaneId, GET} route
+[2024-09-12T22:30:20.170Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/logger, GET} route
+[2024-09-12T22:30:20.170Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/trigger-event/:flowComponentEvent, POST} route
+[2024-09-12T22:30:20.171Z] [LOG] [Bootstrap] [RouterExplorer] Mapped {/template/:flowId/:componentId/:templateId, GET} route
+[2024-09-12T22:30:20.171Z] [LOG] [Bootstrap] [BackplaneService] Connecting to ISMQ...
+[2024-09-12T22:30:20.198Z] [LOG] [Bootstrap] [BackplaneService] Successfully connected to ISMQ
+[2024-09-12T22:30:20.198Z] [LOG] [Bootstrap] [BackplaneService] Successfully connected to message queue
+[2024-09-12T22:30:20.198Z] [LOG] [Bootstrap] [BackplaneService] Resubscribing to all previous subscriptions...
+[2024-09-12T22:30:20.198Z] [LOG] [Bootstrap] [BackplaneService] Subscribing to exchange: flow_exchange, routingKey: componentEvent, queue: component_event_queue
 Subscription response for flow_exchange/component_event_queue: { status: 'ok', message: 'Subscribed successfully' }
-[2024-09-12T21:31:42.979Z] [LOG] [Bootstrap] [BackplaneService] Subscribing to exchange: flow_exchange, routingKey: createConnection, queue: create_connection_queue
+[2024-09-12T22:30:20.302Z] [LOG] [Bootstrap] [BackplaneService] Subscribing to exchange: flow_exchange, routingKey: createConnection, queue: create_connection_queue
 Subscription response for flow_exchange/create_connection_queue: { status: 'ok', message: 'Subscribed successfully' }
-[2024-09-12T21:31:42.985Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726176702834
-[2024-09-12T21:31:42.985Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726176702834
-[2024-09-12T21:31:42.985Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726176702834
-[2024-09-12T21:31:42.985Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726176702834
-[2024-09-12T21:31:42.985Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726176702834
-[2024-09-12T21:31:42.985Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726176702834
-[2024-09-12T21:31:42.985Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726176702834
-[2024-09-12T21:31:42.985Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726176702834
-[2024-09-12T21:31:42.985Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726176702834
-[2024-09-12T21:31:42.986Z] [LOG] [Bootstrap] [NestApplication] Nest application successfully started
-[2024-09-12T21:31:42.986Z] [LOG] [Bootstrap] Starting flow execution...
-[2024-09-12T21:31:42.986Z] [LOG] [Bootstrap] [FlowExecutorService] Executing flow: example-flow
-[2024-09-12T21:31:42.986Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: sm1.initProxyMachine -> jsm1.initProxyMachine
-[2024-09-12T21:31:42.986Z] [LOG] [Bootstrap] [FlowExecutorService] Executing flow: benchmark-flow
-[2024-09-12T21:31:42.986Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: sm.initProxyMachine -> jsm.initProxyMachine
-[2024-09-12T21:31:42.989Z] [LOG] [Bootstrap] Application is running on: http://localhost:3000
-[2024-09-12T21:31:42.993Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-start -> gen1.start
-[2024-09-12T21:31:42.994Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm.get-start -> analyzer.startBenchmark
-[2024-09-12T21:31:43.001Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-finish -> gen1.stop
-[2024-09-12T21:31:43.003Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: analyzer.nextMessageSize -> gen.setMessageSize
-[2024-09-12T21:31:43.006Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-start -> gen2.start
-[2024-09-12T21:31:43.010Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm.get-resume -> analyzer.startBenchmark
-[2024-09-12T21:31:43.015Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: benchmark-flow.sm.initProxyMachine -> jsm.initProxyMachine
-[2024-09-12T21:31:43.016Z] [LOG] [Bootstrap] [EventProcessor] Connection created: benchmark-flow.sm.initProxyMachine -> jsm.initProxyMachine
-[2024-09-12T21:31:43.016Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.sm1.initProxyMachine -> jsm1.initProxyMachine
-[2024-09-12T21:31:43.016Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.sm1.initProxyMachine -> jsm1.initProxyMachine
-[2024-09-12T21:31:43.017Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm.get-finish -> analyzer.endBenchmark
-[2024-09-12T21:31:43.018Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-finish -> gen2.stop
-[2024-09-12T21:31:43.019Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: benchmark-flow.jsm.get-start -> analyzer.startBenchmark
-[2024-09-12T21:31:43.019Z] [LOG] [Bootstrap] [EventProcessor] Connection created: benchmark-flow.jsm.get-start -> analyzer.startBenchmark
-[2024-09-12T21:31:43.019Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-start -> gen1.start
-[2024-09-12T21:31:43.019Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-start -> gen1.start
-[2024-09-12T21:31:43.021Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm.get-reset -> analyzer.startBenchmark
-[2024-09-12T21:31:43.023Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-finish -> gen1.stop
-[2024-09-12T21:31:43.024Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-finish -> gen1.stop
-[2024-09-12T21:31:43.025Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: benchmark-flow.analyzer.nextMessageSize -> gen.setMessageSize
-[2024-09-12T21:31:43.025Z] [LOG] [Bootstrap] [EventProcessor] Connection created: benchmark-flow.analyzer.nextMessageSize -> gen.setMessageSize
-[2024-09-12T21:31:43.027Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: gen.messageGenerated -> proc.messageReceived
-[2024-09-12T21:31:43.030Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: gen1.numberGenerated -> multi.firstNumberReceived
-[2024-09-12T21:31:43.031Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: benchmark-flow.jsm.get-resume -> analyzer.startBenchmark
-[2024-09-12T21:31:43.031Z] [LOG] [Bootstrap] [EventProcessor] Connection created: benchmark-flow.jsm.get-resume -> analyzer.startBenchmark
-[2024-09-12T21:31:43.034Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: proc.processingComplete -> analyzer.dataPoint
-[2024-09-12T21:31:43.037Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-start -> gen2.start
-[2024-09-12T21:31:43.037Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-start -> gen2.start
-[2024-09-12T21:31:43.039Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: analyzer.startMessageGeneration -> gen.start
-[2024-09-12T21:31:43.041Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: benchmark-flow.jsm.get-finish -> analyzer.endBenchmark
-[2024-09-12T21:31:43.041Z] [LOG] [Bootstrap] [EventProcessor] Connection created: benchmark-flow.jsm.get-finish -> analyzer.endBenchmark
-[2024-09-12T21:31:43.042Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: gen2.numberGenerated -> multi.secondNumberReceived
-[2024-09-12T21:31:43.044Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: benchmark-flow.jsm.get-reset -> analyzer.startBenchmark
-[2024-09-12T21:31:43.044Z] [LOG] [Bootstrap] [EventProcessor] Connection created: benchmark-flow.jsm.get-reset -> analyzer.startBenchmark
-[2024-09-12T21:31:43.047Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: analyzer.stopMessageGeneration -> gen.stop
-[2024-09-12T21:31:43.049Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-finish -> gen2.stop
-[2024-09-12T21:31:43.049Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-finish -> gen2.stop
-[2024-09-12T21:31:43.049Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: benchmark-flow.gen.messageGenerated -> proc.messageReceived
-[2024-09-12T21:31:43.049Z] [LOG] [Bootstrap] [EventProcessor] Connection created: benchmark-flow.gen.messageGenerated -> proc.messageReceived
-[2024-09-12T21:31:43.053Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn1.buttonPressed -> jsm1.set-start
-[2024-09-12T21:31:43.054Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: startBtn.buttonPressed -> jsm.set-start
-[2024-09-12T21:31:43.055Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: benchmark-flow.proc.processingComplete -> analyzer.dataPoint
-[2024-09-12T21:31:43.055Z] [LOG] [Bootstrap] [EventProcessor] Connection created: benchmark-flow.proc.processingComplete -> analyzer.dataPoint
-[2024-09-12T21:31:43.058Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.gen1.numberGenerated -> multi.firstNumberReceived
-[2024-09-12T21:31:43.058Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.gen1.numberGenerated -> multi.firstNumberReceived
-[2024-09-12T21:31:43.060Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: benchmark-flow.analyzer.startMessageGeneration -> gen.start
-[2024-09-12T21:31:43.060Z] [LOG] [Bootstrap] [EventProcessor] Connection created: benchmark-flow.analyzer.startMessageGeneration -> gen.start
-[2024-09-12T21:31:43.061Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn2.buttonPressed -> jsm1.set-pause
-[2024-09-12T21:31:43.063Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: stopBtn.buttonPressed -> jsm.set-finish
-[2024-09-12T21:31:43.066Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn3.buttonPressed -> jsm1.set-resume
-[2024-09-12T21:31:43.067Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.gen2.numberGenerated -> multi.secondNumberReceived
-[2024-09-12T21:31:43.067Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.gen2.numberGenerated -> multi.secondNumberReceived
-[2024-09-12T21:31:43.068Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: benchmark-flow.analyzer.stopMessageGeneration -> gen.stop
-[2024-09-12T21:31:43.068Z] [LOG] [Bootstrap] [EventProcessor] Connection created: benchmark-flow.analyzer.stopMessageGeneration -> gen.stop
-[2024-09-12T21:31:43.071Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: gen (messageGenerator) for flow: benchmark-flow
-[2024-09-12T21:31:43.072Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: benchmark-flow.gen
-[2024-09-12T21:31:43.072Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: proc (messageProcessor) for flow: benchmark-flow
-[2024-09-12T21:31:43.072Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: benchmark-flow.proc
-[2024-09-12T21:31:43.072Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: analyzer (benchmarkAnalyzer) for flow: benchmark-flow
-[2024-09-12T21:31:43.072Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: benchmark-flow.analyzer
-[2024-09-12T21:31:43.072Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: sm (stateMachine) for flow: benchmark-flow
-[2024-09-12T21:31:43.072Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: benchmark-flow.sm
-[2024-09-12T21:31:43.072Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: jsm (jobStateMachine) for flow: benchmark-flow
-[2024-09-12T21:31:43.072Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: benchmark-flow.jsm
-[2024-09-12T21:31:43.072Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: startBtn (buttonTrigger) for flow: benchmark-flow
-[2024-09-12T21:31:43.072Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: benchmark-flow.startBtn
-[2024-09-12T21:31:43.072Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: stopBtn (buttonTrigger) for flow: benchmark-flow
-[2024-09-12T21:31:43.072Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: benchmark-flow.stopBtn
-[2024-09-12T21:31:43.072Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: gen (gen) for flow: benchmark-flow
-[2024-09-12T21:31:43.072Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: proc (proc) for flow: benchmark-flow
-[2024-09-12T21:31:43.072Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: analyzer (analyzer) for flow: benchmark-flow
-[2024-09-12T21:31:43.072Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: sm (sm) for flow: benchmark-flow
-[2024-09-12T21:31:43.072Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: jsm (jsm) for flow: benchmark-flow
-[2024-09-12T21:31:43.072Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: startBtn (startBtn) for flow: benchmark-flow
-[2024-09-12T21:31:43.072Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: stopBtn (stopBtn) for flow: benchmark-flow
-[2024-09-12T21:31:43.072Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: gen (messageGenerator) for flow: benchmark-flow
-[2024-09-12T21:31:43.073Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn4.buttonPressed -> jsm1.set-finish
-[2024-09-12T21:31:43.075Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn1.buttonPressed -> jsm1.set-start
-[2024-09-12T21:31:43.075Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn1.buttonPressed -> jsm1.set-start
-[2024-09-12T21:31:43.080Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: benchmark-flow.startBtn.buttonPressed -> jsm.set-start
-[2024-09-12T21:31:43.080Z] [LOG] [Bootstrap] [EventProcessor] Connection created: benchmark-flow.startBtn.buttonPressed -> jsm.set-start
-[2024-09-12T21:31:43.081Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn2.buttonPressed -> jsm1.set-pause
-[2024-09-12T21:31:43.081Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn2.buttonPressed -> jsm1.set-pause
-[2024-09-12T21:31:43.082Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: proc (messageProcessor) for flow: benchmark-flow
-[2024-09-12T21:31:43.083Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn5.buttonPressed -> jsm1.set-reset
-[2024-09-12T21:31:43.088Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: analyzer (benchmarkAnalyzer) for flow: benchmark-flow
-[2024-09-12T21:31:43.092Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: benchmark-flow.stopBtn.buttonPressed -> jsm.set-finish
-[2024-09-12T21:31:43.092Z] [LOG] [Bootstrap] [EventProcessor] Connection created: benchmark-flow.stopBtn.buttonPressed -> jsm.set-finish
-[2024-09-12T21:31:43.092Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn3.buttonPressed -> jsm1.set-resume
-[2024-09-12T21:31:43.092Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn3.buttonPressed -> jsm1.set-resume
-[2024-09-12T21:31:43.095Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: main (eventTrigger) for flow: example-flow
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.main
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn1 (buttonTrigger) for flow: example-flow
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn1
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn2 (buttonTrigger) for flow: example-flow
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn2
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn3 (buttonTrigger) for flow: example-flow
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn3
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn4 (buttonTrigger) for flow: example-flow
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn4
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn5 (buttonTrigger) for flow: example-flow
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn5
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: sm1 (stateMachine) for flow: example-flow
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.sm1
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: jsm1 (jobStateMachine) for flow: example-flow
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.jsm1
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: gen1 (numberGenerator) for flow: example-flow
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.gen1
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: gen2 (numberGenerator) for flow: example-flow
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.gen2
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: multi (numberMultiplier) for flow: example-flow
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.multi
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: main (main) for flow: example-flow
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn1 (btn1) for flow: example-flow
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn2 (btn2) for flow: example-flow
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn3 (btn3) for flow: example-flow
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn4 (btn4) for flow: example-flow
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn5 (btn5) for flow: example-flow
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: sm1 (sm1) for flow: example-flow
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: jsm1 (jsm1) for flow: example-flow
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: gen1 (gen1) for flow: example-flow
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: gen2 (gen2) for flow: example-flow
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: multi (multi) for flow: example-flow
-[2024-09-12T21:31:43.096Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: main (eventTrigger) for flow: example-flow
-[2024-09-12T21:31:43.097Z] [LOG] [benchmark-flow.gen] MessageGenerator initialized with messages to generate: 500
-[2024-09-12T21:31:43.098Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: sm (stateMachine) for flow: benchmark-flow
-[2024-09-12T21:31:43.103Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn4.buttonPressed -> jsm1.set-finish
-[2024-09-12T21:31:43.103Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn4.buttonPressed -> jsm1.set-finish
-[2024-09-12T21:31:43.105Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn1 (buttonTrigger) for flow: example-flow
-[2024-09-12T21:31:43.107Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: jsm (jobStateMachine) for flow: benchmark-flow
-[2024-09-12T21:31:43.114Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: startBtn (buttonTrigger) for flow: benchmark-flow
-[2024-09-12T21:31:43.115Z] [LOG] [benchmark-flow.analyzer] Benchmark initialized with message sizes: 1,10,100,1000,10000, messages per size: 500
-[2024-09-12T21:31:43.115Z] [LOG] [benchmark-flow.analyzer] Data points reset
-[2024-09-12T21:31:43.115Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn2 (buttonTrigger) for flow: example-flow
-[2024-09-12T21:31:43.121Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: stopBtn (buttonTrigger) for flow: benchmark-flow
-[2024-09-12T21:31:43.126Z] [LOG] [benchmark-flow.sm] Handling event: init
-[2024-09-12T21:31:43.126Z] [LOG] [benchmark-flow.sm] State machine initialized with initial state: idle
-[2024-09-12T21:31:43.132Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn3 (buttonTrigger) for flow: example-flow
-[2024-09-12T21:31:43.134Z] [LOG] [benchmark-flow.jsm] Handling event: init
-[2024-09-12T21:31:43.141Z] [LOG] [example-flow.btn1] Handling event: init
-[2024-09-12T21:31:43.141Z] [LOG] [example-flow.btn1] Initializing ButtonTriggerComponent with message: undefined
-[2024-09-12T21:31:43.146Z] [LOG] [benchmark-flow.startBtn] Handling event: init
-[2024-09-12T21:31:43.146Z] [LOG] [benchmark-flow.startBtn] Initializing ButtonTriggerComponent with message: undefined
-[2024-09-12T21:31:43.149Z] [LOG] [benchmark-flow.sm] Sending initProxyMachine event to the connected x state machine: jsm
-[2024-09-12T21:31:43.149Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn4 (buttonTrigger) for flow: example-flow
-[2024-09-12T21:31:43.157Z] [LOG] [benchmark-flow.stopBtn] Handling event: init
-[2024-09-12T21:31:43.157Z] [LOG] [benchmark-flow.stopBtn] Initializing ButtonTriggerComponent with message: undefined
-[2024-09-12T21:31:43.157Z] [LOG] [example-flow.btn2] Handling event: init
-[2024-09-12T21:31:43.157Z] [LOG] [example-flow.btn2] Initializing ButtonTriggerComponent with message: undefined
-[2024-09-12T21:31:43.159Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn5 (buttonTrigger) for flow: example-flow
-[2024-09-12T21:31:43.165Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: sm1 (stateMachine) for flow: example-flow
-[2024-09-12T21:31:43.166Z] [LOG] [benchmark-flow.sm] Handling event: stateChanged
-[2024-09-12T21:31:43.167Z] [WARN] [benchmark-flow.sm] Unknown event: stateChanged
-[2024-09-12T21:31:43.167Z] [LOG] [example-flow.btn3] Handling event: init
-[2024-09-12T21:31:43.167Z] [LOG] [example-flow.btn3] Initializing ButtonTriggerComponent with message: undefined
-[2024-09-12T21:31:43.172Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: jsm1 (jobStateMachine) for flow: example-flow
-[2024-09-12T21:31:43.178Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: gen1 (numberGenerator) for flow: example-flow
-[2024-09-12T21:31:43.178Z] [LOG] [benchmark-flow.jsm] Handling event: initProxyMachine
-[2024-09-12T21:31:43.180Z] [LOG] [example-flow.btn4] Handling event: init
-[2024-09-12T21:31:43.180Z] [LOG] [example-flow.btn4] Initializing ButtonTriggerComponent with message: undefined
-[2024-09-12T21:31:43.186Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: gen2 (numberGenerator) for flow: example-flow
-[2024-09-12T21:31:43.187Z] [LOG] [example-flow.btn5] Handling event: init
-[2024-09-12T21:31:43.188Z] [LOG] [example-flow.btn5] Initializing ButtonTriggerComponent with message: undefined
-[2024-09-12T21:31:43.190Z] [LOG] [example-flow.sm1] Handling event: init
-[2024-09-12T21:31:43.190Z] [LOG] [example-flow.sm1] State machine initialized with initial state: idle
-[2024-09-12T21:31:43.194Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: multi (numberMultiplier) for flow: example-flow
-[2024-09-12T21:31:43.201Z] [LOG] [example-flow.jsm1] Handling event: init
-[2024-09-12T21:31:43.206Z] [LOG] [example-flow.sm1] Sending initProxyMachine event to the connected x state machine: jsm1
-[2024-09-12T21:31:43.210Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: init
-[2024-09-12T21:31:43.211Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: init
-[2024-09-12T21:31:43.216Z] [LOG] [example-flow.multi] NumberMultiplier handling event: init undefined
-[2024-09-12T21:31:43.216Z] [LOG] [example-flow.sm1] Handling event: stateChanged
-[2024-09-12T21:31:43.216Z] [WARN] [example-flow.sm1] Unknown event: stateChanged
-[2024-09-12T21:31:46.785Z] [LOG] [Bootstrap] [AppController] [trigger-event] [benchmark-flow] [startBtn] [triggerButton]
-[2024-09-12T21:31:46.792Z] [LOG] [example-flow.jsm1] Handling event: initProxyMachine
-[2024-09-12T21:31:48.326Z] [LOG] [Bootstrap] [AppController] [trigger-event] [benchmark-flow] [startBtn] [triggerButton]
-[2024-09-12T21:31:48.334Z] [LOG] [benchmark-flow.startBtn] Handling event: triggerButton
-[2024-09-12T21:31:48.334Z] [LOG] [benchmark-flow.startBtn] Button pressed: benchmark-flow.startBtn.triggerButton
-[2024-09-12T21:31:48.342Z] [LOG] [benchmark-flow.startBtn] Handling event: triggerButton
-[2024-09-12T21:31:48.342Z] [LOG] [benchmark-flow.startBtn] Button pressed: benchmark-flow.startBtn.triggerButton
-[2024-09-12T21:31:48.351Z] [LOG] [benchmark-flow.jsm] Handling event: set-start
-[2024-09-12T21:31:48.351Z] [LOG] [benchmark-flow.sm] Transitioned from 'idle' to 'running' on event 'start'
-[2024-09-12T21:31:48.351Z] [LOG] [benchmark-flow.startBtn] Handling event: buttonPressed
-[2024-09-12T21:31:48.351Z] [LOG] [benchmark-flow.jsm] Handling event: set-start
-[2024-09-12T21:31:48.351Z] [WARN] [benchmark-flow.sm] No transition defined for event 'start' in state 'running'
-[2024-09-12T21:31:48.358Z] [LOG] [benchmark-flow.jsm] Handling event: set-start
-[2024-09-12T21:31:48.359Z] [WARN] [benchmark-flow.sm] No transition defined for event 'start' in state 'running'
-[2024-09-12T21:31:48.361Z] [LOG] [benchmark-flow.startBtn] Handling event: buttonPressed
-[2024-09-12T21:31:48.361Z] [LOG] [benchmark-flow.jsm] Handling event: set-start
-[2024-09-12T21:31:48.361Z] [WARN] [benchmark-flow.sm] No transition defined for event 'start' in state 'running'
-[2024-09-12T21:31:48.365Z] [LOG] [benchmark-flow.sm] Handling event: stateChanged
-[2024-09-12T21:31:48.365Z] [WARN] [benchmark-flow.sm] Unknown event: stateChanged
-[2024-09-12T21:32:15.450Z] [LOG] [Bootstrap] [AppController] [trigger-event] [benchmark-flow] [startBtn] [triggerButton]
-[2024-09-12T21:32:15.463Z] [LOG] [benchmark-flow.jsm] Handling event: get-start
-[2024-09-12T21:32:15.463Z] [LOG] [benchmark-flow.analyzer] Data points reset
-========
-Benchmark started for size 1 at 1726176735463
-========
-[2024-09-12T21:32:15.464Z] [LOG] [benchmark-flow.jsm] Handling event: stateChanged
-[2024-09-12T21:32:15.470Z] [LOG] [benchmark-flow.startBtn] Handling event: triggerButton
-[2024-09-12T21:32:15.470Z] [LOG] [benchmark-flow.startBtn] Button pressed: benchmark-flow.startBtn.triggerButton
-[2024-09-12T21:32:15.477Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) starting message generation
-[2024-09-12T21:32:15.480Z] [LOG] [benchmark-flow.startBtn] Handling event: buttonPressed
-[2024-09-12T21:32:15.480Z] [LOG] [benchmark-flow.jsm] Handling event: set-start
-[2024-09-12T21:32:15.480Z] [WARN] [benchmark-flow.sm] No transition defined for event 'start' in state 'running'
-[2024-09-12T21:32:15.488Z] [LOG] [benchmark-flow.jsm] Handling event: set-start
-[2024-09-12T21:32:15.488Z] [WARN] [benchmark-flow.sm] No transition defined for event 'start' in state 'running'
-////////// end benchmark 500 === 500
-[2024-09-12T21:32:17.966Z] [LOG] [benchmark-flow.analyzer] Benchmark ended for size 1 at 1726176737966
-========
-waiting 2s for benchmark to finish
-========
-[2024-09-12T21:32:17.972Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) finished generating 500 messages
-[2024-09-12T21:32:17.980Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) stopping message generation
-[2024-09-12T21:32:19.973Z] [LOG] [benchmark-flow.analyzer] Starting benchmark for next size: 10
-~~~~~~ startNextSizeBenchmark 10
-[2024-09-12T21:32:21.985Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) setting message size to 10 bytes
-[2024-09-12T21:32:21.988Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) starting message generation
-[2024-09-12T21:32:21.989Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) starting message generation
-[2024-09-12T21:32:21.995Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) starting message generation
-////////// end benchmark 500 === 500
-[2024-09-12T21:32:23.770Z] [LOG] [benchmark-flow.analyzer] Benchmark ended for size 10 at 1726176743770
-========
-waiting 2s for benchmark to finish
-========
-[2024-09-12T21:32:23.802Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) stopping message generation
-[2024-09-12T21:32:23.804Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) finished generating 500 messages
-[2024-09-12T21:32:23.809Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) finished generating 500 messages
-[2024-09-12T21:32:23.810Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) finished generating 500 messages
-[2024-09-12T21:32:25.782Z] [LOG] [benchmark-flow.analyzer] Starting benchmark for next size: 100
-~~~~~~ startNextSizeBenchmark 100
-[2024-09-12T21:32:27.793Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) setting message size to 100 bytes
-[2024-09-12T21:32:27.795Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) starting message generation
-[2024-09-12T21:32:27.795Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) starting message generation
-[2024-09-12T21:32:27.798Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) starting message generation
-////////// end benchmark 500 === 500
-[2024-09-12T21:32:29.356Z] [LOG] [benchmark-flow.analyzer] Benchmark ended for size 100 at 1726176749356
-========
-waiting 2s for benchmark to finish
-========
-[2024-09-12T21:32:29.385Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) stopping message generation
-[2024-09-12T21:32:29.388Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) finished generating 500 messages
-[2024-09-12T21:32:29.392Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) finished generating 500 messages
-[2024-09-12T21:32:29.392Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) finished generating 500 messages
-[2024-09-12T21:32:31.368Z] [LOG] [benchmark-flow.analyzer] Starting benchmark for next size: 1000
-~~~~~~ startNextSizeBenchmark 1000
-[2024-09-12T21:32:33.378Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) setting message size to 1000 bytes
-[2024-09-12T21:32:33.379Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) starting message generation
-[2024-09-12T21:32:33.380Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) starting message generation
-[2024-09-12T21:32:33.384Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) starting message generation
-////////// end benchmark 500 === 500
-[2024-09-12T21:32:34.964Z] [LOG] [benchmark-flow.analyzer] Benchmark ended for size 1000 at 1726176754964
-========
-waiting 2s for benchmark to finish
-========
-[2024-09-12T21:32:34.996Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) stopping message generation
-[2024-09-12T21:32:34.997Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) finished generating 500 messages
-[2024-09-12T21:32:35.002Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) finished generating 500 messages
-[2024-09-12T21:32:35.002Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) finished generating 500 messages
-[2024-09-12T21:32:36.978Z] [LOG] [benchmark-flow.analyzer] Starting benchmark for next size: 10000
-~~~~~~ startNextSizeBenchmark 10000
-[2024-09-12T21:32:38.989Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) setting message size to 10000 bytes
-[2024-09-12T21:32:38.991Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) starting message generation
-[2024-09-12T21:32:38.995Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) starting message generation
-[2024-09-12T21:32:38.996Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) starting message generation
-////////// end benchmark 500 === 500
-[2024-09-12T21:32:40.615Z] [LOG] [benchmark-flow.analyzer] Benchmark ended for size 10000 at 1726176760615
-========
-waiting 2s for benchmark to finish
-========
-[2024-09-12T21:32:40.648Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) stopping message generation
-[2024-09-12T21:32:40.653Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) finished generating 500 messages
-[2024-09-12T21:32:40.653Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) finished generating 500 messages
-[2024-09-12T21:32:40.661Z] [LOG] [benchmark-flow.gen] MessageGenerator (benchmark-flow) finished generating 500 messages
-[2024-09-12T21:32:42.628Z] [LOG] [benchmark-flow.analyzer] Analysis for size 1: Count=510, Avg=18.29ms, MPS=54.68
-[2024-09-12T21:32:42.628Z] [LOG] [benchmark-flow.analyzer] Analysis for size 10: Count=534, Avg=33.89ms, MPS=29.51
-[2024-09-12T21:32:42.628Z] [LOG] [benchmark-flow.analyzer] Analysis for size 100: Count=530, Avg=30.66ms, MPS=32.61
-[2024-09-12T21:32:42.628Z] [LOG] [benchmark-flow.analyzer] Analysis for size 1000: Count=527, Avg=30.17ms, MPS=33.14
-[2024-09-12T21:32:42.628Z] [LOG] [benchmark-flow.analyzer] Analysis for size 10000: Count=523, Avg=31.11ms, MPS=32.15
-!!!!!!!!
-benchmark-results: success
-!!!!!!!!
+[2024-09-12T22:30:20.308Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726180220157
+[2024-09-12T22:30:20.308Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726180220157
+[2024-09-12T22:30:20.308Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726180220157
+[2024-09-12T22:30:20.308Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726180220157
+[2024-09-12T22:30:20.308Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726180220157
+[2024-09-12T22:30:20.308Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726180220157
+[2024-09-12T22:30:20.308Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726180220157
+[2024-09-12T22:30:20.308Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726180220157
+[2024-09-12T22:30:20.308Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.component-1726180220157
+[2024-09-12T22:30:20.308Z] [LOG] [Bootstrap] [NestApplication] Nest application successfully started
+[2024-09-12T22:30:20.309Z] [LOG] [Bootstrap] Starting flow execution...
+[2024-09-12T22:30:20.309Z] [LOG] [Bootstrap] [FlowExecutorService] Executing flow: example-flow
+[2024-09-12T22:30:20.309Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: sm1.initProxyMachine -> jsm1.initProxyMachine
+[2024-09-12T22:30:20.309Z] [LOG] [Bootstrap] [FlowExecutorService] Executing flow: benchmark-flow
+[2024-09-12T22:30:20.309Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: sm.initProxyMachine -> jsm.initProxyMachine
+[2024-09-12T22:30:20.311Z] [LOG] [Bootstrap] Application is running on: http://localhost:3000
+[2024-09-12T22:30:20.314Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-start -> gen1.start
+[2024-09-12T22:30:20.320Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm.get-start -> analyzer.startBenchmark
+[2024-09-12T22:30:20.321Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-finish -> gen1.stop
+[2024-09-12T22:30:20.325Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: analyzer.nextMessageSize -> gen.setMessageSize
+[2024-09-12T22:30:20.329Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-start -> gen2.start
+[2024-09-12T22:30:20.332Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm.get-resume -> analyzer.startBenchmark
+[2024-09-12T22:30:20.334Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.sm1.initProxyMachine -> jsm1.initProxyMachine
+[2024-09-12T22:30:20.334Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.sm1.initProxyMachine -> jsm1.initProxyMachine
+[2024-09-12T22:30:20.337Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm.get-finish -> analyzer.endBenchmark
+[2024-09-12T22:30:20.341Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: jsm1.get-finish -> gen2.stop
+[2024-09-12T22:30:20.343Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-start -> gen1.start
+[2024-09-12T22:30:20.343Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-start -> gen1.start
+[2024-09-12T22:30:20.345Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: benchmark-flow.sm.initProxyMachine -> jsm.initProxyMachine
+[2024-09-12T22:30:20.345Z] [LOG] [Bootstrap] [EventProcessor] Connection created: benchmark-flow.sm.initProxyMachine -> jsm.initProxyMachine
+[2024-09-12T22:30:20.345Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: benchmark-flow.jsm.get-start -> analyzer.startBenchmark
+[2024-09-12T22:30:20.345Z] [LOG] [Bootstrap] [EventProcessor] Connection created: benchmark-flow.jsm.get-start -> analyzer.startBenchmark
+[2024-09-12T22:30:20.347Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: gen.messageGenerated -> proc.messageReceived
+[2024-09-12T22:30:20.352Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: gen1.numberGenerated -> multi.firstNumberReceived
+[2024-09-12T22:30:20.356Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: benchmark-flow.analyzer.nextMessageSize -> gen.setMessageSize
+[2024-09-12T22:30:20.356Z] [LOG] [Bootstrap] [EventProcessor] Connection created: benchmark-flow.analyzer.nextMessageSize -> gen.setMessageSize
+[2024-09-12T22:30:20.356Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: benchmark-flow.jsm.get-resume -> analyzer.startBenchmark
+[2024-09-12T22:30:20.356Z] [LOG] [Bootstrap] [EventProcessor] Connection created: benchmark-flow.jsm.get-resume -> analyzer.startBenchmark
+[2024-09-12T22:30:20.356Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: proc.processingComplete -> analyzer.dataPoint
+[2024-09-12T22:30:20.357Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-finish -> gen1.stop
+[2024-09-12T22:30:20.357Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-finish -> gen1.stop
+[2024-09-12T22:30:20.358Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: gen2.numberGenerated -> multi.secondNumberReceived
+[2024-09-12T22:30:20.363Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: benchmark-flow.jsm.get-finish -> analyzer.endBenchmark
+[2024-09-12T22:30:20.363Z] [LOG] [Bootstrap] [EventProcessor] Connection created: benchmark-flow.jsm.get-finish -> analyzer.endBenchmark
+[2024-09-12T22:30:20.363Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: analyzer.startMessageGeneration -> gen.start
+[2024-09-12T22:30:20.366Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn1.buttonPressed -> jsm1.set-start
+[2024-09-12T22:30:20.370Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: benchmark-flow.gen.messageGenerated -> proc.messageReceived
+[2024-09-12T22:30:20.370Z] [LOG] [Bootstrap] [EventProcessor] Connection created: benchmark-flow.gen.messageGenerated -> proc.messageReceived
+[2024-09-12T22:30:20.370Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-start -> gen2.start
+[2024-09-12T22:30:20.370Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-start -> gen2.start
+[2024-09-12T22:30:20.373Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn2.buttonPressed -> jsm1.set-pause
+[2024-09-12T22:30:20.374Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: analyzer.stopMessageGeneration -> gen.stop
+[2024-09-12T22:30:20.376Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.jsm1.get-finish -> gen2.stop
+[2024-09-12T22:30:20.376Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.jsm1.get-finish -> gen2.stop
+[2024-09-12T22:30:20.377Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn3.buttonPressed -> jsm1.set-resume
+[2024-09-12T22:30:20.378Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.gen1.numberGenerated -> multi.firstNumberReceived
+[2024-09-12T22:30:20.378Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.gen1.numberGenerated -> multi.firstNumberReceived
+[2024-09-12T22:30:20.382Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn4.buttonPressed -> jsm1.set-finish
+[2024-09-12T22:30:20.383Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: benchmark-flow.proc.processingComplete -> analyzer.dataPoint
+[2024-09-12T22:30:20.383Z] [LOG] [Bootstrap] [EventProcessor] Connection created: benchmark-flow.proc.processingComplete -> analyzer.dataPoint
+[2024-09-12T22:30:20.384Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: startBtn.buttonPressed -> jsm.set-start
+[2024-09-12T22:30:20.385Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.gen2.numberGenerated -> multi.secondNumberReceived
+[2024-09-12T22:30:20.385Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.gen2.numberGenerated -> multi.secondNumberReceived
+[2024-09-12T22:30:20.390Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: btn5.buttonPressed -> jsm1.set-reset
+[2024-09-12T22:30:20.394Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: stopBtn.buttonPressed -> jsm.set-finish
+[2024-09-12T22:30:20.394Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn1.buttonPressed -> jsm1.set-start
+[2024-09-12T22:30:20.394Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn1.buttonPressed -> jsm1.set-start
+[2024-09-12T22:30:20.395Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: benchmark-flow.analyzer.startMessageGeneration -> gen.start
+[2024-09-12T22:30:20.395Z] [LOG] [Bootstrap] [EventProcessor] Connection created: benchmark-flow.analyzer.startMessageGeneration -> gen.start
+[2024-09-12T22:30:20.395Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn2.buttonPressed -> jsm1.set-pause
+[2024-09-12T22:30:20.395Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn2.buttonPressed -> jsm1.set-pause
+[2024-09-12T22:30:20.397Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: main (eventTrigger) for flow: example-flow
+[2024-09-12T22:30:20.397Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.main
+[2024-09-12T22:30:20.397Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn1 (buttonTrigger) for flow: example-flow
+[2024-09-12T22:30:20.397Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn1
+[2024-09-12T22:30:20.397Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn2 (buttonTrigger) for flow: example-flow
+[2024-09-12T22:30:20.397Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn2
+[2024-09-12T22:30:20.397Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn3 (buttonTrigger) for flow: example-flow
+[2024-09-12T22:30:20.398Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn3
+[2024-09-12T22:30:20.398Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn4 (buttonTrigger) for flow: example-flow
+[2024-09-12T22:30:20.398Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn4
+[2024-09-12T22:30:20.398Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: btn5 (buttonTrigger) for flow: example-flow
+[2024-09-12T22:30:20.398Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.btn5
+[2024-09-12T22:30:20.398Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: sm1 (stateMachine) for flow: example-flow
+[2024-09-12T22:30:20.398Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.sm1
+[2024-09-12T22:30:20.398Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: jsm1 (jobStateMachine) for flow: example-flow
+[2024-09-12T22:30:20.398Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.jsm1
+[2024-09-12T22:30:20.398Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: gen1 (numberGenerator) for flow: example-flow
+[2024-09-12T22:30:20.398Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.gen1
+[2024-09-12T22:30:20.398Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: gen2 (numberGenerator) for flow: example-flow
+[2024-09-12T22:30:20.398Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.gen2
+[2024-09-12T22:30:20.398Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: multi (numberMultiplier) for flow: example-flow
+[2024-09-12T22:30:20.398Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: example-flow.multi
+[2024-09-12T22:30:20.398Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: main (main) for flow: example-flow
+[2024-09-12T22:30:20.398Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn1 (btn1) for flow: example-flow
+[2024-09-12T22:30:20.398Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn2 (btn2) for flow: example-flow
+[2024-09-12T22:30:20.398Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn3 (btn3) for flow: example-flow
+[2024-09-12T22:30:20.398Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn4 (btn4) for flow: example-flow
+[2024-09-12T22:30:20.398Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: btn5 (btn5) for flow: example-flow
+[2024-09-12T22:30:20.398Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: sm1 (sm1) for flow: example-flow
+[2024-09-12T22:30:20.398Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: jsm1 (jsm1) for flow: example-flow
+[2024-09-12T22:30:20.398Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: gen1 (gen1) for flow: example-flow
+[2024-09-12T22:30:20.398Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: gen2 (gen2) for flow: example-flow
+[2024-09-12T22:30:20.398Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: multi (multi) for flow: example-flow
+[2024-09-12T22:30:20.398Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: main (eventTrigger) for flow: example-flow
+[2024-09-12T22:30:20.406Z] [LOG] [Bootstrap] [FlowExecutorService] Creating connection: resetBtn.buttonPressed -> jsm.set-reset
+[2024-09-12T22:30:20.407Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn3.buttonPressed -> jsm1.set-resume
+[2024-09-12T22:30:20.407Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn3.buttonPressed -> jsm1.set-resume
+[2024-09-12T22:30:20.410Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn1 (buttonTrigger) for flow: example-flow
+[2024-09-12T22:30:20.412Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: benchmark-flow.analyzer.stopMessageGeneration -> gen.stop
+[2024-09-12T22:30:20.412Z] [LOG] [Bootstrap] [EventProcessor] Connection created: benchmark-flow.analyzer.stopMessageGeneration -> gen.stop
+[2024-09-12T22:30:20.416Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: gen (messageGenerator) for flow: benchmark-flow
+[2024-09-12T22:30:20.416Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: benchmark-flow.gen
+[2024-09-12T22:30:20.416Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: proc (messageProcessor) for flow: benchmark-flow
+[2024-09-12T22:30:20.416Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: benchmark-flow.proc
+[2024-09-12T22:30:20.416Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: analyzer (benchmarkAnalyzer) for flow: benchmark-flow
+[2024-09-12T22:30:20.416Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: benchmark-flow.analyzer
+[2024-09-12T22:30:20.416Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: sm (stateMachine) for flow: benchmark-flow
+[2024-09-12T22:30:20.416Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: benchmark-flow.sm
+[2024-09-12T22:30:20.416Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: jsm (jobStateMachine) for flow: benchmark-flow
+[2024-09-12T22:30:20.416Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: benchmark-flow.jsm
+[2024-09-12T22:30:20.416Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: startBtn (buttonTrigger) for flow: benchmark-flow
+[2024-09-12T22:30:20.416Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: benchmark-flow.startBtn
+[2024-09-12T22:30:20.416Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: stopBtn (buttonTrigger) for flow: benchmark-flow
+[2024-09-12T22:30:20.416Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: benchmark-flow.stopBtn
+[2024-09-12T22:30:20.416Z] [LOG] [Bootstrap] [FlowExecutorService] Constructing component: resetBtn (buttonTrigger) for flow: benchmark-flow
+[2024-09-12T22:30:20.416Z] [LOG] [Bootstrap] [ComponentRegistry] Registering component: benchmark-flow.resetBtn
+[2024-09-12T22:30:20.416Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: gen (gen) for flow: benchmark-flow
+[2024-09-12T22:30:20.416Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: proc (proc) for flow: benchmark-flow
+[2024-09-12T22:30:20.416Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: analyzer (analyzer) for flow: benchmark-flow
+[2024-09-12T22:30:20.416Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: sm (sm) for flow: benchmark-flow
+[2024-09-12T22:30:20.416Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: jsm (jsm) for flow: benchmark-flow
+[2024-09-12T22:30:20.416Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: startBtn (startBtn) for flow: benchmark-flow
+[2024-09-12T22:30:20.416Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: stopBtn (stopBtn) for flow: benchmark-flow
+[2024-09-12T22:30:20.416Z] [LOG] [Bootstrap] [FlowExecutorService] Sync connections for component: resetBtn (resetBtn) for flow: benchmark-flow
+[2024-09-12T22:30:20.416Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: gen (messageGenerator) for flow: benchmark-flow
+[2024-09-12T22:30:20.420Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn2 (buttonTrigger) for flow: example-flow
+[2024-09-12T22:30:20.423Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn4.buttonPressed -> jsm1.set-finish
+[2024-09-12T22:30:20.423Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn4.buttonPressed -> jsm1.set-finish
+[2024-09-12T22:30:20.423Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: benchmark-flow.startBtn.buttonPressed -> jsm.set-start
+[2024-09-12T22:30:20.423Z] [LOG] [Bootstrap] [EventProcessor] Connection created: benchmark-flow.startBtn.buttonPressed -> jsm.set-start
+[2024-09-12T22:30:20.426Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: proc (messageProcessor) for flow: benchmark-flow
+[2024-09-12T22:30:20.429Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn3 (buttonTrigger) for flow: example-flow
+[2024-09-12T22:30:20.431Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: example-flow.btn5.buttonPressed -> jsm1.set-reset
+[2024-09-12T22:30:20.432Z] [LOG] [Bootstrap] [EventProcessor] Connection created: example-flow.btn5.buttonPressed -> jsm1.set-reset
+[2024-09-12T22:30:20.432Z] [LOG] [Bootstrap] [EventProcessor] Received createConnection: benchmark-flow.stopBtn.buttonPressed -> jsm.set-finish
+[2024-09-12T22:30:20.432Z] [LOG] [Bootstrap] [EventProcessor] Connection created: benchmark-flow.stopBtn.buttonPressed -> jsm.set-finish
+[2024-09-12T22:30:20.434Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: analyzer (benchmarkAnalyzer) for flow: benchmark-flow
+[2024-09-12T22:30:20.439Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn4 (buttonTrigger) for flow: example-flow
+[2024-09-12T22:30:20.444Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: sm (stateMachine) for flow: benchmark-flow
+[2024-09-12T22:30:20.445Z] [LOG] [example-flow.btn1] Handling event: init
+[2024-09-12T22:30:20.445Z] [LOG] [example-flow.btn1] Initializing ButtonTriggerComponent with message: undefined
+[2024-09-12T22:30:20.449Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: btn5 (buttonTrigger) for flow: example-flow
+[2024-09-12T22:30:20.452Z] [LOG] [benchmark-flow.gen] MessageGenerator initialized with messages to generate: 1000
+[2024-09-12T22:30:20.456Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: jsm (jobStateMachine) for flow: benchmark-flow
+[2024-09-12T22:30:20.457Z] [LOG] [example-flow.btn2] Handling event: init
+[2024-09-12T22:30:20.457Z] [LOG] [example-flow.btn2] Initializing ButtonTriggerComponent with message: undefined
+[2024-09-12T22:30:20.460Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: sm1 (stateMachine) for flow: example-flow
+[2024-09-12T22:30:20.466Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: startBtn (buttonTrigger) for flow: benchmark-flow
+[2024-09-12T22:30:20.467Z] [LOG] [example-flow.btn3] Handling event: init
+[2024-09-12T22:30:20.468Z] [LOG] [example-flow.btn3] Initializing ButtonTriggerComponent with message: undefined
+[2024-09-12T22:30:20.471Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: jsm1 (jobStateMachine) for flow: example-flow
+[2024-09-12T22:30:20.473Z] [LOG] [benchmark-flow.analyzer] Benchmark initialized with message sizes: 1,10,100,1000,10000, messages per size: 1000
+[2024-09-12T22:30:20.474Z] [LOG] [benchmark-flow.analyzer] Data points reset
+[2024-09-12T22:30:20.479Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: stopBtn (buttonTrigger) for flow: benchmark-flow
+[2024-09-12T22:30:20.480Z] [LOG] [example-flow.btn4] Handling event: init
+[2024-09-12T22:30:20.480Z] [LOG] [example-flow.btn4] Initializing ButtonTriggerComponent with message: undefined
+[2024-09-12T22:30:20.484Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: gen1 (numberGenerator) for flow: example-flow
+[2024-09-12T22:30:20.487Z] [LOG] [benchmark-flow.sm] Handling event: init
+[2024-09-12T22:30:20.487Z] [LOG] [benchmark-flow.sm] State machine initialized with initial state: idle
+[2024-09-12T22:30:20.490Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: resetBtn (buttonTrigger) for flow: benchmark-flow
+[2024-09-12T22:30:20.491Z] [LOG] [example-flow.btn5] Handling event: init
+[2024-09-12T22:30:20.491Z] [LOG] [example-flow.btn5] Initializing ButtonTriggerComponent with message: undefined
+[2024-09-12T22:30:20.494Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: gen2 (numberGenerator) for flow: example-flow
+[2024-09-12T22:30:20.496Z] [LOG] [benchmark-flow.jsm] Handling event: init
+[2024-09-12T22:30:20.502Z] [LOG] [example-flow.sm1] Handling event: init
+[2024-09-12T22:30:20.502Z] [LOG] [example-flow.sm1] State machine initialized with initial state: idle
+[2024-09-12T22:30:20.506Z] [LOG] [Bootstrap] [FlowExecutorService] Initializing component: multi (numberMultiplier) for flow: example-flow
+[2024-09-12T22:30:20.511Z] [LOG] [benchmark-flow.startBtn] Handling event: init
+[2024-09-12T22:30:20.511Z] [LOG] [benchmark-flow.startBtn] Initializing ButtonTriggerComponent with message: undefined
+[2024-09-12T22:30:20.512Z] [LOG] [example-flow.jsm1] Handling event: init
+[2024-09-12T22:30:20.516Z] [LOG] [benchmark-flow.sm] Sending initProxyMachine event to the connected x state machine: jsm
+[2024-09-12T22:30:20.521Z] [LOG] [example-flow.sm1] Sending initProxyMachine event to the connected x state machine: jsm1
+[2024-09-12T22:30:20.522Z] [LOG] [benchmark-flow.stopBtn] Handling event: init
+[2024-09-12T22:30:20.522Z] [LOG] [benchmark-flow.stopBtn] Initializing ButtonTriggerComponent with message: undefined
+[2024-09-12T22:30:20.523Z] [LOG] [example-flow.gen1] NumberGenerator (example-flow) handling event: init
+[2024-09-12T22:30:20.532Z] [LOG] [benchmark-flow.resetBtn] Handling event: init
+[2024-09-12T22:30:20.532Z] [LOG] [benchmark-flow.resetBtn] Initializing ButtonTriggerComponent with message: undefined
+[2024-09-12T22:30:20.533Z] [LOG] [example-flow.gen2] NumberGenerator (example-flow) handling event: init
+[2024-09-12T22:30:20.537Z] [LOG] [benchmark-flow.sm] Handling event: stateChanged
+[2024-09-12T22:30:20.537Z] [WARN] [benchmark-flow.sm] Unknown event: stateChanged
+[2024-09-12T22:30:20.539Z] [LOG] [example-flow.multi] NumberMultiplier handling event: init undefined
+[2024-09-12T22:30:20.540Z] [LOG] [example-flow.sm1] Handling event: stateChanged
+[2024-09-12T22:30:20.540Z] [WARN] [example-flow.sm1] Unknown event: stateChanged

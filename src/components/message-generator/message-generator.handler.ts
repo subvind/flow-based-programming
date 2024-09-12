@@ -9,7 +9,7 @@ import { TemplateCacheService } from 'src/services/template-cache.service';
 export class MessageGeneratorComponent extends ComponentBase {
   public logger: CustomLogger;
   private messageSize: number = 1;
-  private messagesToGenerate: number = 500;
+  private messagesToGenerate: number = 100;
   private isGenerating: boolean = false;
   public ports = {
     inputs: [

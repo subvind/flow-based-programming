@@ -8,12 +8,12 @@ import { TemplateCacheService } from 'src/services/template-cache.service';
 @Injectable()
 export class BenchmarkAnalyzerComponent extends ComponentBase {
   public logger: CustomLogger;
-  private startTime: number | null = null;
-  private endTime: number | null = null;
+  private startTimes: { [size: number]: number } = {};
+  private endTimes: { [size: number]: number } = {};
   private dataPoints: { [size: number]: number[] } = {};
   private currentMessageSize: number = 1;
   private messageSizes: number[] = [1, 10, 100, 1000, 10000];
-  private messagesPerSize: number = 500;
+  private messagesPerSize: number = 100;
   private currentSizeIndex: number = 0;
   public ports = {
     inputs: [
@@ -44,7 +44,6 @@ export class BenchmarkAnalyzerComponent extends ComponentBase {
   }
 
   async handleEvent(eventId: string, data: any): Promise<void> {
-    // this.logger.log(`BenchmarkAnalyzer (${this.flowId}) handling event: ${eventId}`);
     switch (eventId) {
       case "init": {
         await this.initBenchmark(data);
@@ -77,20 +76,20 @@ export class BenchmarkAnalyzerComponent extends ComponentBase {
   }
   
   private async startBenchmark(): Promise<void> {
-    this.startTime = Date.now();
     this.currentSizeIndex = 0;
     this.currentMessageSize = this.messageSizes[this.currentSizeIndex];
     this.resetDataPoints();
     
+    this.startTimes[this.currentMessageSize] = Date.now();
     console.log('========');
-    console.log(`Benchmark started for size ${this.currentMessageSize} at ${this.startTime}`);
+    console.log(`Benchmark started for size ${this.currentMessageSize} at ${this.startTimes[this.currentMessageSize]}`);
     console.log('========');
     await this.publish(this.flowId, this.componentId, 'startMessageGeneration', {});
   }
 
   private async endBenchmark(): Promise<void> {
-    this.endTime = Date.now();
-    this.logger.log(`Benchmark ended for size ${this.currentMessageSize} at ${this.endTime}`);
+    this.endTimes[this.currentMessageSize] = Date.now();
+    this.logger.log(`Benchmark ended for size ${this.currentMessageSize} at ${this.endTimes[this.currentMessageSize]}`);
 
     await this.publish(this.flowId, this.componentId, 'stopMessageGeneration', {});
 
@@ -113,12 +112,10 @@ export class BenchmarkAnalyzerComponent extends ComponentBase {
   }
 
   private async addDataPoint(processingTime: number, size: number): Promise<void> {
-    // console.log('addDataPoint', size, processingTime);
     if (!this.dataPoints[size]) {
       this.dataPoints[size] = [];
     }
     this.dataPoints[size].push(processingTime);
-    // this.logger.log(`Added data point for size ${size}: ${processingTime}ms (Total: ${this.dataPoints[size].length})`);
     
     if (this.dataPoints[size].length === this.messagesPerSize) {
       console.log('////////// end benchmark', this.dataPoints[size].length, '===', this.messagesPerSize);
@@ -132,6 +129,7 @@ export class BenchmarkAnalyzerComponent extends ComponentBase {
     await this.publish(this.flowId, this.componentId, 'nextMessageSize', { size: this.currentMessageSize });
     console.log('~~~~~~ startNextSizeBenchmark', this.currentMessageSize);
     await new Promise(resolve => setTimeout(resolve, 2000)); // wait for nextMessageSize to propagate
+    this.startTimes[this.currentMessageSize] = Date.now();
     await this.publish(this.flowId, this.componentId, 'startMessageGeneration', {});
     await this.publish(this.flowId, this.componentId, 'startMessageGeneration', {});
     await this.publish(this.flowId, this.componentId, 'startMessageGeneration', {});
@@ -145,7 +143,11 @@ export class BenchmarkAnalyzerComponent extends ComponentBase {
       const messageCount = times.length;
       const totalTime = times.reduce((sum, time) => sum + time, 0);
       const averageProcessingTime = messageCount > 0 ? totalTime / messageCount : 0;
-      const messagesPerSecond = messageCount > 0 ? (messageCount / (totalTime / 1000)).toFixed(2) : '0';
+      
+      const startTime = this.startTimes[size] || 0;
+      const endTime = this.endTimes[size] || 0;
+      const totalDuration = (endTime - startTime) / 1000; // Convert to seconds
+      const messagesPerSecond = totalDuration > 0 ? (messageCount / totalDuration).toFixed(2) : '0';
 
       results[size] = {
         messageCount,
@@ -161,6 +163,8 @@ export class BenchmarkAnalyzerComponent extends ComponentBase {
 
   private resetDataPoints(): void {
     this.dataPoints = {};
+    this.startTimes = {};
+    this.endTimes = {};
     this.messageSizes.forEach(size => {
       this.dataPoints[size] = [];
     });

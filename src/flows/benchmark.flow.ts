@@ -1,6 +1,11 @@
 import { schema } from "../schema/flow.schema";
 import { default as initJobStateMachine } from "src/stateMachines/job.state-machine";
 
+let benchmarks = {
+  messageSizes: [1, 10, 100, 1000, 10000],
+  messagesPerSize: 1000
+}
+
 let messageGenerator = {
   ports: {
     inputs: {
@@ -11,7 +16,8 @@ let messageGenerator = {
     outputs: {
       messageGenerated: {}
     }
-  }
+  },
+  init: benchmarks
 }
 
 let messageProcessor = {
@@ -39,10 +45,7 @@ let benchmarkAnalyzer = {
       nextMessageSize: {}
     }
   },
-  init: {
-    messageSizes: [1, 10, 100, 1000, 10000],
-    messagesPerSize: 500
-  }
+  init: benchmarks
 }
 
 let buttonTrigger = {
@@ -101,6 +104,7 @@ let components = {
   },
   startBtn: { buttonTrigger },
   stopBtn: { buttonTrigger },
+  resetBtn: { buttonTrigger },
 }
 
 let flow = {
@@ -128,10 +132,6 @@ let flow = {
       to: 'components.analyzer.benchmarkAnalyzer.ports.inputs.endBenchmark'
     },
     {
-      from: 'components.jsm.jobStateMachine.ports.outputs.get-reset',
-      to: 'components.analyzer.benchmarkAnalyzer.ports.inputs.startBenchmark'
-    },
-    {
       from: 'components.gen.messageGenerator.ports.outputs.messageGenerated',
       to: 'components.proc.messageProcessor.ports.inputs.messageReceived'
     },
@@ -154,6 +154,10 @@ let flow = {
     {
       from: 'components.stopBtn.buttonTrigger.ports.outputs.buttonPressed',
       to: 'components.jsm.jobStateMachine.ports.inputs.set-finish'
+    },
+    {
+      from: 'components.resetBtn.buttonTrigger.ports.outputs.buttonPressed',
+      to: 'components.jsm.jobStateMachine.ports.inputs.set-reset'
     }
   ]
 };

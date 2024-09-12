@@ -272,6 +272,75 @@ export function dot(a: V3, b: V3): number {
 
 You will now be given the actual INPUT you must work with.
 
+<FILE path="/home/travis/Projects/flow-based-programming/src/logger/custom-logger.ts">
+import { ConsoleLogger, Injectable, Inject } from '@nestjs/common';
+import * as fs from 'fs';
+import * as path from 'path';
+
+@Injectable()
+export class CustomLogger extends ConsoleLogger {
+  constructor(
+    private logId: string,
+  ) {
+    super(logId);
+    this.setLogLevels(['log', 'error', 'warn', 'debug', 'verbose']);
+  }
+
+  log(message: string, context?: string) {
+    this.printMessage(message, 'log', context);
+    // this.emitLogEvent('log', message);
+  }
+
+  warn(message: string, context?: string) {
+    this.printMessage(message, 'warn', context);
+    // this.emitLogEvent('warn', message);
+  }
+
+  error(message: string, trace?: string, context?: string) {
+    this.printMessage(message, 'error', context);
+    // this.emitLogEvent('error', message);
+    if (trace) {
+      this.printMessage(trace, 'error', context);
+    }
+  }
+
+  debug(message: string, context?: string) {
+    this.printMessage(message, 'debug', context);
+  }
+
+  verbose(message: string, context?: string) {
+    this.printMessage(message, 'verbose', context);
+  }
+
+  private printMessage(message: string, logLevel: string, context?: string) {
+    const output = context ? `[${context}] ${message}` : message;
+    console.log(`[${this.getNow()}] [${logLevel.toUpperCase()}] [${this.logId}] ${output}`);
+  }
+
+  private getNow(): string {
+    return new Date().toISOString();
+  }
+
+  static write_to_file(message: string) {
+    const logFile = path.join(process.cwd(), 'start:dev.stdout.txt');
+    fs.appendFile(logFile, message, (err) => {
+      if (err) {
+        console.error('Failed to write to log file:', err);
+      }
+    });
+  }
+
+  static clearSTDOUT() {
+    const logFile = path.join(process.cwd(), 'start:dev.stdout.txt');
+    try {
+      fs.writeFileSync(logFile, '');
+      console.log(`Log file cleared at ${logFile}`);
+    } catch (error) {
+      console.error('Failed to clear log file:', error);
+    }
+  }
+}
+</FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/bases/component.base.ts">
 import { Inject, Injectable } from '@nestjs/common';
 import { Component } from '../interfaces/component.interface';
@@ -311,7 +380,7 @@ export abstract class ComponentBase implements Component {
   abstract handleEvent(eventId: string, data: any): Promise<void>;
 
   async publish(flowId: string, componentId: string, eventId: string, data: any): Promise<void> {
-    this.logger.log(`Publishing: ${flowId}.${componentId}.${eventId} -> ${data}`);
+    // this.logger.log(`Publishing: ${flowId}.${componentId}.${eventId} -> ${data}`); // keep important for debugging
     await this.backplaneService.publish('flow_exchange', 'componentEvent', {
       flowId,
       componentId,
@@ -664,299 +733,33 @@ export class TemplateCacheService {
   }
 }
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/logger/custom-logger.ts">
-import { ConsoleLogger, Injectable, Inject } from '@nestjs/common';
-import * as fs from 'fs';
-import * as path from 'path';
-
-@Injectable()
-export class CustomLogger extends ConsoleLogger {
-  constructor(
-    private logId: string,
-  ) {
-    super(logId);
-    this.setLogLevels(['log', 'error', 'warn', 'debug', 'verbose']);
-  }
-
-  log(message: string, context?: string) {
-    this.printMessage(message, 'log', context);
-    // this.emitLogEvent('log', message);
-  }
-
-  warn(message: string, context?: string) {
-    this.printMessage(message, 'warn', context);
-    // this.emitLogEvent('warn', message);
-  }
-
-  error(message: string, trace?: string, context?: string) {
-    this.printMessage(message, 'error', context);
-    // this.emitLogEvent('error', message);
-    if (trace) {
-      this.printMessage(trace, 'error', context);
-    }
-  }
-
-  debug(message: string, context?: string) {
-    this.printMessage(message, 'debug', context);
-  }
-
-  verbose(message: string, context?: string) {
-    this.printMessage(message, 'verbose', context);
-  }
-
-  private printMessage(message: string, logLevel: string, context?: string) {
-    const output = context ? `[${context}] ${message}` : message;
-    console.log(`[${this.getNow()}] [${logLevel.toUpperCase()}] [${this.logId}] ${output}`);
-  }
-
-  private getNow(): string {
-    return new Date().toISOString();
-  }
-
-  static write_to_file(message: string) {
-    const logFile = path.join(process.cwd(), 'start:dev.stdout.txt');
-    fs.appendFile(logFile, message, (err) => {
-      if (err) {
-        console.error('Failed to write to log file:', err);
-      }
-    });
-  }
-
-  static clearSTDOUT() {
-    const logFile = path.join(process.cwd(), 'start:dev.stdout.txt');
-    try {
-      fs.writeFileSync(logFile, '');
-      console.log(`Log file cleared at ${logFile}`);
-    } catch (error) {
-      console.error('Failed to clear log file:', error);
-    }
-  }
-}
+<FILE path="/home/travis/Projects/flow-based-programming/src/templates/benchmark-results.ejs">
+<div id="benchmark-results">
+  <h2>Benchmark Results</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Message Size</th>
+        <th>Message Count</th>
+        <th>Average Processing Time</th>
+        <th>Messages per Second</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% for (const [size, data] of Object.entries(results)) { %>
+        <tr>
+          <td><%= size %> bytes</td>
+          <td><%= data.messageCount %></td>
+          <td><%= data.averageProcessingTime.toFixed(2) %> ms</td>
+          <td><%= data.messagesPerSecond %></td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/components/benchmark-analyzer/benchmark-analyzer.handler.ts">
-import { CustomLogger } from '../../logger/custom-logger';
-import { Injectable, Inject } from '@nestjs/common';
-import { ComponentBase } from '../../bases/component.base';
-import { BackplaneService } from 'src/services/backplane.service';
-import { Server } from 'socket.io';
-import { TemplateCacheService } from 'src/services/template-cache.service';
 
-@Injectable()
-export class BenchmarkAnalyzerComponent extends ComponentBase {
-  public logger: CustomLogger;
-  private startTime: number | null = null;
-  private endTime: number | null = null;
-  private dataPoints: { [size: number]: number[] } = {};
-  private currentMessageSize: number = 1;
-  private messageSizes: number[] = [1, 10, 100, 1000, 10000];
-  private messagesPerSize: number = 500;
-  private currentSizeIndex: number = 0;
-  public ports = {
-    inputs: [
-      'any.publish.startBenchmark',
-      'any.publish.endBenchmark',
-      'any.publish.dataPoint',
-      'any.publish.setMessageSize'
-    ],
-    outputs: [
-      'any.publish.benchmarkResult',
-      'htmx.display.benchmark-results',
-      'any.publish.startMessageGeneration',
-      'any.publish.stopMessageGeneration',
-      'any.publish.nextMessageSize'
-    ]
-  }
 
-  constructor(
-    @Inject('FLOW_ID') flowId: string,
-    @Inject('COMPONENT_ID') componentId: string,
-    @Inject(BackplaneService) backplane: BackplaneService,
-    @Inject('WEB_SOCKET_SERVER') protected server: Server,
-    @Inject('TEMPLATES') templates: TemplateCacheService
-  ) {
-    super('benchmarkAnalyzer', 'benchmark-analyzer', 'Analyzes benchmark results', flowId, componentId, backplane, server, templates);
-    this.flowId = flowId;
-    this.componentId = componentId;
-    this.logger = new CustomLogger(`${flowId}.${componentId}`);
-  }
-
-  async handleEvent(eventId: string, data: any): Promise<void> {
-    this.logger.log(`BenchmarkAnalyzer (${this.flowId}) handling event: ${eventId}`);
-    switch (eventId) {
-      case "init": {
-        await this.initBenchmark(data);
-        break;
-      }
-      case "startBenchmark": {
-        await this.startBenchmark();
-        break;
-      }
-      case "endBenchmark": {
-        await this.endBenchmark();
-        break;
-      }
-      case "dataPoint": {
-        await this.addDataPoint(data.processingTime, data.size);
-        break;
-      }
-    }
-  }
-
-  private async initBenchmark(data: any): Promise<void> {
-    if (data && data.messageSizes) {
-      this.messageSizes = data.messageSizes;
-    }
-    if (data && data.messagesPerSize) {
-      this.messagesPerSize = data.messagesPerSize;
-    }
-    this.logger.log(`Benchmark initialized with message sizes: ${this.messageSizes}, messages per size: ${this.messagesPerSize}`);
-    this.resetDataPoints();
-  }
-  
-  private async startBenchmark(): Promise<void> {
-    this.startTime = Date.now();
-    this.currentSizeIndex = 0;
-    this.currentMessageSize = this.messageSizes[this.currentSizeIndex];
-    this.resetDataPoints();
-    this.logger.log(`Benchmark started for size ${this.currentMessageSize} at ${this.startTime}`);
-    
-    await this.publish(this.flowId, this.componentId, 'startMessageGeneration', { size: this.currentMessageSize });
-  }
-
-  private async endBenchmark(): Promise<void> {
-    this.endTime = Date.now();
-    this.logger.log(`Benchmark ended for size ${this.currentMessageSize} at ${this.endTime}`);
-
-    await this.publish(this.flowId, this.componentId, 'stopMessageGeneration', {});
-
-    if (this.currentSizeIndex < this.messageSizes.length - 1) {
-      console.log('========')
-      console.log('waiting for benchmark to finish')
-      console.log('========')
-      await new Promise(resolve => setTimeout(resolve, 10000)); // wait for benchmark to finish
-      
-      this.currentSizeIndex++;
-      await this.startNextSizeBenchmark();
-    } else {
-      const result = this.analyzeBenchmark();
-      await this.publish(this.flowId, this.componentId, 'benchmarkResult', result);
-      await this.display(this.flowId, this.componentId, 'benchmark-results', { results: result });
-    }
-  }
-
-  private async addDataPoint(processingTime: number, size: number): Promise<void> {
-    console.log('addDataPoint', size, processingTime);
-    if (!this.dataPoints[size]) {
-      this.dataPoints[size] = [];
-    }
-    this.dataPoints[size].push(processingTime);
-    this.logger.log(`Added data point for size ${size}: ${processingTime}ms (Total: ${this.dataPoints[size].length})`);
-    
-    if (this.dataPoints[size].length >= this.messagesPerSize) {
-      console.log('////////// end benchmark', this.dataPoints[size].length, '>=', this.messagesPerSize)
-      await this.endBenchmark();
-    }
-  }
-
-  private async startNextSizeBenchmark(): Promise<void> {
-    this.currentMessageSize = this.messageSizes[this.currentSizeIndex];
-    this.logger.log(`Starting benchmark for next size: ${this.currentMessageSize}`);
-    await this.publish(this.flowId, this.componentId, 'nextMessageSize', { size: this.currentMessageSize });
-    await new Promise(resolve => setTimeout(resolve, 10000)); // wait for nextMessageSize to propagate
-    await this.publish(this.flowId, this.componentId, 'startMessageGeneration', { size: this.currentMessageSize });
-  }
-
-  private analyzeBenchmark(): BenchmarkResults {
-    const results: BenchmarkResults = {};
-
-    for (const size of this.messageSizes) {
-      const times = this.dataPoints[size] || [];
-      const messageCount = times.length;
-      const totalTime = times.reduce((sum, time) => sum + time, 0);
-      const averageProcessingTime = messageCount > 0 ? totalTime / messageCount : 0;
-      const messagesPerSecond = messageCount > 0 ? (messageCount / (totalTime / 1000)).toFixed(2) : '0';
-
-      results[size] = {
-        messageCount,
-        averageProcessingTime,
-        messagesPerSecond,
-      };
-
-      this.logger.log(`Analysis for size ${size}: Count=${messageCount}, Avg=${averageProcessingTime.toFixed(2)}ms, MPS=${messagesPerSecond}`);
-    }
-
-    return results;
-  }
-
-  private resetDataPoints(): void {
-    this.dataPoints = {};
-    this.messageSizes.forEach(size => {
-      this.dataPoints[size] = [];
-    });
-    this.logger.log('Data points reset');
-  }
-}
-
-interface BenchmarkResult {
-  messageCount: number;
-  averageProcessingTime: number;
-  messagesPerSecond: string;
-}
-
-interface BenchmarkResults {
-  [size: number]: BenchmarkResult;
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/components/message-processor/message-processor.handler.ts">
-import { CustomLogger } from '../../logger/custom-logger';
-import { Injectable, Inject } from '@nestjs/common';
-import { ComponentBase } from '../../bases/component.base';
-import { BackplaneService } from 'src/services/backplane.service';
-import { Server } from 'socket.io';
-import { TemplateCacheService } from 'src/services/template-cache.service';
-
-@Injectable()
-export class MessageProcessorComponent extends ComponentBase {
-  public logger;
-  public ports = {
-    inputs: [
-      'any.publish.messageReceived'
-    ],
-    outputs: [
-      'any.publish.processingComplete'
-    ]
-  }
-
-  constructor(
-    @Inject('FLOW_ID') flowId: string,
-    @Inject('COMPONENT_ID') componentId: string,
-    @Inject(BackplaneService) backplane: BackplaneService,
-    @Inject('WEB_SOCKET_SERVER') protected server: Server,
-    @Inject('TEMPLATES') templates: TemplateCacheService
-  ) {
-    super('messageProcessor', 'message-processor', 'Processes messages for benchmarking', flowId, componentId, backplane, server, templates);
-    this.flowId = flowId;
-    this.componentId = componentId;
-    this.logger = new CustomLogger(`${flowId}.${componentId}`);
-  }
-
-  async handleEvent(eventId: string, data: any): Promise<void> {
-    // this.logger.log(`MessageProcessor (${this.flowId}) handling event: ${eventId}`);
-    switch (eventId) {
-      case "messageReceived": {
-        await this.processMessage(data);
-        break;
-      }
-    }
-  }
-
-  private async processMessage(message: any): Promise<void> {
-    const processingTime = Date.now() - message.timestamp;
-    const size = message.size;
-    await this.publish(this.flowId, this.componentId, 'processingComplete', { processingTime, size });
-  }
-}
-</FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/interfaces/component.interface.ts">
 import { Connection } from "./connection.interface";
 import { Port } from "./port.interface";
@@ -985,38 +788,6 @@ export interface Port {
   dataMethod: 'display' | 'publish';
   eventId: string;
   connections: Connection[];
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/events/transition.event.ts">
-// networks of black box processes, which exchange data
-// across predefined connections by message passing
-export async function transition(process, message): Promise<void> {
-  // console.log('process', process.stateMachine)
-  if (!process.stateMachine) {
-    process.logger.error('[transition] State machine not initialized');
-    return;
-  }
-
-  const previousState = process.stateMachine.getCurrentState();
-  await process.stateMachine.transition({ event: message });
-  const currentState = process.stateMachine.getCurrentState();
-
-  await process.updateDisplay();
-  
-  if (previousState !== currentState) {
-    // Publish to the specific event port
-    await process.publish(process.flowId, process.componentId, `get-${message}`, { 
-      previousState,
-      currentState
-    });
-  
-    // Also publish to the general stateChanged port
-    await process.publish(process.flowId, process.componentId, 'stateChanged', { 
-      previousState,
-      currentState,
-      message
-    });
-  }
 }
 </FILE>
 <FILE path="/home/travis/Projects/flow-based-programming/src/flows/benchmark.flow.ts">
@@ -1052,8 +823,7 @@ let benchmarkAnalyzer = {
     inputs: {
       startBenchmark: {},
       endBenchmark: {},
-      dataPoint: {},
-      setMessageSize: {}
+      dataPoint: {}
     },
     outputs: {
       benchmarkResult: {},
@@ -1183,229 +953,7 @@ let flow = {
 
 export default schema(flow);
 </FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/processors/event.processor.ts">
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ComponentRegistry } from '../services/component-registry.service';
-import { BackplaneService } from '../services/backplane.service';
-
-@Injectable()
-export class EventProcessor implements OnModuleInit {
-  private readonly logger = new Logger(EventProcessor.name);
-  private connections: Map<string, Array<{ toFlow: string; toComponent: string; toEvent: string }>> = new Map();
-
-  constructor(
-    private componentRegistry: ComponentRegistry,
-    private backplaneService: BackplaneService
-  ) {}
-
-  async onModuleInit() {
-    await this.subscribeToEvents();
-  }
-
-  private async subscribeToEvents() {
-    try {
-      await this.backplaneService.subscribe(
-        'flow_exchange',
-        'componentEvent',
-        'component_event_queue',
-        this.handleComponentEvent.bind(this)
-      );
-
-      await this.backplaneService.subscribe(
-        'flow_exchange',
-        'createConnection',
-        'create_connection_queue',
-        this.createConnection.bind(this)
-      );
-    } catch (error) {
-      this.logger.error(`Failed to subscribe to events: ${error.message}`, error.stack);
-    }
-  }
-
-  async handleComponentEvent(msg: {flowId: string, componentId: string, eventId: string, data: any}): Promise<void> {
-    const { flowId, componentId, eventId, data: eventData } = msg;
-    // this.logger.log(`[handleComponentEvent] [${flowId}.${componentId}.${eventId}] data: ${JSON.stringify(eventData)}`);
-    
-    const component = this.componentRegistry.getComponent(flowId, componentId);
-    if (component) {
-      // this.logger.log(`Passing event to component: ${componentId}`);
-      await component.handleEvent(eventId, eventData);
-
-      // Check if there are connections for this event
-      const connectionKey = `${flowId}.${componentId}.${eventId}`;
-      const connections = this.connections.get(connectionKey) || [];
-      for (const connection of connections) {
-        const { toFlow, toComponent, toEvent } = connection;
-        // this.logger.log(`[forwardingComponentEvent] [${toFlow}.${toComponent}.${toEvent}]`);
-        
-        const targetComponent = this.componentRegistry.getComponent(toFlow, toComponent);
-        if (targetComponent) {
-          // this.logger.log(`Forwarding event to component: ${targetComponent.componentId}`);
-          await targetComponent.handleEvent(toEvent, eventData);
-        } else {
-          this.logger.warn(`Target component not found: ${toComponent} in flow: ${toFlow}`);
-        }
-      }
-    } else {
-      this.logger.warn(`Component not found: ${flowId}.${componentId}`);
-    }
-  }
-
-  async createConnection(msg: {flowId: string, fromComponent: string, fromEvent: string, toComponent: string, toEvent: string}): Promise<void>  {
-    const { flowId, fromComponent, fromEvent, toComponent, toEvent } = msg;
-    this.logger.log(`Received createConnection: ${flowId}.${fromComponent}.${fromEvent} -> ${toComponent}.${toEvent}`);
-    
-    const connectionKey = `${flowId}.${fromComponent}.${fromEvent}`;
-    if (!this.connections.has(connectionKey)) {
-      this.connections.set(connectionKey, []);
-    }
-    this.connections.get(connectionKey).push({ toFlow: flowId, toComponent, toEvent });
-    this.logger.log(`Connection created: ${connectionKey} -> ${toComponent}.${toEvent}`);
-  }
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/services/flow-executor.service.ts">
-import { Injectable, Logger } from '@nestjs/common';
-import { ComponentRegistry } from './component-registry.service';
-import { Flow } from '../interfaces/flow.interface';
-import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { Server } from 'socket.io';
-import { initializeComponent } from '../initializers/component.initialize';
-import { Component } from 'src/interfaces/component.interface';
-import { TemplateCacheService } from './template-cache.service';
-import { BackplaneService } from './backplane.service';
-
-@WebSocketGateway()
-@Injectable()
-export class FlowExecutorService {
-  @WebSocketServer() server: Server;
-  private readonly logger = new Logger(FlowExecutorService.name);
-  private flows: Flow[] = [];
-  
-  constructor(
-    private backplaneService: BackplaneService,
-    private componentRegistry: ComponentRegistry,
-    private templateCacheService: TemplateCacheService
-  ) {}
-
-  async getFlows(): Promise<Flow[]> {
-    return this.flows;
-  }
-
-  async getFlow(flowId: string): Promise<Flow | undefined> {
-    return this.flows.find(flow => flow.id === flowId);
-  }
-
-  async executeFlow(flow: Flow) {
-    this.logger.log(`Executing flow: ${flow.id}`);
-
-    // Remove old flow and add new flow
-    var filteredFlows = this.flows.filter(function(f: Flow) { 
-      return f.id != flow.id; 
-    });
-    this.flows = filteredFlows;
-    this.flows.push(flow);
-
-    // Create connections
-    for (const connection of flow.connections) {
-      this.logger.log(`Creating connection: ${connection.fromComponent}.${connection.fromEvent} -> ${connection.toComponent}.${connection.toEvent}`);
-      await this.backplaneService.publish('flow_exchange', 'createConnection', { ...connection, flowId: flow.id });
-    }
-
-    // Construct components
-    let instances = [];
-    for (const component of flow.components) {
-      this.logger.log(`Constructing component: ${component.componentId} (${component.componentRef}) for flow: ${flow.id}`);
-      
-      // initialize a new component instance
-      let componentInstance: Component = initializeComponent(flow, component, this.backplaneService, this.server, this.templateCacheService);
-
-      // register new instance with component registery
-      this.componentRegistry.registerComponent(componentInstance);
-      instances.push(componentInstance);
-    }
-
-    // Sync connections for component
-    for (const instance of instances) {
-      this.logger.log(`Sync connections for component: ${instance.componentId} (${instance.componentRef}) for flow: ${instance.flowId}`);
-      instance.syncConnections(flow.connections, this.componentRegistry);
-    }
-    
-    // Init component
-    for (const component of flow.components) {
-      this.logger.log(`Initializing component: ${component.componentId} (${component.componentRef}) for flow: ${flow.id}`);
-
-      try {
-        await this.backplaneService.publish('flow_exchange', 'componentEvent', {
-          flowId: flow.id,
-          componentId: component.componentId,
-          componentRef: component.componentRef,
-          eventId: 'init',
-          data: component.init,
-        });
-      } catch (error) {
-        this.logger.error(`Error initializing component ${component.componentId} for flow ${flow.id}:`, error);
-      }
-    }
-  }
-}
-</FILE>
-<FILE path="/home/travis/Projects/flow-based-programming/src/modules/app.module.ts">
-import { ComponentRegistry } from '../services/component-registry.service';
-import { FlowExecutorService } from '../services/flow-executor.service';
-import { EventProcessor } from '../processors/event.processor';
-import { CustomLogger } from '../logger/custom-logger';
-import { AppController } from '../controllers/app.controller';
-import { TemplateCacheService } from 'src/services/template-cache.service';
-import { BackplaneService } from '../services/backplane.service';
-
-import { initializeAppModule, components } from '../initializers/app.initialize';
-
-const rabbitmqUri = process.env.RABBITMQ || 'amqp://localhost:5672';
-console.log(`[AppModule] RabbitMQ URI: ${rabbitmqUri}`);
-
-const metadata = {
-  imports: [],
-  controllers: [AppController],
-  providers: [
-    EventProcessor,
-    ComponentRegistry,
-    FlowExecutorService,
-    TemplateCacheService,
-    BackplaneService,
-    {
-      provide: 'BACKPLANE',
-      useFactory: (backplaneService: BackplaneService) => {
-        return () => backplaneService.onModuleInit();
-      },
-      inject: [BackplaneService],
-      multi: true,
-    },
-    {
-      provide: 'FLOW_ID',
-      useValue: 'example-flow', // Use a default flow ID
-    },
-    {
-      provide: 'COMPONENT_ID',
-      useFactory: () => `component-${Date.now()}`, // Generate a unique component ID
-    },
-    {
-      provide: 'WEB_SOCKET_SERVER',
-      useValue: null, // This will be set later in the FlowExecutorService
-    },
-    {
-      provide: 'TEMPLATES',
-      useValue: null, // This will be set later (?)
-    },
-    ...components,
-    CustomLogger
-  ],
-  exports: [EventProcessor],
-}
-
-export const AppModule = initializeAppModule(metadata)
-</FILE>
-<FILE path="src/components/message-generator/message-generator.handler.ts" TARGET>
+<FILE path="/home/travis/Projects/flow-based-programming/src/components/message-generator/message-generator.handler.ts">
 import { CustomLogger } from '../../logger/custom-logger';
 import { Injectable, Inject } from '@nestjs/common';
 import { ComponentBase } from '../../bases/component.base';
@@ -1416,10 +964,9 @@ import { TemplateCacheService } from 'src/services/template-cache.service';
 @Injectable()
 export class MessageGeneratorComponent extends ComponentBase {
   public logger: CustomLogger;
-  private interval: NodeJS.Timeout | null = null;
   private messageSize: number = 1;
   private messagesToGenerate: number = 500;
-  private generatedCount: number = 0;
+  private isGenerating: boolean = false;
   public ports = {
     inputs: [
       'any.publish.start',
@@ -1452,7 +999,7 @@ export class MessageGeneratorComponent extends ComponentBase {
         break;
       }
       case "start": {
-        this.startGenerating();
+        await this.startGenerating();
         break;
       }
       case "stop": {
@@ -1473,34 +1020,31 @@ export class MessageGeneratorComponent extends ComponentBase {
     this.logger.log(`MessageGenerator initialized with messages to generate: ${this.messagesToGenerate}`);
   }
 
-  private startGenerating(): void {
+  private async startGenerating(): Promise<void> {
     this.logger.log(`MessageGenerator (${this.flowId}) starting message generation`);
-    this.generatedCount = 0;
-    if (this.interval) {
-      clearInterval(this.interval);
-    }
-    this.interval = setInterval(async () => {
-      if (this.generatedCount < this.messagesToGenerate) {
-        console.log('startGeneratingInterval', this.generatedCount, '<', this.messagesToGenerate);
-        const message = { 
-          timestamp: Date.now(), 
-          content: "B".repeat(this.messageSize),
-          size: this.messageSize
-        };
-        await this.publish(this.flowId, this.componentId, 'messageGenerated', message);
-        this.generatedCount++;
-      } else {
-        this.stopGenerating();
+    this.isGenerating = true;
+    
+    for (let i = 0; i < this.messagesToGenerate + 10 && this.isGenerating; i++) {
+      const message = { 
+        timestamp: Date.now(), 
+        content: "B".repeat(this.messageSize),
+        size: this.messageSize
+      };
+      await this.publish(this.flowId, this.componentId, 'messageGenerated', message);
+      
+      // Optional: Add a small delay to prevent blocking the event loop
+      if (i % 1000 === 0) {
+        await new Promise(resolve => setImmediate(resolve));
       }
-    }, 1); // Generate messages as fast as possible
+    }
+
+    this.isGenerating = false;
+    this.logger.log(`MessageGenerator (${this.flowId}) finished generating ${this.messagesToGenerate} messages`);
   }
 
   private stopGenerating(): void {
     this.logger.log(`MessageGenerator (${this.flowId}) stopping message generation`);
-    if (this.interval) {
-      clearInterval(this.interval);
-      this.interval = null;
-    }
+    this.isGenerating = false;
   }
 
   private setMessageSize(size: number): void {
@@ -1509,6 +1053,237 @@ export class MessageGeneratorComponent extends ComponentBase {
   }
 }
 </FILE>
+<FILE path="/home/travis/Projects/flow-based-programming/src/components/message-processor/message-processor.handler.ts">
+import { CustomLogger } from '../../logger/custom-logger';
+import { Injectable, Inject } from '@nestjs/common';
+import { ComponentBase } from '../../bases/component.base';
+import { BackplaneService } from 'src/services/backplane.service';
+import { Server } from 'socket.io';
+import { TemplateCacheService } from 'src/services/template-cache.service';
+
+@Injectable()
+export class MessageProcessorComponent extends ComponentBase {
+  public logger;
+  public ports = {
+    inputs: [
+      'any.publish.messageReceived'
+    ],
+    outputs: [
+      'any.publish.processingComplete'
+    ]
+  }
+
+  constructor(
+    @Inject('FLOW_ID') flowId: string,
+    @Inject('COMPONENT_ID') componentId: string,
+    @Inject(BackplaneService) backplane: BackplaneService,
+    @Inject('WEB_SOCKET_SERVER') protected server: Server,
+    @Inject('TEMPLATES') templates: TemplateCacheService
+  ) {
+    super('messageProcessor', 'message-processor', 'Processes messages for benchmarking', flowId, componentId, backplane, server, templates);
+    this.flowId = flowId;
+    this.componentId = componentId;
+    this.logger = new CustomLogger(`${flowId}.${componentId}`);
+  }
+
+  async handleEvent(eventId: string, data: any): Promise<void> {
+    // this.logger.log(`MessageProcessor (${this.flowId}) handling event: ${eventId}`);
+    switch (eventId) {
+      case "messageReceived": {
+        await this.processMessage(data);
+        break;
+      }
+    }
+  }
+
+  private async processMessage(message: any): Promise<void> {
+    const processingTime = Date.now() - message.timestamp;
+    const size = message.size;
+    await this.publish(this.flowId, this.componentId, 'processingComplete', { processingTime, size });
+  }
+}
+</FILE>
+<FILE path="src/components/benchmark-analyzer/benchmark-analyzer.handler.ts" TARGET>
+import { CustomLogger } from '../../logger/custom-logger';
+import { Injectable, Inject } from '@nestjs/common';
+import { ComponentBase } from '../../bases/component.base';
+import { BackplaneService } from 'src/services/backplane.service';
+import { Server } from 'socket.io';
+import { TemplateCacheService } from 'src/services/template-cache.service';
+
+@Injectable()
+export class BenchmarkAnalyzerComponent extends ComponentBase {
+  public logger: CustomLogger;
+  private startTime: number | null = null;
+  private endTime: number | null = null;
+  private dataPoints: { [size: number]: number[] } = {};
+  private currentMessageSize: number = 1;
+  private messageSizes: number[] = [1, 10, 100, 1000, 10000];
+  private messagesPerSize: number = 500;
+  private currentSizeIndex: number = 0;
+  public ports = {
+    inputs: [
+      'any.publish.startBenchmark',
+      'any.publish.endBenchmark',
+      'any.publish.dataPoint'
+    ],
+    outputs: [
+      'any.publish.benchmarkResult',
+      'htmx.display.benchmark-results',
+      'any.publish.startMessageGeneration',
+      'any.publish.stopMessageGeneration',
+      'any.publish.nextMessageSize'
+    ]
+  }
+
+  constructor(
+    @Inject('FLOW_ID') flowId: string,
+    @Inject('COMPONENT_ID') componentId: string,
+    @Inject(BackplaneService) backplane: BackplaneService,
+    @Inject('WEB_SOCKET_SERVER') protected server: Server,
+    @Inject('TEMPLATES') templates: TemplateCacheService
+  ) {
+    super('benchmarkAnalyzer', 'benchmark-analyzer', 'Analyzes benchmark results', flowId, componentId, backplane, server, templates);
+    this.flowId = flowId;
+    this.componentId = componentId;
+    this.logger = new CustomLogger(`${flowId}.${componentId}`);
+  }
+
+  async handleEvent(eventId: string, data: any): Promise<void> {
+    // this.logger.log(`BenchmarkAnalyzer (${this.flowId}) handling event: ${eventId}`);
+    switch (eventId) {
+      case "init": {
+        await this.initBenchmark(data);
+        break;
+      }
+      case "startBenchmark": {
+        await this.startBenchmark();
+        break;
+      }
+      case "endBenchmark": {
+        await this.endBenchmark();
+        break;
+      }
+      case "dataPoint": {
+        await this.addDataPoint(data.processingTime, data.size);
+        break;
+      }
+    }
+  }
+
+  private async initBenchmark(data: any): Promise<void> {
+    if (data && data.messageSizes) {
+      this.messageSizes = data.messageSizes;
+    }
+    if (data && data.messagesPerSize) {
+      this.messagesPerSize = data.messagesPerSize;
+    }
+    this.logger.log(`Benchmark initialized with message sizes: ${this.messageSizes}, messages per size: ${this.messagesPerSize}`);
+    this.resetDataPoints();
+  }
+  
+  private async startBenchmark(): Promise<void> {
+    this.startTime = Date.now();
+    this.currentSizeIndex = 0;
+    this.currentMessageSize = this.messageSizes[this.currentSizeIndex];
+    this.resetDataPoints();
+    
+    console.log('========');
+    console.log(`Benchmark started for size ${this.currentMessageSize} at ${this.startTime}`);
+    console.log('========');
+    await this.publish(this.flowId, this.componentId, 'startMessageGeneration', {});
+  }
+
+  private async endBenchmark(): Promise<void> {
+    this.endTime = Date.now();
+    this.logger.log(`Benchmark ended for size ${this.currentMessageSize} at ${this.endTime}`);
+
+    await this.publish(this.flowId, this.componentId, 'stopMessageGeneration', {});
+
+    console.log('========');
+    console.log('waiting 2s for benchmark to finish');
+    console.log('========');
+    await new Promise(resolve => setTimeout(resolve, 2000)); // wait for benchmark to finish
+
+    if (this.currentSizeIndex < this.messageSizes.length - 1) {
+      this.currentSizeIndex++;
+      await this.startNextSizeBenchmark();
+    } else {
+      const result = this.analyzeBenchmark();
+      await this.publish(this.flowId, this.componentId, 'benchmarkResult', result);
+      await this.display(this.flowId, this.componentId, 'benchmark-results', { results: result });
+      console.log('!!!!!!!!');
+      console.log('benchmark-results: success');
+      console.log('!!!!!!!!');
+    }
+  }
+
+  private async addDataPoint(processingTime: number, size: number): Promise<void> {
+    // console.log('addDataPoint', size, processingTime);
+    if (!this.dataPoints[size]) {
+      this.dataPoints[size] = [];
+    }
+    this.dataPoints[size].push(processingTime);
+    // this.logger.log(`Added data point for size ${size}: ${processingTime}ms (Total: ${this.dataPoints[size].length})`);
+    
+    if (this.dataPoints[size].length === this.messagesPerSize) {
+      console.log('////////// end benchmark', this.dataPoints[size].length, '===', this.messagesPerSize);
+      await this.endBenchmark();
+    }
+  }
+
+  private async startNextSizeBenchmark(): Promise<void> {
+    this.currentMessageSize = this.messageSizes[this.currentSizeIndex];
+    this.logger.log(`Starting benchmark for next size: ${this.currentMessageSize}`);
+    await this.publish(this.flowId, this.componentId, 'nextMessageSize', { size: this.currentMessageSize });
+    console.log('~~~~~~ startNextSizeBenchmark', this.currentMessageSize);
+    await new Promise(resolve => setTimeout(resolve, 2000)); // wait for nextMessageSize to propagate
+    await this.publish(this.flowId, this.componentId, 'startMessageGeneration', {});
+    await this.publish(this.flowId, this.componentId, 'startMessageGeneration', {});
+    await this.publish(this.flowId, this.componentId, 'startMessageGeneration', {});
+  }
+
+  private analyzeBenchmark(): BenchmarkResults {
+    const results: BenchmarkResults = {};
+
+    for (const size of this.messageSizes) {
+      const times = this.dataPoints[size] || [];
+      const messageCount = times.length;
+      const totalTime = times.reduce((sum, time) => sum + time, 0);
+      const averageProcessingTime = messageCount > 0 ? totalTime / messageCount : 0;
+      const messagesPerSecond = messageCount > 0 ? (messageCount / (totalTime / 1000)).toFixed(2) : '0';
+
+      results[size] = {
+        messageCount,
+        averageProcessingTime,
+        messagesPerSecond,
+      };
+
+      this.logger.log(`Analysis for size ${size}: Count=${messageCount}, Avg=${averageProcessingTime.toFixed(2)}ms, MPS=${messagesPerSecond}`);
+    }
+
+    return results;
+  }
+
+  private resetDataPoints(): void {
+    this.dataPoints = {};
+    this.messageSizes.forEach(size => {
+      this.dataPoints[size] = [];
+    });
+    this.logger.log('Data points reset');
+  }
+}
+
+interface BenchmarkResult {
+  messageCount: number;
+  averageProcessingTime: number;
+  messagesPerSecond: string;
+}
+
+interface BenchmarkResults {
+  [size: number]: BenchmarkResult;
+}
+</FILE>
 <REQUEST>
-use a for loop to generate messages instead of an interval
+within benchmark results messages per second should be calculated by the amount of time it took to get all the messages; do not use a formula just use a startAt and finishAt and get the difference.
 </REQUEST>
