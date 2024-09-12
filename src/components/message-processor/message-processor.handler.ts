@@ -31,7 +31,7 @@ export class MessageProcessorComponent extends ComponentBase {
   }
 
   async handleEvent(eventId: string, data: any): Promise<void> {
-    this.logger.log(`MessageProcessor (${this.flowId}) handling event: ${eventId}`);
+    // this.logger.log(`MessageProcessor (${this.flowId}) handling event: ${eventId}`);
     switch (eventId) {
       case "messageReceived": {
         await this.processMessage(data);

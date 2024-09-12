@@ -1,0 +1,24 @@
+<div id="benchmark-results">
+  <h2>Benchmark Results</h2>
+  <p>Total Duration: <%= totalDuration %> ms</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Message Size</th>
+        <th>Message Count</th>
+        <th>Average Processing Time</th>
+        <th>Messages per Second</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% for (const [size, data] of Object.entries(results)) { %>
+        <tr>
+          <td><%= size %> bytes</td>
+          <td><%= data.messageCount %></td>
+          <td><%= data.averageProcessingTime.toFixed(2) %> ms</td>
+          <td><%= data.messagesPerSecond.toFixed(2) %></td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>

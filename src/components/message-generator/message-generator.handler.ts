@@ -7,9 +7,11 @@ import { TemplateCacheService } from 'src/services/template-cache.service';
 
 @Injectable()
 export class MessageGeneratorComponent extends ComponentBase {
-  public logger;
-  public interval: NodeJS.Timeout | null = null;
-  public messageSize: number = 1;
+  public logger: CustomLogger;
+  private interval: NodeJS.Timeout | null = null;
+  private messageSize: number = 1;
+  private messagesToGenerate: number = 1000;
+  private generatedCount: number = 0;
   public ports = {
     inputs: [
       'any.publish.start',
@@ -35,8 +37,12 @@ export class MessageGeneratorComponent extends ComponentBase {
   }
 
   async handleEvent(eventId: string, data: any): Promise<void> {
-    this.logger.log(`MessageGenerator (${this.flowId}) handling event: ${eventId}`);
+    // this.logger.log(`MessageGenerator (${this.flowId}) handling event: ${eventId}`);
     switch (eventId) {
+      case "init": {
+        await this.initGenerator(data);
+        break;
+      }
       case "start": {
         this.startGenerating();
         break;
@@ -52,19 +58,32 @@ export class MessageGeneratorComponent extends ComponentBase {
     }
   }
 
+  private async initGenerator(data: any): Promise<void> {
+    if (data && data.messagesPerSize) {
+      this.messagesToGenerate = data.messagesPerSize;
+    }
+    this.logger.log(`MessageGenerator initialized with messages to generate: ${this.messagesToGenerate}`);
+  }
+
   private startGenerating(): void {
     this.logger.log(`MessageGenerator (${this.flowId}) starting message generation`);
+    this.generatedCount = 0;
     if (this.interval) {
       clearInterval(this.interval);
     }
     this.interval = setInterval(async () => {
-      const message = { 
-        timestamp: Date.now(), 
-        content: "B".repeat(this.messageSize),
-        size: this.messageSize
-      };
-      await this.publish(this.flowId, this.componentId, 'messageGenerated', message);
-    }, 10); // Generate a message every 10ms
+      if (this.generatedCount < this.messagesToGenerate) {
+        const message = { 
+          timestamp: Date.now(), 
+          content: "B".repeat(this.messageSize),
+          size: this.messageSize
+        };
+        await this.publish(this.flowId, this.componentId, 'messageGenerated', message);
+        this.generatedCount++;
+      } else {
+        this.stopGenerating();
+      }
+    }, 1); // Generate messages as fast as possible
   }
 
   private stopGenerating(): void {

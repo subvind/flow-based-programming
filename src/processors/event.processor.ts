@@ -38,11 +38,11 @@ export class EventProcessor implements OnModuleInit {
 
   async handleComponentEvent(msg: {flowId: string, componentId: string, eventId: string, data: any}): Promise<void> {
     const { flowId, componentId, eventId, data: eventData } = msg;
-    this.logger.log(`[handleComponentEvent] [${flowId}.${componentId}.${eventId}] data: ${JSON.stringify(eventData)}`);
+    // this.logger.log(`[handleComponentEvent] [${flowId}.${componentId}.${eventId}] data: ${JSON.stringify(eventData)}`);
     
     const component = this.componentRegistry.getComponent(flowId, componentId);
     if (component) {
-      this.logger.log(`Passing event to component: ${componentId}`);
+      // this.logger.log(`Passing event to component: ${componentId}`);
       await component.handleEvent(eventId, eventData);
 
       // Check if there are connections for this event
@@ -50,11 +50,11 @@ export class EventProcessor implements OnModuleInit {
       const connections = this.connections.get(connectionKey) || [];
       for (const connection of connections) {
         const { toFlow, toComponent, toEvent } = connection;
-        this.logger.log(`[forwardingComponentEvent] [${toFlow}.${toComponent}.${toEvent}]`);
+        // this.logger.log(`[forwardingComponentEvent] [${toFlow}.${toComponent}.${toEvent}]`);
         
         const targetComponent = this.componentRegistry.getComponent(toFlow, toComponent);
         if (targetComponent) {
-          this.logger.log(`Forwarding event to component: ${targetComponent.componentId}`);
+          // this.logger.log(`Forwarding event to component: ${targetComponent.componentId}`);
           await targetComponent.handleEvent(toEvent, eventData);
         } else {
           this.logger.warn(`Target component not found: ${toComponent} in flow: ${toFlow}`);

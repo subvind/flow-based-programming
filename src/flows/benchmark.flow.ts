@@ -34,7 +34,25 @@ let benchmarkAnalyzer = {
       setMessageSize: {}
     },
     outputs: {
-      benchmarkResult: {}
+      benchmarkResult: {},
+      startMessageGeneration: {},
+      stopMessageGeneration: {},
+      nextMessageSize: {}
+    }
+  },
+  init: {
+    messageSizes: [1, 10, 100, 1000, 10000],
+    messagesPerSize: 100
+  }
+}
+
+let buttonTrigger = {
+  ports: {
+    inputs: {
+      triggerButton: {}
+    },
+    outputs: {
+      buttonPressed: {}
     }
   }
 }
@@ -66,18 +84,24 @@ let components = {
         inputs: {
           initProxyMachine: {},
           'set-start': {},
-          'set-stop': {},
-          'set-next': {}
+          'set-pause': {},
+          'set-resume': {},
+          'set-finish': {},
+          'set-reset': {}
         },
         outputs: {
           'get-start': {},
-          'get-stop': {},
-          'get-next': {},
+          'get-pause': {},
+          'get-resume': {},
+          'get-finish': {},
+          'get-reset': {},
           stateChanged: {}
         }
       }
     }
-  }
+  },
+  startBtn: { buttonTrigger },
+  stopBtn: { buttonTrigger },
 }
 
 let flow = {
@@ -90,19 +114,23 @@ let flow = {
     },
     {
       from: 'components.jsm.jobStateMachine.ports.outputs.get-start',
-      to: 'components.gen.messageGenerator.ports.inputs.start'
+      to: 'components.analyzer.benchmarkAnalyzer.ports.inputs.startBenchmark'
     },
     {
-      from: 'components.jsm.jobStateMachine.ports.outputs.get-stop',
-      to: 'components.gen.messageGenerator.ports.inputs.stop'
-    },
-    {
-      from: 'components.jsm.jobStateMachine.ports.outputs.get-next',
+      from: 'components.analyzer.benchmarkAnalyzer.ports.outputs.nextMessageSize',
       to: 'components.gen.messageGenerator.ports.inputs.setMessageSize'
     },
     {
-      from: 'components.jsm.jobStateMachine.ports.outputs.get-next',
-      to: 'components.analyzer.benchmarkAnalyzer.ports.inputs.setMessageSize'
+      from: 'components.jsm.jobStateMachine.ports.outputs.get-resume',
+      to: 'components.analyzer.benchmarkAnalyzer.ports.inputs.startBenchmark'
+    },
+    {
+      from: 'components.jsm.jobStateMachine.ports.outputs.get-finish',
+      to: 'components.analyzer.benchmarkAnalyzer.ports.inputs.endBenchmark'
+    },
+    {
+      from: 'components.jsm.jobStateMachine.ports.outputs.get-reset',
+      to: 'components.analyzer.benchmarkAnalyzer.ports.inputs.startBenchmark'
     },
     {
       from: 'components.gen.messageGenerator.ports.outputs.messageGenerated',
@@ -113,12 +141,20 @@ let flow = {
       to: 'components.analyzer.benchmarkAnalyzer.ports.inputs.dataPoint'
     },
     {
-      from: 'components.jsm.jobStateMachine.ports.outputs.get-start',
-      to: 'components.analyzer.benchmarkAnalyzer.ports.inputs.startBenchmark'
+      from: 'components.analyzer.benchmarkAnalyzer.ports.outputs.startMessageGeneration',
+      to: 'components.gen.messageGenerator.ports.inputs.start'
     },
     {
-      from: 'components.jsm.jobStateMachine.ports.outputs.get-stop',
-      to: 'components.analyzer.benchmarkAnalyzer.ports.inputs.endBenchmark'
+      from: 'components.analyzer.benchmarkAnalyzer.ports.outputs.stopMessageGeneration',
+      to: 'components.gen.messageGenerator.ports.inputs.stop'
+    },
+    {
+      from: 'components.startBtn.buttonTrigger.ports.outputs.buttonPressed',
+      to: 'components.jsm.jobStateMachine.ports.inputs.set-start'
+    },
+    {
+      from: 'components.stopBtn.buttonTrigger.ports.outputs.buttonPressed',
+      to: 'components.jsm.jobStateMachine.ports.inputs.set-finish'
     }
   ]
 };

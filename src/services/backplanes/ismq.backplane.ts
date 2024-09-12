@@ -65,7 +65,7 @@ export class IsmqAdapter implements MessageQueueAdapter {
         try {
           await callback(message);
         } catch (error) {
-          this.logger.error(`Error processing message from queue ${queue}: ${error.message}`);
+          this.logger.error(`Error processing message from queue ${queue}: ${error.message} ${error.stack}`);
         }
       });
     } catch (error) {
