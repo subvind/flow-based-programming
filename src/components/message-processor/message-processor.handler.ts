@@ -42,6 +42,7 @@ export class MessageProcessorComponent extends ComponentBase {
 
   private async processMessage(message: any): Promise<void> {
     const processingTime = Date.now() - message.timestamp;
-    await this.publish(this.flowId, this.componentId, 'processingComplete', { processingTime });
+    const size = message.size;
+    await this.publish(this.flowId, this.componentId, 'processingComplete', { processingTime, size });
   }
 }

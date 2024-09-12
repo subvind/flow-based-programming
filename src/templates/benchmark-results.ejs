@@ -1,6 +1,5 @@
 <div id="benchmark-results">
   <h2>Benchmark Results</h2>
-  <p>Total Duration: <%= totalDuration %> ms</p>
   <table>
     <thead>
       <tr>
@@ -16,7 +15,7 @@
           <td><%= size %> bytes</td>
           <td><%= data.messageCount %></td>
           <td><%= data.averageProcessingTime.toFixed(2) %> ms</td>
-          <td><%= data.messagesPerSecond.toFixed(2) %></td>
+          <td><%= data.messagesPerSecond %></td>
         </tr>
       <% } %>
     </tbody>

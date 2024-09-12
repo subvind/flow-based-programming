@@ -10,7 +10,7 @@ export class MessageGeneratorComponent extends ComponentBase {
   public logger: CustomLogger;
   private interval: NodeJS.Timeout | null = null;
   private messageSize: number = 1;
-  private messagesToGenerate: number = 1000;
+  private messagesToGenerate: number = 500;
   private generatedCount: number = 0;
   public ports = {
     inputs: [

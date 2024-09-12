@@ -42,7 +42,7 @@ let benchmarkAnalyzer = {
   },
   init: {
     messageSizes: [1, 10, 100, 1000, 10000],
-    messagesPerSize: 100
+    messagesPerSize: 500
   }
 }
 
