@@ -4,6 +4,9 @@ import { NumberMultiplierComponent } from '../components/number-multiplier/numbe
 import { StateMachineComponent } from 'src/components/state-machine/state-machine.handler';
 import { JobStateMachineComponent } from 'src/components/job-state-machine/job-state-machine.handler';
 import { ButtonTriggerComponent } from 'src/components/button-trigger/button-trigger.handler';
+import { BenchmarkAnalyzerComponent } from 'src/components/benchmark-analyzer/benchmark-analyzer.handler';
+import { MessageGeneratorComponent } from 'src/components/message-generator/message-generator.handler';
+import { MessageProcessorComponent } from 'src/components/message-processor/message-processor.handler';
 
 export function initializeComponent(flow, component, backplane, server, templates) {
   let componentInstance;
@@ -25,6 +28,15 @@ export function initializeComponent(flow, component, backplane, server, template
       break;
     case 'buttonTrigger':
       componentInstance = new ButtonTriggerComponent(flow.id, component.componentId, backplane, server, templates);
+      break;
+    case 'benchmarkAnalyzer':
+      componentInstance = new BenchmarkAnalyzerComponent(flow.id, component.componentId, backplane, server, templates);
+      break;
+    case 'messageGenerator':
+      componentInstance = new MessageGeneratorComponent(flow.id, component.componentId, backplane, server, templates);
+      break;
+    case 'messageProcessor':
+      componentInstance = new MessageProcessorComponent(flow.id, component.componentId, backplane, server, templates);
       break;
     default:
       this.logger.warn(`Unknown component type: ${component.componentRef}`);

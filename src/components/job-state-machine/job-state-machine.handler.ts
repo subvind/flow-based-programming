@@ -13,6 +13,8 @@ import { transition } from 'src/events/transition.event';
 export class JobStateMachineComponent extends ComponentBase {
   public logger: CustomLogger;
   public stateMachine: StateMachine;
+  private messageSizes: number[] = [1, 10, 100, 1000, 10000];
+  private currentSizeIndex: number = 0;
   
   public ports = {
     inputs: [
@@ -21,7 +23,8 @@ export class JobStateMachineComponent extends ComponentBase {
       'any.publish.set-pause',
       'any.publish.set-resume',
       'any.publish.set-finish',
-      'any.publish.set-reset'
+      'any.publish.set-reset',
+      'any.publish.set-next'
     ],
     outputs: [
       'any.publish.get-start',
@@ -29,6 +32,7 @@ export class JobStateMachineComponent extends ComponentBase {
       'any.publish.get-resume',
       'any.publish.get-finish',
       'any.publish.get-reset',
+      'any.publish.get-next',
       'any.publish.stateChanged',
       'htmx.display.job-state-machine'
     ]
@@ -62,6 +66,10 @@ export class JobStateMachineComponent extends ComponentBase {
         await this.transition(eventId.substring(4)); // Remove 'set-' prefix
         break;
       }
+      case "set-next": {
+        await this.nextMessageSize();
+        break;
+      }
     }
   }
 
@@ -71,6 +79,17 @@ export class JobStateMachineComponent extends ComponentBase {
 
   public transition(data): Promise<void> {
     return transition(this, data);
+  }
+
+  private async nextMessageSize(): Promise<void> {
+    if (this.currentSizeIndex < this.messageSizes.length - 1) {
+      this.currentSizeIndex++;
+      const newSize = this.messageSizes[this.currentSizeIndex];
+      await this.publish(this.flowId, this.componentId, 'get-next', { size: newSize });
+      await this.transition('start');
+    } else {
+      await this.transition('finish');
+    }
   }
 
   public async updateDisplay(): Promise<void> {
@@ -86,7 +105,8 @@ export class JobStateMachineComponent extends ComponentBase {
     await this.display(this.flowId, this.componentId, 'job-state-machine', {
       currentState,
       states: Array.from(states),
-      transitions: Object.fromEntries(transitions)
+      transitions: Object.fromEntries(transitions),
+      currentMessageSize: this.messageSizes[this.currentSizeIndex]
     });
   }
 }

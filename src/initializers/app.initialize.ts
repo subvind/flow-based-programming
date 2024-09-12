@@ -7,6 +7,9 @@ import { EventTriggerComponent } from '../components/event-trigger/event-trigger
 import { StateMachineComponent } from '../components/state-machine/state-machine.handler';
 import { JobStateMachineComponent } from '../components/job-state-machine/job-state-machine.handler';
 import { ButtonTriggerComponent } from 'src/components/button-trigger/button-trigger.handler';
+import { BenchmarkAnalyzerComponent } from '../components/benchmark-analyzer/benchmark-analyzer.handler';
+import { MessageGeneratorComponent } from 'src/components/message-generator/message-generator.handler';
+import { MessageProcessorComponent } from 'src/components/message-processor/message-processor.handler';
 
 export function initializeAppModule(metadata): any {
   @Module(metadata)
@@ -19,6 +22,9 @@ export function initializeAppModule(metadata): any {
       private stateMachineComponent: StateMachineComponent,
       private jobStateMachineComponent: JobStateMachineComponent,
       private buttonTriggerComponent: ButtonTriggerComponent,
+      private benchmarkAnalyzerComponent: BenchmarkAnalyzerComponent,
+      private messageGeneratorComponent: MessageGeneratorComponent,
+      private messageProcessorComponent: MessageProcessorComponent,
     ) {}
 
     onModuleInit() {
@@ -29,6 +35,9 @@ export function initializeAppModule(metadata): any {
       this.componentRegistry.registerComponent(this.stateMachineComponent);
       this.componentRegistry.registerComponent(this.jobStateMachineComponent);
       this.componentRegistry.registerComponent(this.buttonTriggerComponent);
+      this.componentRegistry.registerComponent(this.benchmarkAnalyzerComponent);
+      this.componentRegistry.registerComponent(this.messageGeneratorComponent);
+      this.componentRegistry.registerComponent(this.messageProcessorComponent);
     }
   }
 
@@ -42,4 +51,7 @@ export const components = [
   StateMachineComponent,
   JobStateMachineComponent,
   ButtonTriggerComponent,
+  BenchmarkAnalyzerComponent,
+  MessageGeneratorComponent,
+  MessageProcessorComponent,
 ]

@@ -9,8 +9,7 @@
     "build": "nest build && npm run copy-templates",
     "start": "nest start",
     "start:dev": "npm run copy-templates && nest start --watch 2>&1 | tee start:dev.stdout.txt",
-    "start:prod": "node dist/main",
-    "benchmark:message-queue": "ts-node ./benchmarks/message-queue.benchmark.ts 2>&1 | tee benchmark:message-queue.stdout.txt"
+    "start:prod": "node dist/main"
   },
   "dependencies": {
     "@golevelup/nestjs-rabbitmq": "^5.4.0",
@@ -22,10 +21,8 @@
     "@nestjs/platform-socket.io": "^10.4.1",
     "@nestjs/platform-ws": "^10.4.1",
     "@nestjs/websockets": "^10.4.1",
-    "@types/benchmark": "^2.1.5",
     "amqp-connection-manager": "^4.1.14",
     "amqplib": "^0.10.4",
-    "benchmark": "^2.1.4",
     "bull": "^3.29.3",
     "cookie-parser": "^1.4.6",
     "ejs": "^3.1.10",
