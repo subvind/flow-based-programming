@@ -10,7 +10,13 @@
       </tr>
     </thead>
     <tbody>
-      <% for (const [size, data] of Object.entries(results)) { %>
+      <% 
+        let count = 0;
+        let totalMessagesPerSecond = 0;
+        for (const [size, data] of Object.entries(results)) { 
+          count++;
+          totalMessagesPerSecond += parseFloat(data.messagesPerSecond);
+      %>
         <tr>
           <td><%= size %> bytes</td>
           <td><%= data.messageCount %></td>
@@ -20,4 +26,8 @@
       <% } %>
     </tbody>
   </table>
+  <% 
+    const totalAverageMPS = (totalMessagesPerSecond / count).toFixed(2);
+  %>
+  <p>Total Average: <strong><%= totalAverageMPS %></strong> messages/second</p>
 </div>
